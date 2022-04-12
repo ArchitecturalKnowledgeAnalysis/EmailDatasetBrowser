@@ -1,4 +1,4 @@
-package nl.andrewl.emaildatasetbrowser.email;
+package nl.andrewl.emaildatasetbrowser.view.email;
 
 import nl.andrewl.email_indexer.data.EmailEntry;
 import nl.andrewl.email_indexer.data.EmailRepository;
@@ -102,7 +102,7 @@ public class EmailInfoPanel extends JPanel implements EmailViewListener {
 			this.inReplyToButton.setText(inReplyToButtonText);
 			if (inReplyToActionListener != null) inReplyToButton.removeActionListener(inReplyToActionListener);
 			inReplyToActionListener = e -> {
-				SwingUtilities.invokeLater(() -> parent.navigateTo(email.inReplyTo()));
+				SwingUtilities.invokeLater(() -> parent.fetchAndSetEmail(email.inReplyTo()));
 			};
 			inReplyToButton.addActionListener(inReplyToActionListener);
 		} else {

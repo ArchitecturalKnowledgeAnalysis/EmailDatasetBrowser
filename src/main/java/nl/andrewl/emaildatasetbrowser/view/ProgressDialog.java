@@ -1,4 +1,4 @@
-package nl.andrewl.emaildatasetbrowser.control;
+package nl.andrewl.emaildatasetbrowser.view;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;

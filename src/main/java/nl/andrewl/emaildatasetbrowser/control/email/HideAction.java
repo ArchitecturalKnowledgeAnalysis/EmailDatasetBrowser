@@ -2,7 +2,7 @@ package nl.andrewl.emaildatasetbrowser.control.email;
 
 import nl.andrewl.email_indexer.data.EmailEntry;
 import nl.andrewl.email_indexer.data.EmailRepository;
-import nl.andrewl.emaildatasetbrowser.email.EmailViewPanel;
+import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 
 import java.awt.event.ActionEvent;
 

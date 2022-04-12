@@ -1,4 +1,4 @@
-package nl.andrewl.emaildatasetbrowser.email;
+package nl.andrewl.emaildatasetbrowser.view.email;
 
 import nl.andrewl.email_indexer.data.EmailEntry;
 import nl.andrewl.email_indexer.data.EmailRepository;
@@ -36,7 +36,7 @@ public class RepliesPanel extends JPanel implements EmailViewListener {
 				List<JButton> buttonsToAdd = new ArrayList<>();
 				for (var reply : replies) {
 					JButton button = new JButton("<html><strong>%s</strong><br>by <em>%s</em></html>".formatted(reply.subject(), reply.sentFrom()));
-					button.addActionListener(e -> SwingUtilities.invokeLater(() -> parent.navigateTo(reply.messageId())));
+					button.addActionListener(e -> SwingUtilities.invokeLater(() -> parent.fetchAndSetEmail(reply.messageId())));
 					buttonsToAdd.add(button);
 				}
 				SwingUtilities.invokeLater(() -> {

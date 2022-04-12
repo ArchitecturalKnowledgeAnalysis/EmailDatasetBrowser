@@ -6,8 +6,9 @@ import nl.andrewl.emaildatasetbrowser.control.DatasetOpenAction;
 import nl.andrewl.emaildatasetbrowser.control.ExportDatasetAction;
 import nl.andrewl.emaildatasetbrowser.control.GenerateDatasetAction;
 import nl.andrewl.emaildatasetbrowser.control.email.*;
-import nl.andrewl.emaildatasetbrowser.email.EmailViewPanel;
-import nl.andrewl.emaildatasetbrowser.search.SimpleBrowsePanel;
+import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
+import nl.andrewl.emaildatasetbrowser.view.search.LuceneSearchPanel;
+import nl.andrewl.emaildatasetbrowser.view.search.SimpleBrowsePanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,6 +21,7 @@ import java.awt.event.WindowEvent;
 public class EmailDatasetBrowser extends JFrame {
 	private final EmailViewPanel emailViewPanel;
 	private final SimpleBrowsePanel browsePanel;
+	private final LuceneSearchPanel searchPanel;
 	private EmailDataset currentDataset = null;
 
 	public static void main(String[] args) {
@@ -33,12 +35,13 @@ public class EmailDatasetBrowser extends JFrame {
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.emailViewPanel = new EmailViewPanel();
 		this.browsePanel = new SimpleBrowsePanel(emailViewPanel);
+		this.searchPanel = new LuceneSearchPanel(emailViewPanel);
 
 		JPanel container = new JPanel(new BorderLayout());
 		container.add(this.emailViewPanel, BorderLayout.CENTER);
 		JTabbedPane searchPane = new JTabbedPane();
 		searchPane.add("Browse", browsePanel);
-		searchPane.add("Lucene Search", new JPanel());
+		searchPane.add("Lucene Search", searchPanel);
 		container.add(searchPane, BorderLayout.WEST);
 		this.setContentPane(container);
 
@@ -76,6 +79,7 @@ public class EmailDatasetBrowser extends JFrame {
 		}
 		this.currentDataset = ds;
 		browsePanel.setDataset(ds);
+		searchPanel.setDataset(ds);
 		emailViewPanel.setDataset(ds);
 	}
 

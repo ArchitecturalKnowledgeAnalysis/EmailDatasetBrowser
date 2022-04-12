@@ -1,4 +1,6 @@
-package nl.andrewl.emaildatasetbrowser.control;
+package nl.andrewl.emaildatasetbrowser.view;
+
+import nl.andrewl.emaildatasetbrowser.control.DirectoryFileFilter;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;

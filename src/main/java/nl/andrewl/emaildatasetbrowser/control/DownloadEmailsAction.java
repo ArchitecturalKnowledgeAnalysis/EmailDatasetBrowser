@@ -3,6 +3,9 @@ package nl.andrewl.emaildatasetbrowser.control;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.components.DateTimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
+import nl.andrewl.emaildatasetbrowser.view.LabelledField;
+import nl.andrewl.emaildatasetbrowser.view.PathSelectField;
+import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildownloader.ApacheMailingListFetcher;
 
 import javax.swing.*;
@@ -11,7 +14,6 @@ import java.awt.event.ActionEvent;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 
 public class DownloadEmailsAction extends AbstractAction {
 	private final Window owner;

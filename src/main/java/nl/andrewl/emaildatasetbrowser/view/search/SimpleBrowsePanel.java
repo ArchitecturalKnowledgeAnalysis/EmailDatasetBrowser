@@ -1,11 +1,11 @@
-package nl.andrewl.emaildatasetbrowser.search;
+package nl.andrewl.emaildatasetbrowser.view.search;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailEntryPreview;
 import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.email_indexer.data.EmailSearchResult;
 import nl.andrewl.emaildatasetbrowser.EmailListItemRenderer;
-import nl.andrewl.emaildatasetbrowser.email.EmailViewPanel;
+import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,7 +40,7 @@ public class SimpleBrowsePanel extends JPanel {
 			if (e.getValueIsAdjusting()) return;
 			var selected = emailList.getSelectedValue();
 			if (selected != null) {
-				new EmailRepository(currentDataset).findEmailById(selected.messageId()).ifPresent(emailViewPanel::startNavigate);
+				new EmailRepository(currentDataset).findEmailById(selected.messageId()).ifPresent(emailViewPanel::setEmail);
 			}
 		});
 		JScrollPane listScroller = new JScrollPane(emailList);

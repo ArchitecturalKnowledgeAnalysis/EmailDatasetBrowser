@@ -3,6 +3,8 @@ package nl.andrewl.emaildatasetbrowser.control;
 import nl.andrewl.email_indexer.data.util.FileUtils;
 import nl.andrewl.email_indexer.gen.EmailDatasetGenerator;
 import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
+import nl.andrewl.emaildatasetbrowser.view.PathSelectField;
+import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 
 import javax.swing.*;
 import java.awt.*;

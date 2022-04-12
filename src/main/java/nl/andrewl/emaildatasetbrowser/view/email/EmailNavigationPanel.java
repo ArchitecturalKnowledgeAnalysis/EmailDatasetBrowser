@@ -1,7 +1,7 @@
-package nl.andrewl.emaildatasetbrowser.email;
+package nl.andrewl.emaildatasetbrowser.view.email;
 
 import nl.andrewl.email_indexer.data.EmailEntry;
-import nl.andrewl.emaildatasetbrowser.control.SwingUtils;
+import nl.andrewl.emaildatasetbrowser.view.SwingUtils;
 
 import javax.swing.*;
 import java.awt.*;

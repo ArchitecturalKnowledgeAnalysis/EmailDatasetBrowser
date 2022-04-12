@@ -1,4 +1,4 @@
-package nl.andrewl.emaildatasetbrowser.email;
+package nl.andrewl.emaildatasetbrowser.view.email;
 
 import nl.andrewl.email_indexer.data.EmailEntry;
 import nl.andrewl.email_indexer.data.EmailRepository;

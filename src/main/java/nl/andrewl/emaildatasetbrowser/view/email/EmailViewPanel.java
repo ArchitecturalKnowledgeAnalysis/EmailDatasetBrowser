@@ -1,4 +1,4 @@
-package nl.andrewl.emaildatasetbrowser.email;
+package nl.andrewl.emaildatasetbrowser.view.email;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailEntry;
@@ -16,7 +16,6 @@ import java.util.Set;
 public class EmailViewPanel extends JPanel {
 	private EmailDataset currentDataset = null;
 	private EmailEntry email;
-	private final EmailNavigationPanel navigationPanel;
 	private final Set<EmailViewListener> listeners = new HashSet<>();
 
 	public EmailViewPanel() {
@@ -30,9 +29,6 @@ public class EmailViewPanel extends JPanel {
 		this.add(infoPanel, BorderLayout.EAST);
 		addListener(infoPanel);
 
-		this.navigationPanel = new EmailNavigationPanel(this);
-		this.add(navigationPanel, BorderLayout.NORTH);
-
 		setEmail(null);
 	}
 
@@ -43,7 +39,6 @@ public class EmailViewPanel extends JPanel {
 	public void setDataset(EmailDataset dataset) {
 		this.currentDataset = dataset;
 		setEmail(null);
-		navigationPanel.clear();
 	}
 
 	public EmailDataset getCurrentDataset() {
@@ -68,19 +63,6 @@ public class EmailViewPanel extends JPanel {
 		} else {
 			setEmail(null);
 		}
-	}
-
-	public void navigateTo(String messageId) {
-		fetchAndSetEmail(messageId);
-		if (email != null) {
-			navigationPanel.navigateTo(email);
-		}
-	}
-
-	public void startNavigate(EmailEntry email) {
-		navigationPanel.clear();
-		setEmail(email);
-		navigationPanel.navigateTo(email);
 	}
 
 	public void refresh() {
