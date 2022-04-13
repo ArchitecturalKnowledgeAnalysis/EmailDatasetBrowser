@@ -21,15 +21,13 @@ public class SimpleBrowsePanel extends JPanel {
 
 	private final JComboBox<Boolean> showHiddenComboBox = new JComboBox<>(new Boolean[]{null, true, false});
 	private final JComboBox<Boolean> showTaggedComboBox = new JComboBox<>(new Boolean[]{null, true, false});
-	private final JButton nextPageButton = new JButton("Next Page");
-	private final JButton previousPageButton = new JButton("Previous Page");
+	private final JButton nextPageButton = new JButton("Next");
+	private final JButton previousPageButton = new JButton("Prev");
 	private final JLabel currentPageLabel = new JLabel("Page 1 of 1");
 	private final JLabel sizeLabel = new JLabel("Showing 0 of 0 results");
 
 	public SimpleBrowsePanel(EmailViewPanel emailViewPanel) {
 		super(new BorderLayout());
-		this.setPreferredSize(new Dimension(400, -1));
-
 		this.add(buildFilterPanel(), BorderLayout.NORTH);
 
 		this.emailListModel = new DefaultListModel<>();
@@ -97,7 +95,8 @@ public class SimpleBrowsePanel extends JPanel {
 		JPanel searchPanel = new JPanel();
 		searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.PAGE_AXIS));
 
-		JPanel filterPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+		JPanel filterPanel = new JPanel();
+		filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.PAGE_AXIS));
 		filterPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		filterPanel.add(buildControlPanel("Show Hidden", showHiddenComboBox));
 		showHiddenComboBox.setSelectedItem(false);
@@ -112,6 +111,8 @@ public class SimpleBrowsePanel extends JPanel {
 			this.currentPage = 1;
 			doSearch();
 		});
+		searchPanel.add(filterPanel);
+
 		nextPageButton.addActionListener(e -> {
 			this.currentPage++;
 			doSearch();
@@ -120,11 +121,16 @@ public class SimpleBrowsePanel extends JPanel {
 			this.currentPage--;
 			doSearch();
 		});
-		filterPanel.add(previousPageButton);
-		filterPanel.add(nextPageButton);
-		filterPanel.add(currentPageLabel);
-		filterPanel.add(sizeLabel);
-		searchPanel.add(filterPanel);
+
+		JPanel pageControlPanel = new JPanel(new GridLayout(1, 2));
+		previousPageButton.setMargin(new Insets(0, 0, 0, 0));
+		nextPageButton.setMargin(new Insets(0, 0, 0, 0));
+		pageControlPanel.add(previousPageButton);
+		pageControlPanel.add(nextPageButton);
+		searchPanel.add(pageControlPanel);
+
+		searchPanel.add(currentPageLabel);
+		searchPanel.add(sizeLabel);
 
 		return searchPanel;
 	}
@@ -135,10 +141,11 @@ public class SimpleBrowsePanel extends JPanel {
 		c.fill = GridBagConstraints.NONE;
 		c.weightx = 0.01;
 		c.weighty = 0.5;
-		c.anchor = GridBagConstraints.LINE_END;
+		c.anchor = GridBagConstraints.LINE_START;
 		c.insets = new Insets(2, 2, 2, 2);
 		p.add(new JLabel(label), c);
 		c.weightx = 0.99;
+		c.anchor = GridBagConstraints.LINE_END;
 		c.fill = GridBagConstraints.BOTH;
 		p.add(component);
 		return p;

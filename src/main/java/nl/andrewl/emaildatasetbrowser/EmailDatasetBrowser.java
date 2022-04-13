@@ -38,13 +38,13 @@ public class EmailDatasetBrowser extends JFrame {
 		this.browsePanel = new SimpleBrowsePanel(emailViewPanel);
 		this.searchPanel = new LuceneSearchPanel(emailViewPanel);
 
-		JPanel container = new JPanel(new BorderLayout());
-		container.add(this.emailViewPanel, BorderLayout.CENTER);
 		JTabbedPane searchPane = new JTabbedPane();
 		searchPane.add("Browse", browsePanel);
 		searchPane.add("Lucene Search", searchPanel);
-		container.add(searchPane, BorderLayout.WEST);
-		this.setContentPane(container);
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		splitPane.add(searchPane);
+		splitPane.add(emailViewPanel);
+		setContentPane(splitPane);
 
 		this.setJMenuBar(buildMenu());
 		this.setPreferredSize(new Dimension(1000, 600));

@@ -43,7 +43,6 @@ public class LuceneSearchPanel extends JPanel {
             }
         });
         JScrollPane resultsScrollPane = new JScrollPane(resultsTree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        resultsScrollPane.setPreferredSize(new Dimension(200, -1));
         add(resultsScrollPane, BorderLayout.CENTER);
 
         searchButton.addActionListener(e -> doSearch(queryField, emailViewPanel, resultsTree));
