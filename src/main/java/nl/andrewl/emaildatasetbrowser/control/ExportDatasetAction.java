@@ -2,12 +2,12 @@ package nl.andrewl.emaildatasetbrowser.control;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
+import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.concurrent.ForkJoinPool;
 
 public class ExportDatasetAction extends AbstractAction {
 	private final EmailDatasetBrowser browser;
@@ -20,7 +20,11 @@ public class ExportDatasetAction extends AbstractAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (this.browser.getCurrentDataset() != null) {
-			JFileChooser fc = new JFileChooser(Path.of(".").toFile());
+			var ds = browser.getCurrentDataset();
+			Path parentDir = ds.getOpenDir().getParent();
+			String fileName = ds.getOpenDir().getFileName().toString() + ".zip";
+			Path dsPath = parentDir.resolve(fileName);
+			JFileChooser fc = new JFileChooser(dsPath.toFile());
 			int result = fc.showSaveDialog(browser);
 			if (result == JFileChooser.APPROVE_OPTION) {
 				if (!fc.getSelectedFile().toPath().getFileName().toString().toLowerCase().endsWith(".zip")) {
@@ -32,26 +36,21 @@ public class ExportDatasetAction extends AbstractAction {
 					);
 				} else {
 					Path file = fc.getSelectedFile().toPath();
-					JDialog progressDialog = buildProgressDialog(file);
-					ForkJoinPool.commonPool().execute(() -> progressDialog.setVisible(true));
 					if (!closeBeforeExport()) return;
+					ProgressDialog progress = ProgressDialog.minimalText(browser, "Exporting");
+					progress.activate();
+					progress.append("Exporting dataset to " + file.toAbsolutePath());
 					long start = System.currentTimeMillis();
 					EmailDataset.buildZip(this.browser.getCurrentDataset().getOpenDir(), file)
 							.handle((unused, throwable) -> {
-								System.out.println("Done!");
 								if (throwable != null) {
-									throwable.printStackTrace();
+									progress.append("An error occurred: " + throwable.getMessage());
 								} else {
 									long dur = System.currentTimeMillis() - start;
-									JOptionPane.showMessageDialog(
-											browser,
-											"Export completed in %.1f seconds.".formatted((float) dur / 1000.0f),
-											"Export Complete",
-											JOptionPane.INFORMATION_MESSAGE
-									);
+									progress.append("Export completed in %.1f seconds.".formatted((float) dur / 1000.0f));
 								}
-								progressDialog.dispose();
 								reopenAfterExport();
+								progress.done();
 								return null;
 							});
 				}
@@ -64,18 +63,6 @@ public class ExportDatasetAction extends AbstractAction {
 					JOptionPane.WARNING_MESSAGE
 			);
 		}
-	}
-
-	private JDialog buildProgressDialog(Path file) {
-		JDialog progressDialog = new JDialog(browser, "Exporting...");
-		JPanel p = new JPanel();
-		JLabel label = new JLabel("Exporting dataset to " + file + " using highest compression settings.");
-		p.add(label);
-		progressDialog.setContentPane(p);
-		progressDialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		progressDialog.pack();
-		progressDialog.setLocationRelativeTo(browser);
-		return progressDialog;
 	}
 
 	private boolean closeBeforeExport() {

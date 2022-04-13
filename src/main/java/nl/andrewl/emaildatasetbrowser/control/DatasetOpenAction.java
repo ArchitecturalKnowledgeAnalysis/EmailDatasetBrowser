@@ -3,6 +3,7 @@ package nl.andrewl.emaildatasetbrowser.control;
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
+import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -24,28 +25,33 @@ public class DatasetOpenAction extends AbstractAction {
 		int result = fc.showOpenDialog(browser);
 		if (result == JFileChooser.APPROVE_OPTION) {
 			File f = fc.getSelectedFile();
-			EmailDataset.open(f.toPath())
-					.exceptionally(throwable -> {
-						throwable.printStackTrace();
-						JOptionPane.showMessageDialog(
-								browser,
-								"Could not open dataset: " + throwable.getMessage(),
-								"Could not open dataset",
-								JOptionPane.WARNING_MESSAGE
-						);
-						return null;
-					})
-					.thenAccept(ds -> {
-						browser.setDataset(ds);
-						var repo = new EmailRepository(ds);
-						String message = "Opened dataset from %s with\n%d emails,\n%d tags,\n%d tagged emails".formatted(
-								ds.getOpenDir(),
-								repo.countEmails(),
-								repo.countTags(),
-								repo.countTaggedEmails()
-						);
-						JOptionPane.showMessageDialog(browser, message, "Dataset Opened", JOptionPane.INFORMATION_MESSAGE);
-					});
+			ProgressDialog progress = new ProgressDialog(
+					browser,
+					"Opening Dataset",
+					"Opening dataset from " + f.getAbsolutePath(),
+					true,
+					false,
+					true
+			);
+			progress.activate();
+			var future = EmailDataset.open(f.toPath());
+			future.handleAsync((dataset, throwable) -> {
+				progress.done();
+				if (throwable != null) {
+					progress.append("Could not open dataset: " + throwable.getMessage());
+				} else {
+					browser.setDataset(dataset);
+					var repo = new EmailRepository(dataset);
+					String message = "Opened dataset from %s with\n%d emails,\n%d tags,\n%d tagged emails".formatted(
+							dataset.getOpenDir(),
+							repo.countEmails(),
+							repo.countTags(),
+							repo.countTaggedEmails()
+					);
+					progress.append(message);
+				}
+				return null;
+			});
 		}
 	}
 }

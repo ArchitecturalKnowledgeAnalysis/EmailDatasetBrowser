@@ -5,6 +5,7 @@ import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.emaildatasetbrowser.control.DatasetOpenAction;
 import nl.andrewl.emaildatasetbrowser.control.ExportDatasetAction;
 import nl.andrewl.emaildatasetbrowser.control.GenerateDatasetAction;
+import nl.andrewl.emaildatasetbrowser.control.RegenerateIndexesAction;
 import nl.andrewl.emaildatasetbrowser.control.email.*;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 import nl.andrewl.emaildatasetbrowser.view.search.LuceneSearchPanel;
@@ -88,6 +89,7 @@ public class EmailDatasetBrowser extends JFrame {
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.add(new JMenuItem(new DatasetOpenAction(this)));
 		fileMenu.add(new JMenuItem(new GenerateDatasetAction(this)));
+		fileMenu.add(new JMenuItem(new RegenerateIndexesAction(this)));
 		fileMenu.add(new JMenuItem(new ExportDatasetAction(this)));
 		menuBar.add(fileMenu);
 

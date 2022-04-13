@@ -1,10 +1,12 @@
 package nl.andrewl.emaildatasetbrowser.control.email;
 
 import nl.andrewl.email_indexer.data.EmailRepository;
+import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.util.concurrent.ForkJoinPool;
 
 public class DeleteHiddenAction extends AbstractAction {
 	private final EmailViewPanel emailViewPanel;
@@ -24,7 +26,12 @@ public class DeleteHiddenAction extends AbstractAction {
 				JOptionPane.YES_NO_OPTION
 		);
 		if (result == JOptionPane.YES_OPTION) {
-			new EmailRepository(emailViewPanel.getCurrentDataset()).deleteAllHidden();
+			ProgressDialog progress = ProgressDialog.minimal(emailViewPanel, "Deleting Hidden Emails", "Deleting all hidden emails permanently...");
+			ForkJoinPool.commonPool().submit(() -> {
+				new EmailRepository(emailViewPanel.getCurrentDataset()).deleteAllHidden();
+				progress.append("All emails have been deleted.");
+				progress.done();
+			});
 		}
 	}
 }

@@ -49,6 +49,7 @@ public class SimpleBrowsePanel extends JPanel {
 
 	public void setDataset(EmailDataset ds) {
 		this.emailListModel.clear();
+		this.currentDataset = ds;
 
 		// Set all elements
 		boolean enabled = ds != null;
@@ -63,7 +64,6 @@ public class SimpleBrowsePanel extends JPanel {
 		previousPageButton.setEnabled(enabled);
 
 		// Set the dataset after updating all controls.
-		this.currentDataset = ds;
 		if (ds != null) {
 			this.currentPage = 1;
 			doSearch();
@@ -96,27 +96,6 @@ public class SimpleBrowsePanel extends JPanel {
 	private JPanel buildFilterPanel() {
 		JPanel searchPanel = new JPanel();
 		searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.PAGE_AXIS));
-
-//		JPanel textSearchPanel = new JPanel(new GridBagLayout());
-//		GridBagConstraints c = new GridBagConstraints();
-//		c.gridx = 0; c.gridy = 0;
-//		c.weightx = 0.99; c.weighty = 0.5;
-//		c.anchor = GridBagConstraints.LINE_START;
-//		c.fill = GridBagConstraints.BOTH;
-//		c.insets = new Insets(2, 2, 2, 2);
-//		textSearchPanel.add(searchField, c);
-//		c.gridx = 1;
-//		c.weightx = 0.01;
-//		c.fill = GridBagConstraints.BOTH;
-//		textSearchPanel.add(searchButton, c);
-//		searchButton.addActionListener(e -> {
-//			if (this.currentDataset != null) {
-//				var results = new EmailRepository(currentDataset).search(searchField.getText());
-//				showResults(results);
-//			}
-//		});
-//		searchButton.setToolTipText("Search email threads using Lucene indexes.");
-//		searchPanel.add(textSearchPanel);
 
 		JPanel filterPanel = new JPanel(new GridLayout(0, 2, 5, 5));
 		filterPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
