@@ -2,6 +2,7 @@ package nl.andrewl.emaildatasetbrowser.view.search;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailIndexSearcher;
+import nl.andrewl.emaildatasetbrowser.control.search.ExportLuceneSearchAction;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 
@@ -19,18 +20,26 @@ import java.util.List;
 public class LuceneSearchPanel extends JPanel {
     private EmailDataset dataset;
     private final JButton searchButton;
+    private final JButton exportButton;
     private final DefaultMutableTreeNode resultsRoot = new DefaultMutableTreeNode();
     private final DefaultTreeModel resultsModel = new DefaultTreeModel(resultsRoot);
+    private final JTextArea queryField;
 
     public LuceneSearchPanel(EmailViewPanel emailViewPanel) {
         super(new BorderLayout());
 
         JPanel inputPanel = new JPanel(new BorderLayout());
-        JTextArea queryField = new JTextArea();
+        queryField = new JTextArea();
         queryField.setPreferredSize(new Dimension(-1, 100));
         searchButton = new JButton("Search");
+        JButton clearButton = new JButton("Clear");
+        exportButton = new JButton("Export");
         inputPanel.add(new JScrollPane(queryField), BorderLayout.CENTER);
-        inputPanel.add(searchButton, BorderLayout.SOUTH);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        buttonPanel.add(searchButton);
+        buttonPanel.add(clearButton);
+        buttonPanel.add(exportButton);
+        inputPanel.add(buttonPanel, BorderLayout.SOUTH);
         add(inputPanel, BorderLayout.NORTH);
 
         JTree resultsTree = new JTree(resultsModel);
@@ -45,7 +54,13 @@ public class LuceneSearchPanel extends JPanel {
         JScrollPane resultsScrollPane = new JScrollPane(resultsTree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         add(resultsScrollPane, BorderLayout.CENTER);
 
-        searchButton.addActionListener(e -> doSearch(queryField, emailViewPanel, resultsTree));
+        searchButton.addActionListener(e -> doSearch(resultsTree));
+        clearButton.addActionListener(e -> {
+            queryField.setText(null);
+            resultsRoot.removeAllChildren();
+            resultsModel.nodeStructureChanged(resultsRoot);
+        });
+        exportButton.addActionListener(new ExportLuceneSearchAction(this));
     }
 
     public void setDataset(EmailDataset dataset) {
@@ -53,17 +68,26 @@ public class LuceneSearchPanel extends JPanel {
         resultsRoot.removeAllChildren();
         resultsModel.nodeStructureChanged(resultsRoot);
         searchButton.setEnabled(dataset != null);
+        exportButton.setEnabled(dataset != null);
     }
 
-    private void doSearch(JTextArea queryField, EmailViewPanel emailViewPanel, JTree resultsTree) {
-        resultsRoot.removeAllChildren();
-        resultsModel.nodeStructureChanged(resultsRoot);
+    public EmailDataset getDataset() {
+        return dataset;
+    }
+
+    public String getQuery() {
         String query = queryField.getText();
         if (query == null || query.isBlank()) {
-            emailViewPanel.setEmail(null);
-            return;
+            return null;
         }
-        query = query.trim();
+        return query.trim();
+    }
+
+    private void doSearch(JTree resultsTree) {
+        resultsRoot.removeAllChildren();
+        resultsModel.nodeStructureChanged(resultsRoot);
+        String query = getQuery();
+        if (query == null) return;
 
         ProgressDialog progress = ProgressDialog.minimalText(this, "Searching");
         progress.append("Searching over all emails using query: \"%s\"".formatted(query));
