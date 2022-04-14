@@ -16,6 +16,7 @@ import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class ExportLuceneSearchAction implements ActionListener {
@@ -41,12 +42,17 @@ public class ExportLuceneSearchAction implements ActionListener {
         progress.append("Generating export for query: \"%s\"".formatted(query));
         var repo = new EmailRepository(searchPanel.getDataset());
         new EmailIndexSearcher().searchAsync(searchPanel.getDataset(), query)
-                .handleAsync((emails, throwable) -> {
+                .handleAsync((emailIds, throwable) -> {
                     if (throwable != null) {
                         progress.append("An error occurred while searching: " + throwable.getMessage());
                     } else {
-                        progress.append("Found %d emails.".formatted(emails.size()));
+                        progress.append("Found %d emails.".formatted(emailIds.size()));
                         try {
+                            List<EmailEntryPreview> emails = emailIds.parallelStream()
+                                    .map(id -> repo.findPreviewById(id).orElse(null))
+                                    .filter(Objects::nonNull)
+                                    .peek(repo::loadRepliesRecursive)
+                                    .toList();
                             writeExport(emails, repo, query, file, progress);
                         } catch (IOException ex) {
                             progress.append("An error occurred while exporting: " + ex.getMessage());

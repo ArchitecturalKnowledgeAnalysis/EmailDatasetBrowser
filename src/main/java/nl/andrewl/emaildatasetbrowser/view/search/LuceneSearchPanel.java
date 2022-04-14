@@ -2,6 +2,7 @@ package nl.andrewl.emaildatasetbrowser.view.search;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailIndexSearcher;
+import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.emaildatasetbrowser.control.search.ExportLuceneSearchAction;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
@@ -12,7 +13,10 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A panel for executing Lucene search queries and examining the results.
@@ -30,11 +34,13 @@ public class LuceneSearchPanel extends JPanel {
 
         JPanel inputPanel = new JPanel(new BorderLayout());
         queryField = new JTextArea();
-        queryField.setPreferredSize(new Dimension(-1, 100));
+        queryField.setLineWrap(true);
+        var queryScrollPane = new JScrollPane(queryField);
+        queryScrollPane.setPreferredSize(new Dimension(-1, 100));
+        inputPanel.add(queryScrollPane, BorderLayout.CENTER);
         searchButton = new JButton("Search");
         JButton clearButton = new JButton("Clear");
         exportButton = new JButton("Export");
-        inputPanel.add(new JScrollPane(queryField), BorderLayout.CENTER);
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttonPanel.add(searchButton);
         buttonPanel.add(clearButton);
@@ -89,17 +95,45 @@ public class LuceneSearchPanel extends JPanel {
         String query = getQuery();
         if (query == null) return;
 
-        ProgressDialog progress = ProgressDialog.minimalText(this, "Searching");
-        progress.append("Searching over all emails using query: \"%s\"".formatted(query));
-        var future = new EmailIndexSearcher().searchAsync(dataset, queryField.getText()).thenAcceptAsync(emails -> {
-            progress.append("Found %d email threads whose contents match the query.".formatted(emails.size()));
-            List<EmailTreeNode> nodes = emails.stream().map(EmailTreeNode::new).toList();
-            SwingUtilities.invokeLater(() -> {
-                nodes.forEach(resultsRoot::add);
-                resultsModel.nodeStructureChanged(resultsRoot);
-                resultsTree.expandPath(new TreePath(resultsRoot.getPath()));
-            });
-        });
-        progress.bind(future);
+        ProgressDialog progress = new ProgressDialog(
+                SwingUtilities.getWindowAncestor(this),
+                "Searching",
+                null,
+                true,
+                true,
+                true
+        );
+        progress.activate();
+        progress.append("Searching over all emails using query: \"%s\"\nPlease be patient. This may take a while.".formatted(query));
+        final Instant start = Instant.now();
+        var future = new EmailIndexSearcher().searchAsync(dataset, queryField.getText())
+                .handleAsync((emailIds, throwable) -> {
+                    System.out.println("Search complete!");
+                    if (throwable != null) {
+                        progress.append("An error occurred: " + throwable);
+                    } else {
+                        Duration dur = Duration.between(start, Instant.now());
+                        progress.append("Found %d email threads in %.1f seconds whose emails matched the query."
+                                .formatted(emailIds.size(), dur.toMillis() / 1000f));
+                        var repo = new EmailRepository(dataset);
+                        List<EmailTreeNode> nodes = emailIds.stream()
+                                        .map(id -> repo.findPreviewById(id).orElse(null))
+                                        .filter(Objects::nonNull)
+                                        .map(entry -> {
+                                            repo.loadRepliesRecursive(entry);
+                                            return new EmailTreeNode(entry);
+                                        })
+                                        .toList();
+                        progress.append("Loaded email thread information from the database.");
+                        SwingUtilities.invokeLater(() -> {
+                            nodes.forEach(resultsRoot::add);
+                            resultsModel.nodeStructureChanged(resultsRoot);
+                            resultsTree.expandPath(new TreePath(resultsRoot.getPath()));
+                        });
+                    }
+                    progress.done();
+                    return null;
+                });
+        progress.onCancel(() -> future.cancel(true));
     }
 }
