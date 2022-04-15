@@ -135,6 +135,10 @@ public class ProgressDialog extends JDialog implements Consumer<String> {
 		this.cancelAction = cancelAction;
 	}
 
+	/**
+	 * Appends a message to the dialog.
+	 * @param msg The message to append.
+	 */
 	public synchronized void append(String msg) {
 		if (textBox != null) {
 			SwingUtilities.invokeLater(() -> {
@@ -142,6 +146,15 @@ public class ProgressDialog extends JDialog implements Consumer<String> {
 				textBox.setCaretPosition(textBox.getText().length());
 			});
 		}
+	}
+
+	/**
+	 * Helper function to append a formatted string to the dialog.
+	 * @param msg The format string.
+	 * @param args The arguments for the string.
+	 */
+	public void appendF(String msg, Object... args) {
+		append(String.format(msg, args));
 	}
 
 	/**

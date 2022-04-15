@@ -108,32 +108,37 @@ public class LuceneSearchPanel extends JPanel {
         final Instant start = Instant.now();
         var future = new EmailIndexSearcher().searchAsync(dataset, queryField.getText())
                 .handleAsync((emailIds, throwable) -> {
-                    System.out.println("Search complete!");
                     if (throwable != null) {
                         progress.append("An error occurred: " + throwable);
                     } else {
-                        Duration dur = Duration.between(start, Instant.now());
-                        progress.append("Found %d email threads in %.1f seconds whose emails matched the query."
-                                .formatted(emailIds.size(), dur.toMillis() / 1000f));
-                        var repo = new EmailRepository(dataset);
-                        List<EmailTreeNode> nodes = emailIds.stream()
-                                        .map(id -> repo.findPreviewById(id).orElse(null))
-                                        .filter(Objects::nonNull)
-                                        .map(entry -> {
-                                            repo.loadRepliesRecursive(entry);
-                                            return new EmailTreeNode(entry);
-                                        })
-                                        .toList();
-                        progress.append("Loaded email thread information from the database.");
-                        SwingUtilities.invokeLater(() -> {
-                            nodes.forEach(resultsRoot::add);
-                            resultsModel.nodeStructureChanged(resultsRoot);
-                            resultsTree.expandPath(new TreePath(resultsRoot.getPath()));
-                        });
+                        showResults(start, progress, emailIds, resultsTree);
                     }
                     progress.done();
                     return null;
                 });
         progress.onCancel(() -> future.cancel(true));
+    }
+
+    private void showResults(final Instant start, ProgressDialog progress, List<String> emailIds, JTree resultsTree) {
+        Duration dur = Duration.between(start, Instant.now());
+        progress.appendF("Found %d email threads in %.1f seconds whose emails matched the query.", emailIds.size(), dur.toMillis() / 1000f);
+        progress.append("Loading detailed email thread information from the database. This may take a while.");
+        Instant start2 = Instant.now();
+        var repo = new EmailRepository(dataset);
+        List<EmailTreeNode> nodes = emailIds.stream()
+                .map(id -> repo.findPreviewById(id).orElse(null))
+                .filter(Objects::nonNull)
+                .map(entry -> {
+                    repo.loadRepliesRecursive(entry);
+                    return new EmailTreeNode(entry);
+                })
+                .toList();
+        dur = Duration.between(start2, Instant.now());
+        progress.appendF("Loaded email thread information from the database in %.1f seconds.", dur.toMillis() / 1000f);
+        SwingUtilities.invokeLater(() -> {
+            nodes.forEach(resultsRoot::add);
+            resultsModel.nodeStructureChanged(resultsRoot);
+            resultsTree.expandPath(new TreePath(resultsRoot.getPath()));
+        });
     }
 }
