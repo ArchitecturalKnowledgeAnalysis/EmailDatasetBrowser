@@ -25,7 +25,7 @@ public class RegenerateIndexesAction extends AbstractAction {
             progress.append("Starting the process of regenerating indexes.");
             ForkJoinPool.commonPool().submit(() -> {
                 try {
-                    new EmailIndexGenerator().regenerateIndex(ds, progress);
+                    new EmailIndexGenerator().generateIndex(ds, progress);
                     progress.append("Indexes have been regenerated successfully.");
                 } catch (IOException ex) {
                     progress.append("An error occurred: " + ex.getMessage());
