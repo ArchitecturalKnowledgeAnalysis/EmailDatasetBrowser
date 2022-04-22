@@ -23,11 +23,16 @@ import java.util.Objects;
  */
 public class LuceneSearchPanel extends JPanel {
     private EmailDataset dataset;
-    private final JButton searchButton;
-    private final JButton exportButton;
+
+    private final JTextArea queryField;
+    private final JButton searchButton = new JButton("Search");
+    private final JSpinner resultCountSpinner = new JSpinner(new SpinnerNumberModel(100, 100, 10000, 100));
+    private final JButton exportButton = new JButton("Export");
+
     private final DefaultMutableTreeNode resultsRoot = new DefaultMutableTreeNode();
     private final DefaultTreeModel resultsModel = new DefaultTreeModel(resultsRoot);
-    private final JTextArea queryField;
+    private final JTree resultsTree = new JTree(resultsModel);
+
 
     public LuceneSearchPanel(EmailViewPanel emailViewPanel) {
         super(new BorderLayout());
@@ -38,25 +43,27 @@ public class LuceneSearchPanel extends JPanel {
         var queryScrollPane = new JScrollPane(queryField);
         queryScrollPane.setPreferredSize(new Dimension(-1, 100));
         inputPanel.add(queryScrollPane, BorderLayout.CENTER);
-        searchButton = new JButton("Search");
-        JButton clearButton = new JButton("Clear");
-        exportButton = new JButton("Export");
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.PAGE_AXIS));
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttonPanel.add(searchButton);
+        JButton clearButton = new JButton("Clear");
         buttonPanel.add(clearButton);
-        buttonPanel.add(exportButton);
-        inputPanel.add(buttonPanel, BorderLayout.SOUTH);
+        bottomPanel.add(buttonPanel);
+
+        JPanel exportPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        exportPanel.add(resultCountSpinner);
+        exportPanel.add(exportButton);
+        bottomPanel.add(exportPanel);
+
+        inputPanel.add(bottomPanel, BorderLayout.SOUTH);
         add(inputPanel, BorderLayout.NORTH);
 
-        JTree resultsTree = new JTree(resultsModel);
         resultsTree.setRootVisible(false);
         resultsTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        resultsTree.getSelectionModel().addTreeSelectionListener(e -> {
-            if (e.getPath().getLastPathComponent() instanceof EmailTreeNode etn) {
-                emailViewPanel.fetchAndSetEmail(etn.getEmail().messageId());
-                resultsTree.expandPath(new TreePath(etn.getPath()));
-            }
-        });
+        resultsTree.getSelectionModel().addTreeSelectionListener(new EmailTreeSelectionListener(emailViewPanel, resultsTree));
         JScrollPane resultsScrollPane = new JScrollPane(resultsTree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         add(resultsScrollPane, BorderLayout.CENTER);
 
@@ -87,6 +94,10 @@ public class LuceneSearchPanel extends JPanel {
             return null;
         }
         return query.trim();
+    }
+
+    public int getResultCount() {
+        return (int) resultCountSpinner.getValue();
     }
 
     private void doSearch(JTree resultsTree) {
@@ -121,22 +132,26 @@ public class LuceneSearchPanel extends JPanel {
 
     private void showResults(final Instant start, ProgressDialog progress, List<String> emailIds, JTree resultsTree) {
         Duration dur = Duration.between(start, Instant.now());
-        progress.appendF("Found %d email threads in %.1f seconds whose emails matched the query.", emailIds.size(), dur.toMillis() / 1000f);
+        progress.appendF("Found %d email threads in %.3f seconds whose emails matched the query.", emailIds.size(), dur.toMillis() / 1000f);
         progress.append("Loading detailed email thread information from the database. This may take a while.");
         Instant start2 = Instant.now();
         var repo = new EmailRepository(dataset);
+        int resultCount = getResultCount();
+        progress.appendF("Showing the top %d results.", resultCount);
         List<EmailTreeNode> nodes = emailIds.stream()
                 .map(id -> repo.findPreviewById(id).orElse(null))
                 .filter(Objects::nonNull)
-                .map(entry -> {
-                    repo.loadRepliesRecursive(entry);
-                    return new EmailTreeNode(entry);
-                })
+                .map(EmailTreeNode::new)
+                .limit(resultCount)
                 .toList();
         dur = Duration.between(start2, Instant.now());
-        progress.appendF("Loaded email thread information from the database in %.1f seconds.", dur.toMillis() / 1000f);
+        progress.appendF("Loaded email thread information from the database in %.3f seconds.", dur.toMillis() / 1000f);
         SwingUtilities.invokeLater(() -> {
-            nodes.forEach(resultsRoot::add);
+            int i = 1;
+            for (var node : nodes) {
+                node.setRootResultIndex(i++);
+                resultsRoot.add(node);
+            }
             resultsModel.nodeStructureChanged(resultsRoot);
             resultsTree.expandPath(new TreePath(resultsRoot.getPath()));
         });

@@ -47,10 +47,12 @@ public class ExportLuceneSearchAction implements ActionListener {
                         progress.append("An error occurred while searching: " + throwable.getMessage());
                     } else {
                         progress.append("Found %d emails.".formatted(emailIds.size()));
+                        progress.appendF("Exporting the top %d emails.", searchPanel.getResultCount());
                         try {
                             List<EmailEntryPreview> emails = emailIds.parallelStream()
                                     .map(id -> repo.findPreviewById(id).orElse(null))
                                     .filter(Objects::nonNull)
+                                    .limit(searchPanel.getResultCount())
                                     .peek(repo::loadRepliesRecursive)
                                     .toList();
                             writeExport(emails, repo, query, file, progress);

@@ -9,8 +9,11 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.prefs.Preferences;
 
 public class DatasetOpenAction extends AbstractAction {
+	private static final String PREF_OPEN_DIR = "dataset_open_dir";
+
 	private final EmailDatasetBrowser browser;
 
 	public DatasetOpenAction(EmailDatasetBrowser browser) {
@@ -20,7 +23,8 @@ public class DatasetOpenAction extends AbstractAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		JFileChooser fc = new JFileChooser(Path.of(".").toFile());
+		Preferences prefs = EmailDatasetBrowser.getPreferences();
+		JFileChooser fc = new JFileChooser(prefs.get(PREF_OPEN_DIR, Path.of(".").toAbsolutePath().toString()));
 		fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		int result = fc.showOpenDialog(browser);
 		if (result == JFileChooser.APPROVE_OPTION) {
@@ -28,13 +32,16 @@ public class DatasetOpenAction extends AbstractAction {
 			ProgressDialog progress = new ProgressDialog(
 					browser,
 					"Opening Dataset",
-					"Opening dataset from " + f.getAbsolutePath(),
+					null,
 					true,
 					false,
 					true
 			);
 			progress.activate();
-			var future = EmailDataset.open(f.toPath());
+			progress.append("Opening dataset from " + f.getAbsolutePath());
+			Path datasetPath = f.toPath();
+			prefs.put(PREF_OPEN_DIR, datasetPath.getParent().toAbsolutePath().toString());
+			var future = EmailDataset.open(datasetPath);
 			future.handleAsync((dataset, throwable) -> {
 				progress.done();
 				if (throwable != null) {

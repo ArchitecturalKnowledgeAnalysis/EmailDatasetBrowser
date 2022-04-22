@@ -7,6 +7,7 @@ import nl.andrewl.emaildatasetbrowser.control.ExportDatasetAction;
 import nl.andrewl.emaildatasetbrowser.control.GenerateDatasetAction;
 import nl.andrewl.emaildatasetbrowser.control.RegenerateIndexesAction;
 import nl.andrewl.emaildatasetbrowser.control.email.*;
+import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 import nl.andrewl.emaildatasetbrowser.view.search.LuceneSearchPanel;
 import nl.andrewl.emaildatasetbrowser.view.search.SimpleBrowsePanel;
@@ -15,11 +16,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.prefs.Preferences;
 
 /**
  * The main JFrame for the dataset browser application.
  */
 public class EmailDatasetBrowser extends JFrame {
+	public static final String PREFERENCES_NODE_NAME = "email_dataset_browser_prefs";
+
 	private final EmailViewPanel emailViewPanel;
 	private final SimpleBrowsePanel browsePanel;
 	private final LuceneSearchPanel searchPanel;
@@ -56,10 +60,20 @@ public class EmailDatasetBrowser extends JFrame {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				if (currentDataset != null) {
+					ProgressDialog dialog = ProgressDialog.minimal(emailViewPanel, "Closing dataset...", "Closing the dataset before exiting.");
+					dialog.activate();
 					try {
 						currentDataset.close();
 					} catch (Exception ex) {
 						ex.printStackTrace();
+						JOptionPane.showMessageDialog(
+								emailViewPanel,
+								"An error occurred while closing the database:\n" + ex.getMessage(),
+								"Error",
+								JOptionPane.ERROR_MESSAGE
+						);
+					} finally {
+						dialog.done();
 					}
 				}
 			}
@@ -103,5 +117,9 @@ public class EmailDatasetBrowser extends JFrame {
 		menuBar.add(filterMenu);
 
 		return menuBar;
+	}
+
+	public static Preferences getPreferences() {
+		return Preferences.userRoot().node(PREFERENCES_NODE_NAME);
 	}
 }
