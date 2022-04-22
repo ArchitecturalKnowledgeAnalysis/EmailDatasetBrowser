@@ -28,8 +28,8 @@ jobs:
           servers: |
             [{
               "id": "github-akr",
-              "username": "${{ secrets.GITHUB_USERNAME }}",
-              "password": "${{ secrets.GITHUB_TOKEN }}"
+              "username": "${{ secrets.AKR_USERNAME }}",
+              "password": "${{ secrets.AKR_TOKEN }}"
             }]
 
       # Run our maven command.
