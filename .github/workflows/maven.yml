@@ -3,12 +3,10 @@ name: Java CI with Maven
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build:
-    name: Build and Release
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +28,7 @@ jobs:
           mvn -B package --file pom.xml
           asset=$(find target/ -type f -name "*-jar-with-dependencies.jar")
           clean_name=$(echo $asset | sed -r 's/-jar-with-dependencies//')
+          echo "GITHUB_JAR_CLEAN_NAME=$clean_name" >> $GITHUB_ENV
           mv -f $asset $clean_name
           [[ $clean_name =~ ([[:digit:]]+(.[[:digit:]]+)*).jar ]]
           version=${BASH_REMATCH[1]}
@@ -40,4 +39,3 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: $clean_name
-          tag_name: $version
