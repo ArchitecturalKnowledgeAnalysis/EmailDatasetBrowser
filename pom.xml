@@ -38,6 +38,16 @@
         </dependency>
     </dependencies>
 
+    <repositories>
+        <repository>
+            <id>github-architecturalknowledgeresearch</id>
+            <url>https://maven.pkg.github.com/architecturalknowledgeresearch</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <build>
         <plugins>
             <plugin>
