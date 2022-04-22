@@ -22,6 +22,11 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      # Set up maven settings.
+#      - uses: s4u/maven-settings-action@v2.6.0
+#        with:
+#          servers:
+
       # Run our maven command.
       - name: Build with Maven
         run: |

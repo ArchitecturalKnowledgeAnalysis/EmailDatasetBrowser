@@ -40,8 +40,8 @@
 
     <repositories>
         <repository>
-            <id>github-architecturalknowledgeresearch</id>
-            <url>https://maven.pkg.github.com/architecturalknowledgeresearch</url>
+            <id>akr-emailindexer</id>
+            <url>https://maven.pkg.github.com/architecturalknowledgeresearch/emailindexer</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
