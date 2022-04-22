@@ -23,9 +23,14 @@ jobs:
           cache: maven
 
       # Set up maven settings.
-#      - uses: s4u/maven-settings-action@v2.6.0
-#        with:
-#          servers:
+      - uses: s4u/maven-settings-action@v2.6.0
+        with:
+          servers: |
+            [{
+              "id": "github-akr",
+              "username": "${{ secrets.GITHUB_USERNAME }}",
+              "password": "${{ secrets.GITHUB_TOKEN }}"
+            }]
 
       # Run our maven command.
       - name: Build with Maven
