@@ -78,7 +78,7 @@ public class SimpleBrowsePanel extends JPanel {
 				20,
 				(Boolean) this.showHiddenComboBox.getSelectedItem(),
 				(Boolean) this.showTaggedComboBox.getSelectedItem()
-		);
+		).join();
 		showResults(results);
 		this.currentPageLabel.setText("Page %d of %d".formatted(results.page(), results.pageCount()));
 		this.sizeLabel.setText("Showing %d of %d results".formatted(results.emails().size(), results.totalResultCount()));
