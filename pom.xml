@@ -16,14 +16,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>nl.andrewl</groupId>
-            <artifactId>emailindexer</artifactId>
-            <version>1.6.7</version>
+            <groupId>com.github.ArchitecturalKnowledgeAnalysis</groupId>
+            <artifactId>EmailIndexer</artifactId>
+            <version>v1.6.8</version>
         </dependency>
         <dependency>
-            <groupId>nl.andrewl</groupId>
-            <artifactId>emaildownloader</artifactId>
-            <version>1.1.1</version>
+            <groupId>com.github.ArchitecturalKnowledgeAnalysis</groupId>
+            <artifactId>EmailDownloader</artifactId>
+            <version>v1.1.1</version>
         </dependency>
 
         <dependency>
@@ -40,11 +40,8 @@
 
     <repositories>
         <repository>
-            <id>github-akr</id>
-            <url>https://maven.pkg.github.com/architecturalknowledgeresearch</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 

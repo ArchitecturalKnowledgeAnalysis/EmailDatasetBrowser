@@ -22,16 +22,6 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # Set up maven settings.
-      - uses: s4u/maven-settings-action@v2.6.0
-        with:
-          servers: |
-            [{
-              "id": "github-akr",
-              "username": "${{ secrets.AKR_USERNAME }}",
-              "password": "${{ secrets.AKR_TOKEN }}"
-            }]
-
       # Run our maven command.
       - name: Build with Maven
         run: |
@@ -40,12 +30,14 @@ jobs:
           clean_name=$(echo $asset | sed -r 's/-jar-with-dependencies//')
           echo "GITHUB_JAR_CLEAN_NAME=$clean_name" >> $GITHUB_ENV
           mv -f $asset $clean_name
+          echo "Moved  $asset to $clean_name"
           [[ $clean_name =~ ([[:digit:]]+(.[[:digit:]]+)*).jar ]]
           version=${BASH_REMATCH[1]}
+          echo "Found version: $version"
 
       # Make a release.
       - name: Create Release
         if: ${{ success() && startsWith(github.ref, 'refs/tags/') }}
         uses: softprops/action-gh-release@v1
         with:
-          files: $clean_name
+          files: $GITHUB_JAR_CLEAN_NAME
