@@ -1,6 +1,7 @@
 package nl.andrewl.emaildatasetbrowser.view;
 
 import javax.swing.*;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.Random;
 
@@ -10,8 +11,14 @@ public final class SwingUtils {
 
 	public static void setAllButtonsEnabled(Container c, boolean enabled) {
 		for (var component : c.getComponents()) {
-			if (component instanceof JComponent button) {
+			if (component instanceof JButton button) {
 				button.setEnabled(enabled);
+			} else if (component instanceof JTextComponent text) {
+				text.setEnabled(enabled);
+			} else if (component instanceof JCheckBox checkBox) {
+				checkBox.setEnabled(enabled);
+			} else if (component instanceof JComboBox<?> comboBox) {
+				comboBox.setEnabled(enabled);
 			} else if (component instanceof Container nested) {
 				setAllButtonsEnabled(nested, enabled);
 			}
