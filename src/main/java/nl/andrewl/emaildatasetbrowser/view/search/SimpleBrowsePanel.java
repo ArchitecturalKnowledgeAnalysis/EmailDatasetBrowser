@@ -3,12 +3,18 @@ package nl.andrewl.emaildatasetbrowser.view.search;
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailEntryPreview;
 import nl.andrewl.email_indexer.data.EmailRepository;
-import nl.andrewl.email_indexer.data.EmailSearchResult;
+import nl.andrewl.email_indexer.data.search.EmailSearchResult;
+import nl.andrewl.email_indexer.data.search.EmailSearcher;
+import nl.andrewl.email_indexer.data.search.SearchFilter;
+import nl.andrewl.email_indexer.data.search.filter.HiddenFilter;
 import nl.andrewl.emaildatasetbrowser.EmailListItemRenderer;
+import nl.andrewl.emaildatasetbrowser.view.SwingUtils;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Panel for browsing the dataset using some filters and a paginated results
@@ -73,15 +79,20 @@ public class SimpleBrowsePanel extends JPanel {
 			this.emailListModel.clear();
 			return;
 		}
-		var results = new EmailRepository(currentDataset).findAll(
-				this.currentPage,
-				20,
-				(Boolean) this.showHiddenComboBox.getSelectedItem(),
-				(Boolean) this.showTaggedComboBox.getSelectedItem()
-		).join();
-		showResults(results);
-		this.currentPageLabel.setText("Page %d of %d".formatted(results.page(), results.pageCount()));
-		this.sizeLabel.setText("Showing %d of %d results".formatted(results.emails().size(), results.totalResultCount()));
+		List<SearchFilter> filters = new ArrayList<>(2);
+		Boolean hidden = (Boolean) this.showHiddenComboBox.getSelectedItem();
+		if (hidden != null) filters.add(new HiddenFilter(hidden));
+		SwingUtils.setAllButtonsEnabled(this, false);
+		new EmailSearcher(currentDataset).findAll(this.currentPage, 20, filters)
+			.handle((results, throwable) -> {
+				SwingUtilities.invokeLater(() -> {
+					SwingUtils.setAllButtonsEnabled(this, true);
+					showResults(results);
+					this.currentPageLabel.setText("Page %d of %d".formatted(results.page(), results.pageCount()));
+					this.sizeLabel.setText("Showing %d of %d results".formatted(results.emails().size(), results.totalResultCount()));
+				});
+				return null;
+			});
 	}
 
 	private void showResults(EmailSearchResult result) {

@@ -1,8 +1,8 @@
 package nl.andrewl.emaildatasetbrowser.control.search;
 
 import nl.andrewl.email_indexer.data.EmailEntryPreview;
-import nl.andrewl.email_indexer.data.EmailIndexSearcher;
 import nl.andrewl.email_indexer.data.EmailRepository;
+import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.search.LuceneSearchPanel;
 

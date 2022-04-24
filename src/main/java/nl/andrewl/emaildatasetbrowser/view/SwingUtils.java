@@ -10,7 +10,7 @@ public final class SwingUtils {
 
 	public static void setAllButtonsEnabled(Container c, boolean enabled) {
 		for (var component : c.getComponents()) {
-			if (component instanceof JButton button) {
+			if (component instanceof JComponent button) {
 				button.setEnabled(enabled);
 			} else if (component instanceof Container nested) {
 				setAllButtonsEnabled(nested, enabled);
