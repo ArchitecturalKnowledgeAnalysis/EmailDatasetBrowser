@@ -7,6 +7,7 @@ import nl.andrewl.email_indexer.data.search.EmailSearchResult;
 import nl.andrewl.email_indexer.data.search.EmailSearcher;
 import nl.andrewl.email_indexer.data.search.SearchFilter;
 import nl.andrewl.email_indexer.data.search.filter.HiddenFilter;
+import nl.andrewl.email_indexer.data.search.filter.TagFilter;
 import nl.andrewl.emaildatasetbrowser.EmailListItemRenderer;
 import nl.andrewl.emaildatasetbrowser.view.SwingUtils;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
@@ -24,9 +25,10 @@ public class SimpleBrowsePanel extends JPanel {
 	private final DefaultListModel<EmailEntryPreview> emailListModel;
 	private EmailDataset currentDataset;
 	private int currentPage = 1;
+	private TagFilter currentTagFilter = TagFilter.excludeNone();
 
 	private final JComboBox<Boolean> showHiddenComboBox = new JComboBox<>(new Boolean[]{null, true, false});
-	private final JComboBox<Boolean> showTaggedComboBox = new JComboBox<>(new Boolean[]{null, true, false});
+	private final JButton editTagFilterButton = new JButton("Edit");
 	private final JButton nextPageButton = new JButton("Next");
 	private final JButton previousPageButton = new JButton("Prev");
 	private final JLabel currentPageLabel = new JLabel("Page 1 of 1");
@@ -58,11 +60,10 @@ public class SimpleBrowsePanel extends JPanel {
 		// Set all elements
 		boolean enabled = ds != null;
 
+		editTagFilterButton.setEnabled(enabled);
+
 		showHiddenComboBox.setSelectedItem(false);
 		showHiddenComboBox.setEnabled(enabled);
-
-		showTaggedComboBox.setSelectedItem(null);
-		showTaggedComboBox.setEnabled(enabled);
 
 		nextPageButton.setEnabled(enabled);
 		previousPageButton.setEnabled(enabled);
@@ -82,6 +83,7 @@ public class SimpleBrowsePanel extends JPanel {
 		List<SearchFilter> filters = new ArrayList<>(2);
 		Boolean hidden = (Boolean) this.showHiddenComboBox.getSelectedItem();
 		if (hidden != null) filters.add(new HiddenFilter(hidden));
+		if (!currentTagFilter.getWhereClause().isBlank()) filters.add(currentTagFilter);
 		SwingUtils.setAllButtonsEnabled(this, false);
 		new EmailSearcher(currentDataset).findAll(this.currentPage, 20, filters)
 			.handle((results, throwable) -> {
@@ -116,14 +118,35 @@ public class SimpleBrowsePanel extends JPanel {
 			this.currentPage = 1;
 			doSearch();
 		});
-		filterPanel.add(buildControlPanel("Show Tagged", showTaggedComboBox));
-		showTaggedComboBox.addActionListener(e -> {
+		filterPanel.add(buildControlPanel("Tag Filter", editTagFilterButton));
+		editTagFilterButton.addActionListener(e -> {
 			if (currentDataset == null) return;
-			this.currentPage = 1;
-			doSearch();
+			JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Edit Tag Filter", Dialog.ModalityType.APPLICATION_MODAL);
+			JPanel panel = new JPanel(new BorderLayout());
+			var tagFilterPanel = new TagFilterPanel(currentDataset, currentTagFilter);
+			tagFilterPanel.setPreferredSize(new Dimension(400, 400));
+			panel.add(tagFilterPanel, BorderLayout.CENTER);
+			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+			JButton cancelButton = new JButton("Cancel");
+			cancelButton.addActionListener(ev -> dialog.dispose());
+			JButton okayButton = new JButton("Okay");
+			okayButton.addActionListener(ev -> {
+				currentTagFilter = tagFilterPanel.getFilter();
+				dialog.dispose();
+				doSearch();
+			});
+			buttonPanel.add(cancelButton);
+			buttonPanel.add(okayButton);
+			panel.add(buttonPanel, BorderLayout.SOUTH);
+			dialog.setContentPane(panel);
+			dialog.pack();
+			dialog.setLocationRelativeTo(this);
+			dialog.setVisible(true);
 		});
 		searchPanel.add(filterPanel);
 
+
+		// Page control panel settings.
 		nextPageButton.addActionListener(e -> {
 			this.currentPage++;
 			doSearch();
