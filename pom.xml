@@ -57,7 +57,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser</mainClass>
+                            <mainClass>nl.andrewl.emaildatasetbrowser.EdbApp</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

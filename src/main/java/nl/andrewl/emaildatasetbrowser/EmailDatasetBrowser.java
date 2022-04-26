@@ -1,11 +1,7 @@
 package nl.andrewl.emaildatasetbrowser;
 
-import com.formdev.flatlaf.FlatDarkLaf;
 import nl.andrewl.email_indexer.data.EmailDataset;
-import nl.andrewl.emaildatasetbrowser.control.DatasetOpenAction;
-import nl.andrewl.emaildatasetbrowser.control.ExportDatasetAction;
-import nl.andrewl.emaildatasetbrowser.control.GenerateDatasetAction;
-import nl.andrewl.emaildatasetbrowser.control.RegenerateIndexesAction;
+import nl.andrewl.emaildatasetbrowser.control.*;
 import nl.andrewl.emaildatasetbrowser.control.email.*;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
@@ -28,12 +24,6 @@ public class EmailDatasetBrowser extends JFrame {
 	private final SimpleBrowsePanel browsePanel;
 	private final LuceneSearchPanel searchPanel;
 	private EmailDataset currentDataset = null;
-
-	public static void main(String[] args) {
-		FlatDarkLaf.setup();
-		var browser = new EmailDatasetBrowser();
-		browser.setVisible(true);
-	}
 
 	public EmailDatasetBrowser () {
 		super("Email Dataset Browser");
@@ -59,23 +49,7 @@ public class EmailDatasetBrowser extends JFrame {
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				if (currentDataset != null) {
-					ProgressDialog dialog = ProgressDialog.minimal(emailViewPanel, "Closing dataset...", "Closing the dataset before exiting.");
-					dialog.activate();
-					try {
-						currentDataset.close();
-					} catch (Exception ex) {
-						ex.printStackTrace();
-						JOptionPane.showMessageDialog(
-								emailViewPanel,
-								"An error occurred while closing the database:\n" + ex.getMessage(),
-								"Error",
-								JOptionPane.ERROR_MESSAGE
-						);
-					} finally {
-						dialog.done();
-					}
-				}
+				setDataset(null);
 			}
 		});
 	}
@@ -84,13 +58,14 @@ public class EmailDatasetBrowser extends JFrame {
 		return this.currentDataset;
 	}
 
+	/**
+	 * Sets the dataset that this browser will render. If the browser already
+	 * has a dataset open, it will close that one first.
+	 * @param ds The dataset to use.
+	 */
 	public void setDataset(EmailDataset ds) {
 		if (currentDataset != null) {
-			try {
-				currentDataset.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			closeDataset();
 		}
 		this.currentDataset = ds;
 		browsePanel.setDataset(ds);
@@ -105,6 +80,7 @@ public class EmailDatasetBrowser extends JFrame {
 		fileMenu.add(new JMenuItem(new GenerateDatasetAction(this)));
 		fileMenu.add(new JMenuItem(new RegenerateIndexesAction(this)));
 		fileMenu.add(new JMenuItem(new ExportDatasetAction(this)));
+		fileMenu.add(new JMenuItem(new CloseDatasetAction(this)));
 		menuBar.add(fileMenu);
 
 		JMenu filterMenu = new JMenu("Filter");
@@ -117,6 +93,33 @@ public class EmailDatasetBrowser extends JFrame {
 		menuBar.add(filterMenu);
 
 		return menuBar;
+	}
+
+	private void closeDataset() {
+		if (currentDataset == null) return;
+		ProgressDialog dialog = new ProgressDialog(
+				this,
+				"Closing Dataset",
+				"Closing the current dataset.",
+				true,
+				false,
+				false
+		);
+		dialog.activate();
+		try {
+			currentDataset.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			JOptionPane.showMessageDialog(
+					emailViewPanel,
+					"An error occurred while closing the database:\n" + ex.getMessage(),
+					"Error",
+					JOptionPane.ERROR_MESSAGE
+			);
+		} finally {
+			dialog.done();
+			currentDataset = null;
+		}
 	}
 
 	public static Preferences getPreferences() {

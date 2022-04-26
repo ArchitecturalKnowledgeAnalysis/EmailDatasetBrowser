@@ -43,9 +43,9 @@ public class DatasetOpenAction extends AbstractAction {
 			prefs.put(PREF_OPEN_DIR, datasetPath.getParent().toAbsolutePath().toString());
 			var future = EmailDataset.open(datasetPath);
 			future.handleAsync((dataset, throwable) -> {
-				progress.done();
 				if (throwable != null) {
 					progress.append("Could not open dataset: " + throwable.getMessage());
+					progress.done();
 				} else {
 					browser.setDataset(dataset);
 					var repo = new EmailRepository(dataset);
@@ -56,6 +56,7 @@ public class DatasetOpenAction extends AbstractAction {
 							repo.countTaggedEmails()
 					);
 					progress.append(message);
+					progress.done();
 				}
 				return null;
 			});

@@ -67,6 +67,8 @@ public class SimpleBrowsePanel extends JPanel {
 
 		nextPageButton.setEnabled(enabled);
 		previousPageButton.setEnabled(enabled);
+		currentPageLabel.setText("Page 1 of 1");
+		sizeLabel.setText("Showing 0 of 0 results");
 
 		// Set the dataset after updating all controls.
 		if (ds != null) {

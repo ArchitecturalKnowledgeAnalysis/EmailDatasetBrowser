@@ -22,6 +22,10 @@ public class PathSelectField extends JPanel {
 	private Path selectedPath = null;
 
 	public PathSelectField(int fileSelectionMode, boolean acceptAll, FileFilter filter) {
+		this(fileSelectionMode, acceptAll, filter, "Select file...");
+	}
+
+	public PathSelectField(int fileSelectionMode, boolean acceptAll, FileFilter filter, String label) {
 		super(new BorderLayout());
 		this.fileSelectionMode = fileSelectionMode;
 		this.acceptAll = acceptAll;
@@ -32,7 +36,7 @@ public class PathSelectField extends JPanel {
 		pathField.setEditable(false);
 		add(pathField, BorderLayout.CENTER);
 
-		selectPathButton = new JButton("Select file...");
+		selectPathButton = new JButton(label);
 		selectPathButton.setMinimumSize(new Dimension(50, 30));
 		add(selectPathButton, BorderLayout.EAST);
 
@@ -49,11 +53,11 @@ public class PathSelectField extends JPanel {
 	}
 
 	public static PathSelectField directorySelectField() {
-		return new PathSelectField(JFileChooser.DIRECTORIES_ONLY, false, new DirectoryFileFilter());
+		return new PathSelectField(JFileChooser.DIRECTORIES_ONLY, false, new DirectoryFileFilter(), "Select directory...");
 	}
 
 	public static PathSelectField fileTypeSelectField(String extension, String name) {
-		return new PathSelectField(JFileChooser.FILES_ONLY, false, new FileNameExtensionFilter(name, extension));
+		return new PathSelectField(JFileChooser.FILES_ONLY, false, new FileNameExtensionFilter(name, extension), "Select file...");
 	}
 
 	public void setEnabled(boolean enabled) {
