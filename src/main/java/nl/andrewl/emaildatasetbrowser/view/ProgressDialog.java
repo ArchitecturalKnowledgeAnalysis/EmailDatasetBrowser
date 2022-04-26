@@ -6,7 +6,6 @@ import java.awt.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -15,13 +14,13 @@ import java.util.function.Consumer;
  * periodically posting messages to the dialog's log text component.
  */
 public class ProgressDialog extends JDialog implements Consumer<String> {
-	private static final int MIN_OPEN_TIME = 1000;
+	private static final int MIN_OPEN_TIME = 2000;
 
 	private final JTextArea textBox;
 	private final JButton doneButton;
 	private final JButton cancelButton;
 	private Runnable cancelAction;
-	private Instant openedAt;
+	private Instant lastAppendAt;
 
 	public ProgressDialog(Window owner, String title, String description) {
 		this(owner, title, description, true, true, true);
@@ -108,7 +107,6 @@ public class ProgressDialog extends JDialog implements Consumer<String> {
 	 */
 	public void activate() {
 		new Thread(() -> {
-			openedAt = Instant.now();
 			setVisible(true);
 		}).start();
 	}
@@ -150,6 +148,7 @@ public class ProgressDialog extends JDialog implements Consumer<String> {
 			SwingUtilities.invokeLater(() -> {
 				textBox.setText(textBox.getText() + "\n" + msg);
 				textBox.setCaretPosition(textBox.getText().length());
+				lastAppendAt = Instant.now();
 			});
 		}
 	}
@@ -175,18 +174,18 @@ public class ProgressDialog extends JDialog implements Consumer<String> {
 			}
 			doneButton.setEnabled(true);
 		} else {
-			close();
+			closeAutomatically();
 		}
 	}
 
-	private void close() {
-		if (openedAt == null) {
+	private void closeAutomatically() {
+		if (lastAppendAt == null) {
 			CompletableFuture.delayedExecutor(MIN_OPEN_TIME, TimeUnit.MILLISECONDS).execute(this::dispose);
 		} else {
 			Instant now = Instant.now();
-			Duration openTime = Duration.between(openedAt, now);
-			if (openTime.toMillis() < MIN_OPEN_TIME) {
-				long timeToWait = MIN_OPEN_TIME - openTime.toMillis();
+			Duration timeSinceLastAppend = Duration.between(lastAppendAt, now);
+			if (timeSinceLastAppend.toMillis() < MIN_OPEN_TIME) {
+				long timeToWait = MIN_OPEN_TIME - timeSinceLastAppend.toMillis();
 				CompletableFuture.delayedExecutor(timeToWait, TimeUnit.MILLISECONDS).execute(this::dispose);
 			} else {
 				dispose();

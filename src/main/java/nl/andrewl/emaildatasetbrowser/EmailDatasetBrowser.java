@@ -108,6 +108,7 @@ public class EmailDatasetBrowser extends JFrame {
 		dialog.appendF("Closing the currently open dataset at %s", currentDataset.getOpenDir());
 		dialog.activate();
 		try {
+			// TODO: Async close!
 			currentDataset.close();
 			dialog.append("Dataset closed successfully.");
 		} catch (Exception ex) {

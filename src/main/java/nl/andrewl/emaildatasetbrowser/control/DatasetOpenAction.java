@@ -35,7 +35,7 @@ public class DatasetOpenAction extends AbstractAction {
 					null,
 					true,
 					false,
-					true
+					false
 			);
 			progress.activate();
 			progress.append("Opening dataset from " + f.getAbsolutePath());
