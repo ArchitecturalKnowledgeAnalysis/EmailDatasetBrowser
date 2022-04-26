@@ -1,6 +1,7 @@
 package nl.andrewl.emaildatasetbrowser.control;
 
 import nl.andrewl.email_indexer.gen.EmailIndexGenerator;
+import nl.andrewl.email_indexer.util.Status;
 import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 
@@ -25,7 +26,7 @@ public class RegenerateIndexesAction extends AbstractAction {
             progress.append("Starting the process of regenerating indexes.");
             ForkJoinPool.commonPool().submit(() -> {
                 try {
-                    new EmailIndexGenerator().generateIndex(ds, progress);
+                    new EmailIndexGenerator(new Status().withMessageConsumer(progress)).generateIndex(ds);
                     progress.append("Indexes have been regenerated successfully.");
                 } catch (IOException ex) {
                     progress.append("An error occurred: " + ex.getMessage());

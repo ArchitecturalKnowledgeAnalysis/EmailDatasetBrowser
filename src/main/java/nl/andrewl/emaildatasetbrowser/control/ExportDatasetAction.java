@@ -1,13 +1,12 @@
 package nl.andrewl.emaildatasetbrowser.control;
 
-import nl.andrewl.email_indexer.data.EmailDataset;
+import nl.andrewl.email_indexer.data.export.PathAwareExporter;
 import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.nio.file.Path;
-import java.sql.SQLException;
 
 public class ExportDatasetAction extends AbstractAction {
 	private final EmailDatasetBrowser browser;
@@ -36,12 +35,11 @@ public class ExportDatasetAction extends AbstractAction {
 					);
 				} else {
 					Path file = fc.getSelectedFile().toPath();
-					if (!closeBeforeExport()) return;
 					ProgressDialog progress = ProgressDialog.minimalText(browser, "Exporting");
 					progress.activate();
 					progress.append("Exporting dataset to " + file.toAbsolutePath());
 					long start = System.currentTimeMillis();
-					EmailDataset.buildZip(this.browser.getCurrentDataset().getOpenDir(), file)
+					new PathAwareExporter().exportTo(browser.getCurrentDataset(), file)
 							.handle((unused, throwable) -> {
 								if (throwable != null) {
 									progress.append("An error occurred: " + throwable.getMessage());
@@ -49,7 +47,6 @@ public class ExportDatasetAction extends AbstractAction {
 									long dur = System.currentTimeMillis() - start;
 									progress.append("Export completed in %.1f seconds.".formatted((float) dur / 1000.0f));
 								}
-								reopenAfterExport();
 								progress.done();
 								return null;
 							});
@@ -62,37 +59,6 @@ public class ExportDatasetAction extends AbstractAction {
 					"No Open Dataset",
 					JOptionPane.WARNING_MESSAGE
 			);
-		}
-	}
-
-	private boolean closeBeforeExport() {
-		try {
-			this.browser.getCurrentDataset().close();
-			return true;
-		} catch (SQLException ex) {
-			ex.printStackTrace();
-			JOptionPane.showMessageDialog(
-					browser,
-					"Could not close dataset's DB connection prior to export.",
-					"Error",
-					JOptionPane.ERROR_MESSAGE
-			);
-			return false;
-		}
-	}
-
-	private void reopenAfterExport() {
-		try {
-			this.browser.getCurrentDataset().establishConnection();
-		} catch (SQLException ex) {
-			ex.printStackTrace();
-			JOptionPane.showMessageDialog(
-					browser,
-					"Could not reestablish dataset's DB connection after export.",
-					"Error",
-					JOptionPane.ERROR_MESSAGE
-			);
-			browser.setDataset(null);
 		}
 	}
 }

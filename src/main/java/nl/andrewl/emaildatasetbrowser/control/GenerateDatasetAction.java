@@ -1,7 +1,8 @@
 package nl.andrewl.emaildatasetbrowser.control;
 
-import nl.andrewl.email_indexer.data.util.FileUtils;
 import nl.andrewl.email_indexer.gen.EmailDatasetGenerator;
+import nl.andrewl.email_indexer.util.FileUtils;
+import nl.andrewl.email_indexer.util.Status;
 import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.view.PathSelectField;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
@@ -53,7 +54,8 @@ public class GenerateDatasetAction extends AbstractAction {
 			dialog.dispose();
 			ProgressDialog progressDialog = new ProgressDialog(browser, "Generating...", "Generating the dataset.");
 			progressDialog.activate();
-			new EmailDatasetGenerator().generate(paths, dsDir, progressDialog).handle((unused, throwable) -> {
+			Status status = new Status().withMessageConsumer(progressDialog);
+			new EmailDatasetGenerator(status).generate(paths, dsDir).handle((unused, throwable) -> {
 				progressDialog.done();
 				if (throwable != null) {
 					throwable.printStackTrace();
