@@ -17,9 +17,9 @@ import java.util.function.Consumer;
 public class ProgressDialog extends JDialog implements Consumer<String> {
 	private static final int MIN_OPEN_TIME = 1000;
 
-	private JTextArea textBox;
-	private JButton doneButton;
-	private JButton cancelButton;
+	private final JTextArea textBox;
+	private final JButton doneButton;
+	private final JButton cancelButton;
 	private Runnable cancelAction;
 	private Instant openedAt;
 
@@ -46,6 +46,8 @@ public class ProgressDialog extends JDialog implements Consumer<String> {
 			JScrollPane scrollPane = new JScrollPane(textBox, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 			scrollPane.setPreferredSize(new Dimension(500, 400));
 			p.add(scrollPane, BorderLayout.CENTER);
+		} else {
+			textBox = null;
 		}
 
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -56,14 +58,18 @@ public class ProgressDialog extends JDialog implements Consumer<String> {
 				dispose();
 			});
 			buttonPanel.add(cancelButton);
+		} else {
+			cancelButton = null;
 		}
 		if (showDone) {
 			doneButton = new JButton("Done");
 			doneButton.setEnabled(false);
 			doneButton.addActionListener(e -> dispose());
 			buttonPanel.add(doneButton);
+		} else {
+			doneButton = null;
 		}
-		p.add(buttonPanel, BorderLayout.SOUTH);
+		if (showCancel || showDone) p.add(buttonPanel, BorderLayout.SOUTH);
 
 		setContentPane(p);
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
