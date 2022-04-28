@@ -22,6 +22,11 @@ public class EmailBodyPanel extends JPanel implements EmailViewListener {
 
 	private void setEmail(EmailEntry email) {
 		if (email != null) {
+			if (email.body().startsWith("<html>")) {
+				textPane.setContentType("text/html");
+			} else {
+				textPane.setContentType("text/plain");
+			}
 			textPane.setText(email.body());
 			textPane.setCaretPosition(0);
 		} else {
