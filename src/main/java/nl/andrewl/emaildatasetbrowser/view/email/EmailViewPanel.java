@@ -19,15 +19,18 @@ public class EmailViewPanel extends JPanel {
 	private final Set<EmailViewListener> listeners = new HashSet<>();
 
 	public EmailViewPanel() {
-		this.setLayout(new BorderLayout());
+		super(new BorderLayout());
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		EmailBodyPanel bodyPanel = new EmailBodyPanel();
-		this.add(bodyPanel, BorderLayout.CENTER);
+		splitPane.add(bodyPanel);
 		addListener(bodyPanel);
 
 		EmailInfoPanel infoPanel = new EmailInfoPanel(this);
 		infoPanel.setPreferredSize(new Dimension(400, -1));
-		this.add(infoPanel, BorderLayout.EAST);
+		splitPane.add(infoPanel);
 		addListener(infoPanel);
+		splitPane.setOneTouchExpandable(true);
+		this.add(splitPane, BorderLayout.CENTER);
 
 		setEmail(null);
 	}
