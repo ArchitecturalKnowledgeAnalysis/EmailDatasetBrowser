@@ -59,7 +59,10 @@ public class TagPanel extends JPanel implements EmailViewListener {
 		JComboBox<String> tagComboBox = new JComboBox<>(this.tagComboBoxModel);
 		tagComboBox.setEditable(true);
 		buttonPanel.add(tagComboBox, BorderLayout.CENTER);
+
 		JPanel buttonCtlPanel = new JPanel();
+		buttonCtlPanel.setLayout(new BoxLayout(buttonCtlPanel, BoxLayout.PAGE_AXIS));
+
 		JButton addButton = new JButton("Add");
 		addButton.addActionListener(e -> {
 			String tag = (String) tagComboBox.getSelectedItem();
@@ -68,7 +71,6 @@ public class TagPanel extends JPanel implements EmailViewListener {
 				parent.refresh();
 			}
 		});
-		buttonCtlPanel.add(addButton);
 		removeButton.addActionListener(e -> {
 			var repo = new EmailRepository(parent.getCurrentDataset());
 			for (var tag : tagList.getSelectedValuesList()) {
@@ -76,7 +78,11 @@ public class TagPanel extends JPanel implements EmailViewListener {
 			}
 			parent.refresh();
 		});
-		buttonCtlPanel.add(removeButton);
+		JPanel topButtonPanel = new JPanel();
+		topButtonPanel.add(addButton);
+		topButtonPanel.add(removeButton);
+		buttonCtlPanel.add(topButtonPanel);
+
 		buttonPanel.add(buttonCtlPanel, BorderLayout.EAST);
 		this.add(buttonPanel, BorderLayout.SOUTH);
 	}
