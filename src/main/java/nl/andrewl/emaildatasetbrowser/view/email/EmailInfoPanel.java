@@ -83,7 +83,7 @@ public class EmailInfoPanel extends JPanel implements EmailViewListener {
 		if (email != null) {
 			this.subjectLabel.setText("<html>%s</html>".formatted(email.subject()));
 			this.dateLabel.setText(email.date().format(DateTimeFormatter.ofPattern("dd MMMM, yyyy HH:mm:ss Z")));
-			this.sentFromLabel.setText(email.sentFrom());
+			this.sentFromLabel.setText("<html>%s</html>".formatted(email.sentFrom()));
 			String inReplyToButtonText;
 			Optional<EmailEntry> inReplyTo = Optional.empty();
 			if (parent.getCurrentDataset() != null) {
