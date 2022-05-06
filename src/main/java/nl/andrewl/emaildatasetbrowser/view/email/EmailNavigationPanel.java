@@ -1,7 +1,7 @@
 package nl.andrewl.emaildatasetbrowser.view.email;
 
 import nl.andrewl.email_indexer.data.EmailEntry;
-import nl.andrewl.emaildatasetbrowser.view.SwingUtils;
+import nl.andrewl.emaildatasetbrowser.util.ColorHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -79,7 +79,7 @@ public class EmailNavigationPanel extends JPanel {
 			var email = navigationStack.get(i);
 			JButton button = new JButton(email.subject().substring(0, Math.min(email.subject().length(), 24)));
 			button.setToolTipText("Subject: %s\nFrom: %s\nId: %s".formatted(email.subject(), email.sentFrom(), email.messageId()));
-			button.setForeground(SwingUtils.getColor(email.messageId()));
+			button.setForeground(ColorHelper.getColor(email.messageId()));
 			final int idx = i;
 			button.addActionListener(e -> {
 				for (int k = navigationStack.size() - 1; k > idx; k--) navigationStack.pop();

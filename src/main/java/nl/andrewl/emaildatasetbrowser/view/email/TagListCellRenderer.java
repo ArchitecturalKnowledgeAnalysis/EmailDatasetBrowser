@@ -1,6 +1,6 @@
 package nl.andrewl.emaildatasetbrowser.view.email;
 
-import nl.andrewl.emaildatasetbrowser.view.SwingUtils;
+import nl.andrewl.emaildatasetbrowser.util.ColorHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +19,7 @@ public class TagListCellRenderer implements ListCellRenderer<String> {
 
 	@Override
 	public Component getListCellRendererComponent(JList<? extends String> list, String value, int index, boolean isSelected, boolean cellHasFocus) {
-		Color foregroundColor = SwingUtils.getColor(value);
+		Color foregroundColor = ColorHelper.getColor(value);
 
 		label.setText(value);
 		label.setForeground(foregroundColor);
