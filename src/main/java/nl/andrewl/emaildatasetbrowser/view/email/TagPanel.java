@@ -66,10 +66,15 @@ public class TagPanel extends JPanel implements EmailViewListener {
 		JButton addButton = new JButton("Add");
 		addButton.addActionListener(e -> {
 			String tag = (String) tagComboBox.getSelectedItem();
-			if (tag != null && isValidTag(tag)) {
-				new EmailRepository(parent.getCurrentDataset()).addTag(email.messageId(), tag);
-				parent.refresh();
+			if (tag == null)
+				return;
+			if (tag.contains(",")) {
+				String message = String.format("The tag name \"%s\" is invalid", tag);
+				JOptionPane.showMessageDialog(parent, message, "Invalid Tag", JOptionPane.ERROR_MESSAGE);
+				return;
 			}
+			new EmailRepository(parent.getCurrentDataset()).addTag(email.messageId(), tag);
+			parent.refresh();
 		});
 		removeButton.addActionListener(e -> {
 			var repo = new EmailRepository(parent.getCurrentDataset());
@@ -85,15 +90,6 @@ public class TagPanel extends JPanel implements EmailViewListener {
 
 		buttonPanel.add(buttonCtlPanel, BorderLayout.EAST);
 		this.add(buttonPanel, BorderLayout.SOUTH);
-	}
-
-	private boolean isValidTag(String tag) {
-		boolean isValid = !tag.contains(",");
-		if (!isValid) {
-			String message = String.format("The tag name \"%s\" is invalid", tag); 
-			JOptionPane.showMessageDialog(parent, message, "Invalid Tag", JOptionPane.ERROR_MESSAGE);
-		}
-		return isValid;
 	}
 
 	private void setEmail(EmailEntry email) {
