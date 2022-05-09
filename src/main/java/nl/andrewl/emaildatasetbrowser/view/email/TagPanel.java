@@ -110,10 +110,15 @@ public class TagPanel extends JPanel implements EmailViewListener {
 
 	private void onTagSelected(JComboBox<String> tagComboBox) {
 		String tag = (String) tagComboBox.getSelectedItem();
-		if (tag != null) {
-			new EmailRepository(parent.getCurrentDataset()).addTag(email.messageId(), tag);
-			parent.refresh();
+		if (tag == null)
+			return;
+		if (tag.contains(",")) {
+			String message = String.format("The tag name \"%s\" is invalid", tag);
+			JOptionPane.showMessageDialog(parent, message, "Invalid Tag", JOptionPane.ERROR_MESSAGE);
+			return;
 		}
+		new EmailRepository(parent.getCurrentDataset()).addTag(email.messageId(), tag);
+		parent.refresh();
 	}
 
 	@Override
