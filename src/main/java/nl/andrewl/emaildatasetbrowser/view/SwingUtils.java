@@ -32,8 +32,9 @@ public final class SwingUtils {
 				return (T) component;
 			} else if (component instanceof Container nested) {
 				T result = findFirstInstance(nested, type);
-				if (result != null)
+				if (result != null) {
 					return result;
+				}
 			}
 		}
 		return null;
