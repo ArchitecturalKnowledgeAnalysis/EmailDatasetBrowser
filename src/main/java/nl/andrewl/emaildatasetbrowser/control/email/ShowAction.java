@@ -18,7 +18,7 @@ public class ShowAction extends EmailAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		new EmailRepository(emailViewPanel.getCurrentDataset()).showEmail(emailViewPanel.getEmail().messageId());
+		new EmailRepository(emailViewPanel.getCurrentDataset()).showEmail(emailViewPanel.getEmail().id());
 		emailViewPanel.refresh();
 	}
 }

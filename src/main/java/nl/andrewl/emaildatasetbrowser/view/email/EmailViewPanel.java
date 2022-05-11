@@ -54,14 +54,12 @@ public class EmailViewPanel extends JPanel {
 
 	public void setEmail(EmailEntry email) {
 		this.email = email;
-		listeners.forEach(l -> {
-			SwingUtilities.invokeLater(() -> l.emailUpdated(email));
-		});
+		listeners.forEach(l -> SwingUtilities.invokeLater(() -> l.emailUpdated(email)));
 	}
 
-	public void fetchAndSetEmail(String messageId) {
+	public void fetchAndSetEmail(long id) {
 		if (this.currentDataset != null) {
-			new EmailRepository(currentDataset).findEmailById(messageId)
+			new EmailRepository(currentDataset).findEmailById(id)
 					.ifPresentOrElse(this::setEmail, () -> setEmail(null));
 		} else {
 			setEmail(null);
@@ -69,6 +67,6 @@ public class EmailViewPanel extends JPanel {
 	}
 
 	public void refresh() {
-		if (this.email != null) fetchAndSetEmail(email.messageId());
+		if (this.email != null) fetchAndSetEmail(email.id());
 	}
 }

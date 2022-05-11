@@ -2,6 +2,7 @@ package nl.andrewl.emaildatasetbrowser.control;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailRepository;
+import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 
@@ -49,10 +50,11 @@ public class DatasetOpenAction extends AbstractAction {
 				} else {
 					browser.setDataset(dataset);
 					var repo = new EmailRepository(dataset);
+					var tagRepo = new TagRepository(dataset);
 					String message = "Opened dataset from %s with\n%d emails,\n%d tags,\n%d tagged emails".formatted(
 							dataset.getOpenDir(),
 							repo.countEmails(),
-							repo.countTags(),
+							tagRepo.countTags(),
 							repo.countTaggedEmails()
 					);
 					progress.append(message);

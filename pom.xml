@@ -6,7 +6,7 @@
 
     <groupId>nl.andrewl</groupId>
     <artifactId>emaildatasetbrowser</artifactId>
-    <version>1.4.7</version>
+    <version>2.0.0</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -18,7 +18,7 @@
         <dependency>
             <groupId>com.github.ArchitecturalKnowledgeAnalysis</groupId>
             <artifactId>EmailIndexer</artifactId>
-            <version>v1.8.2</version>
+            <version>v2.0.5</version>
         </dependency>
         <dependency>
             <groupId>com.github.ArchitecturalKnowledgeAnalysis</groupId>

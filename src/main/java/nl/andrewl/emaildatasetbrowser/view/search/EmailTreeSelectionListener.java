@@ -25,7 +25,7 @@ public class EmailTreeSelectionListener implements TreeSelectionListener {
 	public void valueChanged(TreeSelectionEvent e) {
 		EmailDataset dataset = emailViewPanel.getCurrentDataset();
 		if (e.getPath().getLastPathComponent() instanceof EmailTreeNode node && dataset != null) {
-			emailViewPanel.fetchAndSetEmail(node.getEmail().messageId());
+			emailViewPanel.fetchAndSetEmail(node.getEmail().id());
 			node.loadReplies(dataset);
 			tree.expandPath(new TreePath(node.getPath()));
 		}

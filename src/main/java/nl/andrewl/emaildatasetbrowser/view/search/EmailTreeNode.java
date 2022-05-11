@@ -29,7 +29,7 @@ public class EmailTreeNode extends DefaultMutableTreeNode {
 
     public void loadReplies(EmailDataset dataset) {
         if (loadedReplies) return;
-        for (var reply : new EmailRepository(dataset).findAllReplies(email.messageId())) {
+        for (var reply : new EmailRepository(dataset).findAllReplies(email.id())) {
             add(new EmailTreeNode(reply));
         }
         loadedReplies = true;

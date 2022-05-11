@@ -85,24 +85,24 @@ public class EmailInfoPanel extends JPanel implements EmailViewListener {
 			this.dateLabel.setText(email.date().format(DateTimeFormatter.ofPattern("dd MMMM, yyyy HH:mm:ss Z")));
 			this.sentFromLabel.setText("<html>%s</html>".formatted(email.sentFrom()));
 			String inReplyToButtonText;
-			Optional<EmailEntry> inReplyTo = Optional.empty();
-			if (parent.getCurrentDataset() != null) {
-				inReplyTo = new EmailRepository(parent.getCurrentDataset()).findEmailById(email.inReplyTo());
+			Optional<EmailEntry> optionalParent = Optional.empty();
+			if (this.parent.getCurrentDataset() != null && email.parentId() != null) {
+				optionalParent = new EmailRepository(this.parent.getCurrentDataset()).findEmailById(email.parentId());
 			}
-			if (email.inReplyTo() == null || email.inReplyTo().isBlank() || inReplyTo.isEmpty()) {
+			if (inReplyToActionListener != null) inReplyToButton.removeActionListener(inReplyToActionListener);
+			if (optionalParent.isEmpty()) {
 				inReplyToButtonText = "None";
 				inReplyToButton.setEnabled(false);
 			} else {
-				var parentEmail = inReplyTo.get();
+				var parentEmail = optionalParent.get();
 				inReplyToButtonText = "<html><strong>%s</strong><br>by <em>%s</em></html>".formatted(parentEmail.subject(), parentEmail.sentFrom());
 				inReplyToButton.setEnabled(true);
+				inReplyToActionListener = e -> {
+					SwingUtilities.invokeLater(() -> this.parent.fetchAndSetEmail(email.parentId()));
+				};
+				inReplyToButton.addActionListener(inReplyToActionListener);
 			}
 			this.inReplyToButton.setText(inReplyToButtonText);
-			if (inReplyToActionListener != null) inReplyToButton.removeActionListener(inReplyToActionListener);
-			inReplyToActionListener = e -> {
-				SwingUtilities.invokeLater(() -> parent.fetchAndSetEmail(email.inReplyTo()));
-			};
-			inReplyToButton.addActionListener(inReplyToActionListener);
 		} else {
 			this.inReplyToButton.setEnabled(false);
 		}

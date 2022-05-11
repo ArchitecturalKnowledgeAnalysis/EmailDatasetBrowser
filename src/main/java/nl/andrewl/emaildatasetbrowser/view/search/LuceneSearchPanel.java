@@ -130,7 +130,7 @@ public class LuceneSearchPanel extends JPanel {
         progress.onCancel(() -> future.cancel(true));
     }
 
-    private void showResults(final Instant start, ProgressDialog progress, List<String> emailIds, JTree resultsTree) {
+    private void showResults(final Instant start, ProgressDialog progress, List<Long> emailIds, JTree resultsTree) {
         Duration dur = Duration.between(start, Instant.now());
         progress.appendF("Found %d email threads in %.3f seconds whose emails matched the query.", emailIds.size(), dur.toMillis() / 1000f);
         progress.append("Loading detailed email thread information from the database. This may take a while.");

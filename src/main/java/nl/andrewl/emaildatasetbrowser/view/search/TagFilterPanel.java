@@ -1,11 +1,13 @@
 package nl.andrewl.emaildatasetbrowser.view.search;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
-import nl.andrewl.email_indexer.data.EmailRepository;
+import nl.andrewl.email_indexer.data.Tag;
+import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.filter.TagFilter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 /**
  * Panel that can be used to show and select a specific tag filter for
@@ -16,8 +18,8 @@ public class TagFilterPanel extends JPanel {
 	private static final String EXCLUDE = "Exclude Selected";
 
 	private final JComboBox<String> typeSelect = new JComboBox<>(new String[]{INCLUDE, EXCLUDE});
-	private final DefaultListModel<String> tagListModel = new DefaultListModel<>();
-	private final JList<String> tagList = new JList<>(tagListModel);
+	private final DefaultListModel<Tag> tagListModel = new DefaultListModel<>();
+	private final JList<Tag> tagList = new JList<>(tagListModel);
 
 	public TagFilterPanel(EmailDataset dataset, TagFilter currentFilter) {
 		super(new BorderLayout());
@@ -25,8 +27,8 @@ public class TagFilterPanel extends JPanel {
 		tagList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		add(new JScrollPane(tagList), BorderLayout.CENTER);
 
-		var repo = new EmailRepository(dataset);
-		tagListModel.addAll(repo.getAllTags());
+		var repo = new TagRepository(dataset);
+		tagListModel.addAll(repo.findAll());
 
 		setFilter(currentFilter);
 	}
@@ -36,11 +38,11 @@ public class TagFilterPanel extends JPanel {
 			case INCLUDE_ANY -> INCLUDE;
 			case EXCLUDE_ANY -> EXCLUDE;
 		});
-		int[] selectedIndices = new int[filter.tags().size()];
+		int[] selectedIndices = new int[filter.tagIds().size()];
 		int idx = 0;
-		for (var tag : filter.tags()) {
+		for (int tagId : filter.tagIds()) {
 			for (int i = 0; i < tagListModel.size(); i++) {
-				if (tagListModel.get(i).equals(tag)) {
+				if (tagListModel.get(i).id() == tagId) {
 					selectedIndices[idx++] = i;
 					break;
 				}
@@ -57,6 +59,7 @@ public class TagFilterPanel extends JPanel {
 			case EXCLUDE -> TagFilter.Type.EXCLUDE_ANY;
 			default -> TagFilter.Type.EXCLUDE_ANY;
 		};
-		return new TagFilter(tagList.getSelectedValuesList(), type);
+		List<Integer> selectedIds = tagList.getSelectedValuesList().stream().map(Tag::id).toList();
+		return new TagFilter(selectedIds, type);
 	}
 }

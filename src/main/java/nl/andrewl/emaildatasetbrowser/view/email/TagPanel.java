@@ -1,7 +1,8 @@
 package nl.andrewl.emaildatasetbrowser.view.email;
 
 import nl.andrewl.email_indexer.data.EmailEntry;
-import nl.andrewl.email_indexer.data.EmailRepository;
+import nl.andrewl.email_indexer.data.Tag;
+import nl.andrewl.email_indexer.data.TagRepository;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,10 +14,10 @@ import java.util.concurrent.ForkJoinPool;
  */
 public class TagPanel extends JPanel implements EmailViewListener {
 	private final EmailViewPanel parent;
-	private final DefaultListModel<String> tagListModel = new DefaultListModel<>();
-	private final DefaultListModel<String> parentTagListModel = new DefaultListModel<>();
-	private final DefaultListModel<String> childTagListModel = new DefaultListModel<>();
-	private final DefaultComboBoxModel<String> tagComboBoxModel = new DefaultComboBoxModel<>();
+	private final DefaultListModel<Tag> tagListModel = new DefaultListModel<>();
+	private final DefaultListModel<Tag> parentTagListModel = new DefaultListModel<>();
+	private final DefaultListModel<Tag> childTagListModel = new DefaultListModel<>();
+	private final DefaultComboBoxModel<Tag> tagComboBoxModel = new DefaultComboBoxModel<>();
 	private EmailEntry email = null;
 	private final JButton removeButton = new JButton("Remove");
 
@@ -28,7 +29,7 @@ public class TagPanel extends JPanel implements EmailViewListener {
 
 		JPanel centerPanel = new JPanel(new GridLayout(0, 2));
 
-		JList<String> tagList = new JList<>(this.tagListModel);
+		JList<Tag> tagList = new JList<>(this.tagListModel);
 		tagList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		tagList.setCellRenderer(new TagListCellRenderer());
 		tagList.getSelectionModel().addListSelectionListener(e -> {
@@ -39,13 +40,13 @@ public class TagPanel extends JPanel implements EmailViewListener {
 		centerPanel.add(new JScrollPane(tagList));
 
 		JPanel otherTagsPanel = new JPanel(new GridLayout(2, 0));
-		JList<String> parentTagList = new JList<>(this.parentTagListModel);
+		JList<Tag> parentTagList = new JList<>(this.parentTagListModel);
 		parentTagList.setCellRenderer(new TagListCellRenderer());
 		parentTagList.setEnabled(false);
 		JScrollPane parentTagScrollPane = new JScrollPane(parentTagList);
 		parentTagScrollPane.setBorder(BorderFactory.createTitledBorder("Parent Tags"));
 		otherTagsPanel.add(parentTagScrollPane);
-		JList<String> childTagList = new JList<>(this.childTagListModel);
+		JList<Tag> childTagList = new JList<>(this.childTagListModel);
 		childTagList.setCellRenderer(new TagListCellRenderer());
 		childTagList.setEnabled(false);
 		JScrollPane childTagScrollPane = new JScrollPane(childTagList);
@@ -56,12 +57,13 @@ public class TagPanel extends JPanel implements EmailViewListener {
 		this.add(centerPanel, BorderLayout.CENTER);
 
 		JPanel buttonPanel = new JPanel(new BorderLayout());
-		JComboBox<String> tagComboBox = new JComboBox<>(this.tagComboBoxModel);
-		tagComboBox.setEditable(true);
+		JComboBox<Tag> tagComboBox = new JComboBox<>(this.tagComboBoxModel);
+		tagComboBox.setEditable(false);
 		buttonPanel.add(tagComboBox, BorderLayout.CENTER);
 		tagComboBox.addActionListener(e -> {
-			if (e.getActionCommand() == "comboBoxChanged")
+			if (e.getActionCommand().equals("comboBoxChanged")) {
 				onTagSelected(tagComboBox);
+			}
 		});
 
 
@@ -71,9 +73,9 @@ public class TagPanel extends JPanel implements EmailViewListener {
 		JButton addButton = new JButton("Add");
 		addButton.addActionListener(e -> { onTagSelected(tagComboBox); });
 		removeButton.addActionListener(e -> {
-			var repo = new EmailRepository(parent.getCurrentDataset());
+			var repo = new TagRepository(parent.getCurrentDataset());
 			for (var tag : tagList.getSelectedValuesList()) {
-				repo.removeTag(email.messageId(), tag);
+				repo.removeTag(email.id(), tag.id());
 			}
 			parent.refresh();
 		});
@@ -93,14 +95,15 @@ public class TagPanel extends JPanel implements EmailViewListener {
 		this.parentTagListModel.removeAllElements();
 		this.childTagListModel.removeAllElements();
 		if (email != null) {
-			this.tagListModel.addAll(email.tags());
 			ForkJoinPool.commonPool().execute(() -> {
-				var repo = new EmailRepository(parent.getCurrentDataset());
-				var tags = repo.getAllTags();
-				var parentTags = repo.getAllParentTags(email.messageId());
-				var childTags = repo.getAllChildTags(email.messageId());
+				var repo = new TagRepository(parent.getCurrentDataset());
+				var tags = repo.findAll();
+				var thisTags = repo.getTags(email.id());
+				var parentTags = repo.getAllParentTags(email.id());
+				var childTags = repo.getAllChildTags(email.id());
 				SwingUtilities.invokeLater(() -> {
 					this.tagComboBoxModel.addAll(tags);
+					this.tagListModel.addAll(thisTags);
 					this.parentTagListModel.addAll(parentTags);
 					this.childTagListModel.addAll(childTags);
 				});
@@ -108,16 +111,10 @@ public class TagPanel extends JPanel implements EmailViewListener {
 		}
 	}
 
-	private void onTagSelected(JComboBox<String> tagComboBox) {
-		String tag = (String) tagComboBox.getSelectedItem();
-		if (tag == null)
-			return;
-		if (tag.contains(",")) {
-			String message = String.format("The tag name \"%s\" is invalid", tag);
-			JOptionPane.showMessageDialog(parent, message, "Invalid Tag", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		new EmailRepository(parent.getCurrentDataset()).addTag(email.messageId(), tag);
+	private void onTagSelected(JComboBox<Tag> tagComboBox) {
+		Tag tag = (Tag) tagComboBox.getSelectedItem();
+		if (tag == null) return;
+		new TagRepository(parent.getCurrentDataset()).addTag(email.id(), tag.id());
 		parent.refresh();
 	}
 

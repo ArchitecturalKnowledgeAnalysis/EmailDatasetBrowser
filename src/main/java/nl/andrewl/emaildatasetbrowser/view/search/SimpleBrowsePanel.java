@@ -2,7 +2,6 @@ package nl.andrewl.emaildatasetbrowser.view.search;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailEntryPreview;
-import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.email_indexer.data.search.EmailSearchResult;
 import nl.andrewl.email_indexer.data.search.EmailSearcher;
 import nl.andrewl.email_indexer.data.search.SearchFilter;
@@ -46,7 +45,7 @@ public class SimpleBrowsePanel extends JPanel {
 			if (e.getValueIsAdjusting()) return;
 			var selected = emailList.getSelectedValue();
 			if (selected != null) {
-				new EmailRepository(currentDataset).findEmailById(selected.messageId()).ifPresent(emailViewPanel::setEmail);
+				emailViewPanel.fetchAndSetEmail(selected.id());
 			}
 		});
 		JScrollPane listScroller = new JScrollPane(emailList);

@@ -32,11 +32,11 @@ public class RepliesPanel extends JPanel implements EmailViewListener {
 		if (email != null) {
 			ForkJoinPool.commonPool().execute(() -> {
 				var repo = new EmailRepository(parent.getCurrentDataset());
-				var replies = repo.findAllReplies(email.messageId());
+				var replies = repo.findAllReplies(email.id());
 				List<JButton> buttonsToAdd = new ArrayList<>();
 				for (var reply : replies) {
 					JButton button = new JButton("<html><strong>%s</strong><br>by <em>%s</em></html>".formatted(reply.subject(), reply.sentFrom()));
-					button.addActionListener(e -> SwingUtilities.invokeLater(() -> parent.fetchAndSetEmail(reply.messageId())));
+					button.addActionListener(e -> SwingUtilities.invokeLater(() -> parent.fetchAndSetEmail(reply.id())));
 					buttonsToAdd.add(button);
 				}
 				SwingUtilities.invokeLater(() -> {

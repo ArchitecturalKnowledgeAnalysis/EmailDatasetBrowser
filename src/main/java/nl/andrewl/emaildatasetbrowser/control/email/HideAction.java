@@ -13,7 +13,7 @@ public class HideAction extends EmailAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		new EmailRepository(emailViewPanel.getCurrentDataset()).hideEmail(emailViewPanel.getEmail().messageId());
+		new EmailRepository(emailViewPanel.getCurrentDataset()).hideEmail(emailViewPanel.getEmail().id());
 		emailViewPanel.refresh();
 	}
 
