@@ -26,7 +26,7 @@ public class LuceneSearchPanel extends JPanel {
 
     private final JTextArea queryField;
     private final JButton searchButton = new JButton("Search");
-    private final JSpinner resultCountSpinner = new JSpinner(new SpinnerNumberModel(100, 100, 10000, 100));
+    private final JSpinner resultCountSpinner = new JSpinner(new SpinnerNumberModel(100, 1, 10000, 1));
     private final JButton exportButton = new JButton("Export");
 
     private final DefaultMutableTreeNode resultsRoot = new DefaultMutableTreeNode();

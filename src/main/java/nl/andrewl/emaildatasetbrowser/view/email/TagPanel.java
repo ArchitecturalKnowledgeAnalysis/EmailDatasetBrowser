@@ -59,18 +59,17 @@ public class TagPanel extends JPanel implements EmailViewListener {
 		JComboBox<String> tagComboBox = new JComboBox<>(this.tagComboBoxModel);
 		tagComboBox.setEditable(true);
 		buttonPanel.add(tagComboBox, BorderLayout.CENTER);
+		tagComboBox.addActionListener(e -> {
+			if (e.getActionCommand() == "comboBoxChanged")
+				onTagSelected(tagComboBox);
+		});
+
 
 		JPanel buttonCtlPanel = new JPanel();
 		buttonCtlPanel.setLayout(new BoxLayout(buttonCtlPanel, BoxLayout.PAGE_AXIS));
 
 		JButton addButton = new JButton("Add");
-		addButton.addActionListener(e -> {
-			String tag = (String) tagComboBox.getSelectedItem();
-			if (tag != null) {
-				new EmailRepository(parent.getCurrentDataset()).addTag(email.messageId(), tag);
-				parent.refresh();
-			}
-		});
+		addButton.addActionListener(e -> { onTagSelected(tagComboBox); });
 		removeButton.addActionListener(e -> {
 			var repo = new EmailRepository(parent.getCurrentDataset());
 			for (var tag : tagList.getSelectedValuesList()) {
@@ -107,6 +106,19 @@ public class TagPanel extends JPanel implements EmailViewListener {
 				});
 			});
 		}
+	}
+
+	private void onTagSelected(JComboBox<String> tagComboBox) {
+		String tag = (String) tagComboBox.getSelectedItem();
+		if (tag == null)
+			return;
+		if (tag.contains(",")) {
+			String message = String.format("The tag name \"%s\" is invalid", tag);
+			JOptionPane.showMessageDialog(parent, message, "Invalid Tag", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		new EmailRepository(parent.getCurrentDataset()).addTag(email.messageId(), tag);
+		parent.refresh();
 	}
 
 	@Override
