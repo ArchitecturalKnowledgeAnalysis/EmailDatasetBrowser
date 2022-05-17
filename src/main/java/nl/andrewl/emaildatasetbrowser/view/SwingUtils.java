@@ -2,7 +2,6 @@ package nl.andrewl.emaildatasetbrowser.view;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
-
 import java.awt.*;
 
 public final class SwingUtils {
@@ -38,5 +37,10 @@ public final class SwingUtils {
 			}
 		}
 		return null;
+	}
+
+	public static boolean confirm(Component parent, String msg) {
+		int result = JOptionPane.showConfirmDialog(parent, msg, "Confirm", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		return result == JOptionPane.OK_OPTION;
 	}
 }

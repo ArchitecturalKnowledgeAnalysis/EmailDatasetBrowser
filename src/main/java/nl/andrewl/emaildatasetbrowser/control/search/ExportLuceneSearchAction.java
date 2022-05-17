@@ -45,7 +45,7 @@ public class ExportLuceneSearchAction implements ActionListener {
         progress.append("Generating export for query: \"%s\"".formatted(query));
         var repo = new EmailRepository(searchPanel.getDataset());
         var tagRepo = new TagRepository(searchPanel.getDataset());
-        new EmailIndexSearcher().searchAsync(searchPanel.getDataset(), query)
+        new EmailIndexSearcher().searchAsync(searchPanel.getDataset(), query, searchPanel.getResultCount())
                 .handleAsync((emailIds, throwable) -> {
                     if (throwable != null) {
                         progress.append("An error occurred while searching: " + throwable.getMessage());

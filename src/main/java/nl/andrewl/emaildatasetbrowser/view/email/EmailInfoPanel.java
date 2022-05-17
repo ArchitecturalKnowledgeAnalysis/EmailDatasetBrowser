@@ -113,4 +113,8 @@ public class EmailInfoPanel extends JPanel implements EmailViewListener {
 		setEmail(email);
 		setVisible(email != null);
 	}
+
+	public TagPanel getTagPanel() {
+		return tagPanel;
+	}
 }

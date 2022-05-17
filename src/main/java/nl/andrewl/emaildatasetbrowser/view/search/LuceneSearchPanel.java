@@ -117,7 +117,7 @@ public class LuceneSearchPanel extends JPanel {
         progress.activate();
         progress.append("Searching over all emails using query: \"%s\"\nPlease be patient. This may take a while.".formatted(query));
         final Instant start = Instant.now();
-        var future = new EmailIndexSearcher().searchAsync(dataset, queryField.getText())
+        var future = new EmailIndexSearcher().searchAsync(dataset, queryField.getText(), getResultCount())
                 .handleAsync((emailIds, throwable) -> {
                     if (throwable != null) {
                         progress.append("An error occurred: " + throwable);

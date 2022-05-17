@@ -3,6 +3,7 @@ package nl.andrewl.emaildatasetbrowser;
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.emaildatasetbrowser.control.*;
 import nl.andrewl.emaildatasetbrowser.control.email.*;
+import nl.andrewl.emaildatasetbrowser.control.tag.ManageTagsAction;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 import nl.andrewl.emaildatasetbrowser.view.search.LuceneSearchPanel;
@@ -12,6 +13,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.concurrent.CompletableFuture;
 import java.util.prefs.Preferences;
 
 /**
@@ -49,7 +51,7 @@ public class EmailDatasetBrowser extends JFrame {
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				setDataset(null);
+				closeDataset().join();
 			}
 		});
 	}
@@ -65,12 +67,16 @@ public class EmailDatasetBrowser extends JFrame {
 	 */
 	public void setDataset(EmailDataset ds) {
 		if (currentDataset != null) {
-			closeDataset();
+			closeDataset().join();
 		}
 		this.currentDataset = ds;
 		browsePanel.setDataset(ds);
 		searchPanel.setDataset(ds);
 		emailViewPanel.setDataset(ds);
+	}
+
+	public EmailViewPanel getEmailViewPanel() {
+		return emailViewPanel;
 	}
 
 	private JMenuBar buildMenu() {
@@ -89,14 +95,18 @@ public class EmailDatasetBrowser extends JFrame {
 		filterMenu.add(new JMenuItem(new HideAllByAuthorAction(emailViewPanel)));
 		filterMenu.add(new JMenuItem(new HideAllByBodyAction(emailViewPanel)));
 		filterMenu.add(new JMenuItem(new DeleteHiddenAction(emailViewPanel)));
-
 		menuBar.add(filterMenu);
+
+		JMenu tagMenu = new JMenu("Tag");
+		tagMenu.add(new JMenuItem(new ManageTagsAction(this)));
+		menuBar.add(tagMenu);
 
 		return menuBar;
 	}
 
-	private void closeDataset() {
-		if (currentDataset == null) return;
+	private CompletableFuture<Void> closeDataset() {
+		// TODO: Figure out why progress dialog only populates info after future completes.
+		if (currentDataset == null) return CompletableFuture.completedFuture(null);
 		ProgressDialog dialog = new ProgressDialog(
 				this,
 				"Closing Dataset",
@@ -107,22 +117,22 @@ public class EmailDatasetBrowser extends JFrame {
 		);
 		dialog.appendF("Closing the currently open dataset at %s", currentDataset.getOpenDir());
 		dialog.activate();
-		try {
-			// TODO: Async close!
-			currentDataset.close();
-			dialog.append("Dataset closed successfully.");
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			JOptionPane.showMessageDialog(
-					emailViewPanel,
-					"An error occurred while closing the database:\n" + ex.getMessage(),
-					"Error",
-					JOptionPane.ERROR_MESSAGE
-			);
-		} finally {
+		return currentDataset.close().handle((unused, throwable) -> {
+			if (throwable != null) {
+				throwable.printStackTrace();
+				JOptionPane.showMessageDialog(
+						emailViewPanel,
+						"An error occurred while closing the database:\n" + throwable.getMessage(),
+						"Error",
+						JOptionPane.ERROR_MESSAGE
+				);
+			} else {
+				dialog.append("Dataset closed successfully.");
+			}
 			dialog.done();
 			currentDataset = null;
-		}
+			return null;
+		});
 	}
 
 	public static Preferences getPreferences() {

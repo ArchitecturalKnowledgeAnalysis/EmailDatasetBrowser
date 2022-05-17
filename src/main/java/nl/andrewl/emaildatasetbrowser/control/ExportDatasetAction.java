@@ -1,6 +1,6 @@
 package nl.andrewl.emaildatasetbrowser.control;
 
-import nl.andrewl.email_indexer.data.export.PathAwareExporter;
+import nl.andrewl.email_indexer.data.export.dataset.ZipExporter;
 import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 
@@ -39,7 +39,8 @@ public class ExportDatasetAction extends AbstractAction {
 					progress.activate();
 					progress.append("Exporting dataset to " + file.toAbsolutePath());
 					long start = System.currentTimeMillis();
-					new PathAwareExporter().exportTo(browser.getCurrentDataset(), file)
+					// TODO: Add a choice of exports instead of just zip.
+					new ZipExporter().export(browser.getCurrentDataset(), file)
 							.handle((unused, throwable) -> {
 								if (throwable != null) {
 									progress.append("An error occurred: " + throwable.getMessage());

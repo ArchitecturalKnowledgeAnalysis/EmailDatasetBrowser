@@ -16,6 +16,7 @@ import java.util.Set;
 public class EmailViewPanel extends JPanel {
 	private EmailDataset currentDataset = null;
 	private EmailEntry email;
+	private final EmailInfoPanel infoPanel;
 	private final Set<EmailViewListener> listeners = new HashSet<>();
 
 	public EmailViewPanel() {
@@ -25,7 +26,7 @@ public class EmailViewPanel extends JPanel {
 		splitPane.add(bodyPanel);
 		addListener(bodyPanel);
 
-		EmailInfoPanel infoPanel = new EmailInfoPanel(this);
+		infoPanel = new EmailInfoPanel(this);
 		infoPanel.setPreferredSize(new Dimension(400, -1));
 		splitPane.add(infoPanel);
 		addListener(infoPanel);
@@ -68,5 +69,9 @@ public class EmailViewPanel extends JPanel {
 
 	public void refresh() {
 		if (this.email != null) fetchAndSetEmail(email.id());
+	}
+
+	public EmailInfoPanel getInfoPanel() {
+		return infoPanel;
 	}
 }
