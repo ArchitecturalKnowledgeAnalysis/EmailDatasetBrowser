@@ -26,13 +26,13 @@ public class EdbApp {
 			System.err.println(path + " doesn't exist.");
 			System.exit(1);
 		}
-		EmailDataset.open(path).handle((dataset, throwable) -> {
-			if (throwable != null) {
-				throwable.printStackTrace();
-				System.exit(1);
-			}
-			browser.setDataset(dataset);
-			return null;
-		}).join();
+		EmailDataset.open(path)
+				.exceptionally(throwable -> {
+					throwable.printStackTrace();
+					System.exit(1);
+					return null;
+				})
+				.thenCompose(browser::setDataset)
+				.join();
 	}
 }

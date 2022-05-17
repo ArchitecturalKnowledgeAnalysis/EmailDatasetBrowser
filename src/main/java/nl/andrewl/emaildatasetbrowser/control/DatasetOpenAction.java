@@ -43,22 +43,29 @@ public class DatasetOpenAction extends AbstractAction {
 			Path datasetPath = f.toPath();
 			prefs.put(PREF_OPEN_DIR, datasetPath.getParent().toAbsolutePath().toString());
 			var future = EmailDataset.open(datasetPath);
-			future.handleAsync((dataset, throwable) -> {
+			future.handle((dataset, throwable) -> {
 				if (throwable != null) {
 					progress.append("Could not open dataset: " + throwable.getMessage());
 					progress.done();
 				} else {
-					browser.setDataset(dataset);
-					var repo = new EmailRepository(dataset);
-					var tagRepo = new TagRepository(dataset);
-					String message = "Opened dataset from %s with\n%d emails,\n%d tags,\n%d tagged emails".formatted(
-							dataset.getOpenDir(),
-							repo.countEmails(),
-							tagRepo.countTags(),
-							repo.countTaggedEmails()
-					);
-					progress.append(message);
-					progress.done();
+					browser.setDataset(dataset)
+						.handle((unused, throwable1) -> {
+							if (throwable1 != null) {
+								progress.append("Could not display dataset in the browser: " + throwable1.getMessage());
+							} else {
+								var repo = new EmailRepository(dataset);
+								var tagRepo = new TagRepository(dataset);
+								String message = "Opened dataset from %s with\n%d emails,\n%d tags,\n%d tagged emails".formatted(
+										dataset.getOpenDir(),
+										repo.countEmails(),
+										tagRepo.countTags(),
+										repo.countTaggedEmails()
+								);
+								progress.append(message);
+							}
+							progress.done();
+							return null;
+						});
 				}
 				return null;
 			});

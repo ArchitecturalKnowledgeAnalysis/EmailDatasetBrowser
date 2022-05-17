@@ -13,6 +13,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.prefs.Preferences;
 
@@ -46,7 +47,7 @@ public class EmailDatasetBrowser extends JFrame {
 		this.setPreferredSize(new Dimension(1000, 600));
 		this.pack();
 		this.setLocationRelativeTo(null);
-		this.setDataset(null);
+		this.setDataset(null).join();
 
 		this.addWindowListener(new WindowAdapter() {
 			@Override
@@ -65,14 +66,24 @@ public class EmailDatasetBrowser extends JFrame {
 	 * has a dataset open, it will close that one first.
 	 * @param ds The dataset to use.
 	 */
-	public void setDataset(EmailDataset ds) {
-		if (currentDataset != null) {
-			closeDataset().join();
+	public CompletableFuture<Void> setDataset(EmailDataset ds) {
+		try {
+			if (ds != null && ds.getVersion() < 2) {
+				return CompletableFuture.failedFuture(new IllegalArgumentException("Cannot load old dataset versions."));
+			}
+		} catch (IOException e) {
+			return CompletableFuture.failedFuture(e);
 		}
-		this.currentDataset = ds;
-		browsePanel.setDataset(ds);
-		searchPanel.setDataset(ds);
-		emailViewPanel.setDataset(ds);
+		CompletableFuture<Void> cf = CompletableFuture.completedFuture(null);
+		if (currentDataset != null) {
+			cf = cf.thenCompose(unused -> closeDataset());
+		}
+		return cf.thenAccept(unused -> {
+			this.currentDataset = ds;
+			browsePanel.setDataset(ds);
+			searchPanel.setDataset(ds);
+			emailViewPanel.setDataset(ds);
+		});
 	}
 
 	public EmailViewPanel getEmailViewPanel() {
@@ -83,6 +94,7 @@ public class EmailDatasetBrowser extends JFrame {
 		JMenuBar menuBar = new JMenuBar();
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.add(new JMenuItem(new DatasetOpenAction(this)));
+		fileMenu.add(new JMenuItem(new UpgradeDatasetAction(this)));
 		fileMenu.add(new JMenuItem(new GenerateDatasetAction(this)));
 		fileMenu.add(new JMenuItem(new RegenerateIndexesAction(this)));
 		fileMenu.add(new JMenuItem(new ExportDatasetAction(this)));
@@ -105,7 +117,6 @@ public class EmailDatasetBrowser extends JFrame {
 	}
 
 	private CompletableFuture<Void> closeDataset() {
-		// TODO: Figure out why progress dialog only populates info after future completes.
 		if (currentDataset == null) return CompletableFuture.completedFuture(null);
 		ProgressDialog dialog = new ProgressDialog(
 				this,
