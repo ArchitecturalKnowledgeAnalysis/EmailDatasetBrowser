@@ -90,6 +90,14 @@ public class EmailDatasetBrowser extends JFrame {
 		return emailViewPanel;
 	}
 
+	public SimpleBrowsePanel getBrowsePanel() {
+		return browsePanel;
+	}
+
+	public LuceneSearchPanel getSearchPanel() {
+		return searchPanel;
+	}
+
 	private JMenuBar buildMenu() {
 		JMenuBar menuBar = new JMenuBar();
 		JMenu fileMenu = new JMenu("File");
@@ -106,8 +114,13 @@ public class EmailDatasetBrowser extends JFrame {
 		filterMenu.add(new JMenuItem(new ShowAction(emailViewPanel)));
 		filterMenu.add(new JMenuItem(new HideAllByAuthorAction(emailViewPanel)));
 		filterMenu.add(new JMenuItem(new HideAllByBodyAction(emailViewPanel)));
+		filterMenu.add(new JMenuItem(new HideBySqlAction(this)));
 		filterMenu.add(new JMenuItem(new DeleteHiddenAction(emailViewPanel)));
 		menuBar.add(filterMenu);
+
+		JMenu viewMenu = new JMenu("View");
+		viewMenu.add(new JMenuItem(new ViewSelectionAction(this)));
+		menuBar.add(viewMenu);
 
 		JMenu tagMenu = new JMenu("Tag");
 		tagMenu.add(new JMenuItem(new ManageTagsAction(this)));
