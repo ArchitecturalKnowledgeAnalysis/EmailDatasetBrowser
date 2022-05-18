@@ -1,16 +1,16 @@
 package nl.andrewl.emaildatasetbrowser.view.search.export;
 
-import java.util.concurrent.CompletableFuture;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
-import javax.swing.JButton;
-
+import nl.andrewl.email_indexer.data.export.query.PlainTextQueryExporter;
+import nl.andrewl.email_indexer.data.export.query.QueryExportParams;
+import nl.andrewl.email_indexer.data.export.query.QueryExporter;
 import nl.andrewl.emaildatasetbrowser.view.search.LuceneSearchPanel;
 
 public final class PlainTextExportPanel extends ExportParameterPanel {
 
 	public PlainTextExportPanel(LuceneSearchPanel searchPanel) {
 		super(searchPanel);
-		add(new JButton("Some button for plain text"));
 	}
 
 	@Override
@@ -19,9 +19,14 @@ public final class PlainTextExportPanel extends ExportParameterPanel {
 	}
 
 	@Override
-	public CompletableFuture<Void> export() {
-		// TODO Auto-generated method stub
-		return null;
+	protected FileNameExtensionFilter buildFileNameFilter() {
+		return new FileNameExtensionFilter(
+				"Text Files",
+				"txt");
+	}
 
+	@Override
+	protected QueryExporter buildExporter(QueryExportParams params) {
+		return new PlainTextQueryExporter(params);
 	}
 }

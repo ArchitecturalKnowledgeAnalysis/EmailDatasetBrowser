@@ -16,8 +16,6 @@ public class LuceneSearchExportPanel extends JDialog {
     private final HashMap<String, ExportParameterPanel> parameterPanels = new HashMap<>();
     private String currentExportPanel;
 
-    // private final JButton exportButton;
-
     public LuceneSearchExportPanel(Window owner, LuceneSearchPanel searchPanel) {
         super(owner, PANEL_TITLE, ModalityType.TOOLKIT_MODAL);
 
