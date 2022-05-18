@@ -76,8 +76,8 @@ public class LuceneSearchPanel extends JPanel {
         });
         exportButton.addActionListener((e) -> {
             LuceneSearchExportPanel panel = new LuceneSearchExportPanel(
-                SwingUtilities.getWindowAncestor(this), 
-                this);
+                    SwingUtilities.getWindowAncestor(this),
+                    this);
             panel.activate();
         });
     }
@@ -110,8 +110,9 @@ public class LuceneSearchPanel extends JPanel {
         resultsRoot.removeAllChildren();
         resultsModel.nodeStructureChanged(resultsRoot);
         String query = getQuery();
-        if (query == null)
+        if (query == null) {
             return;
+        }
 
         ProgressDialog progress = new ProgressDialog(
                 SwingUtilities.getWindowAncestor(this),
