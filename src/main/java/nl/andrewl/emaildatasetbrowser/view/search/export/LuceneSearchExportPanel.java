@@ -24,14 +24,11 @@ public class LuceneSearchExportPanel extends JDialog {
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.PAGE_AXIS));
 
-        // Header
         JComboBox<String> exportTypes = new JComboBox<>();
         exportTypes.addActionListener(e -> {
             setExportPanel((String) exportTypes.getSelectedItem());
         });
         p.add(exportTypes);
-
-        // Body
 
         ExportParameterPanel pdfPanel = new PdfExportParameterPanel(searchPanel);
         parameterPanels.put(pdfPanel.getKey(), pdfPanel);
@@ -45,7 +42,6 @@ public class LuceneSearchExportPanel extends JDialog {
         parameterPanels.values().forEach(panel -> exportTypes.addItem(panel.getKey()));
         setExportPanel((String) exportTypes.getSelectedItem());
 
-        // Footer
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
         JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(e -> dispose());
@@ -70,13 +66,12 @@ public class LuceneSearchExportPanel extends JDialog {
 
         p.add(buttonPanel);
 
-        // General setup
         setContentPane(p);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setBounds(0, 0, 300, 225);
         setLocationRelativeTo(owner);
     }
-
+    
     private void setExportPanel(String newValue) {
         if (this.currentExportPanel != null) {
             parameterPanels.get(this.currentExportPanel).setVisible(false);
