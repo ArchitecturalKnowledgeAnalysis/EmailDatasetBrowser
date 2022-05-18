@@ -69,7 +69,7 @@ public class LuceneSearchExportPanel extends JDialog {
         setBounds(0, 0, 300, 225);
         setLocationRelativeTo(owner);
     }
-    
+
     private void setExportPanel(String newValue) {
         if (this.currentExportPanel != null) {
             parameterPanels.get(this.currentExportPanel).setVisible(false);

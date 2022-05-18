@@ -1,16 +1,5 @@
 package nl.andrewl.emaildatasetbrowser.view.search.export;
 
-import java.io.FileFilter;
-import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
-
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import nl.andrewl.email_indexer.data.export.query.PdfQueryExporter;

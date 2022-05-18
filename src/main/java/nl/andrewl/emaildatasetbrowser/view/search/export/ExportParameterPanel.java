@@ -1,7 +1,6 @@
 package nl.andrewl.emaildatasetbrowser.view.search.export;
 
 import java.awt.FlowLayout;
-import java.io.FileFilter;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
