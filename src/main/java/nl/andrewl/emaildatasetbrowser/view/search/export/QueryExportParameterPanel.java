@@ -19,17 +19,20 @@ import nl.andrewl.email_indexer.data.export.query.QueryExportParams;
 import nl.andrewl.email_indexer.data.export.query.QueryExporter;
 import nl.andrewl.emaildatasetbrowser.view.search.LuceneSearchPanel;
 
-public abstract class ExportParameterPanel extends JPanel {
+/**
+ * Simple JPanel base class for Exporting queries.
+ */
+public abstract class QueryExportParameterPanel extends JPanel {
     private LuceneSearchPanel searchPanel;
 
     private final JSpinner maxResultsSpinner = new JSpinner(
             new SpinnerNumberModel(100, 1, 10000, 1));
-    private final JCheckBox toggleButton = new JCheckBox("Separate mailing threads");
-    private final JTextField pathField = new JTextField();
+    private final JCheckBox separateThreadsToggle = new JCheckBox("Separate mailing threads");
+    private final JTextField outputPathField = new JTextField();
 
     private Path outputPath = null;
 
-    public ExportParameterPanel(LuceneSearchPanel searchPanel) {
+    public QueryExportParameterPanel(LuceneSearchPanel searchPanel) {
         super(new FlowLayout(FlowLayout.LEFT));
         this.searchPanel = searchPanel;
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -40,13 +43,13 @@ public abstract class ExportParameterPanel extends JPanel {
 
         JButton searchDirectoryButton = new JButton("Select Directory");
         JButton searchFileButton = new JButton("Select File");
-        toggleButton.addActionListener(e -> {
-            searchDirectoryButton.setVisible(toggleButton.isSelected());
-            searchFileButton.setVisible(!toggleButton.isSelected());
+        separateThreadsToggle.addActionListener(e -> {
+            searchDirectoryButton.setVisible(separateThreadsToggle.isSelected());
+            searchFileButton.setVisible(!separateThreadsToggle.isSelected());
             outputPath = null;
             updatePathField();
         });
-        add(toggleButton);
+        add(separateThreadsToggle);
 
         searchDirectoryButton.addActionListener(e -> {
             JFileChooser fc = new JFileChooser();
@@ -73,30 +76,42 @@ public abstract class ExportParameterPanel extends JPanel {
         });
         add(searchFileButton);
 
-        pathField.setEditable(false);
-        add(pathField);
+        outputPathField.setEditable(false);
+        add(outputPathField);
     }
 
+    /**
+     * Updates the displayed path.
+     */
     private void updatePathField() {
         if (this.outputPath != null) {
-            this.pathField.setText(this.outputPath.toString());
+            this.outputPathField.setText(this.outputPath.toString());
         } else {
-            this.pathField.setText("");
+            this.outputPathField.setText("");
         }
     }
 
+    /**
+     * Exports the query results.
+     */
     public CompletableFuture<Void> export() {
         QueryExportParams params = new QueryExportParams()
                 .withQuery(this.searchPanel.getQuery())
                 .withMaxResultCount((int) this.maxResultsSpinner.getValue())
-                .withSeparateEmailThreads(this.toggleButton.isSelected());
+                .withSeparateEmailThreads(this.separateThreadsToggle.isSelected());
         QueryExporter exporter = buildExporter(params);
         return exporter.export(this.searchPanel.getDataset(), this.outputPath);
     }
 
-    public abstract String getKey();
+    public abstract String getName();
 
+    /**
+     * Builder function for the to-be-used FileNameExtentionFilter.
+     */
     protected abstract FileNameExtensionFilter buildFileNameFilter();
 
+    /**
+     * Builder function for the to-be-used QueryExporter.
+     */
     protected abstract QueryExporter buildExporter(QueryExportParams params);
 }

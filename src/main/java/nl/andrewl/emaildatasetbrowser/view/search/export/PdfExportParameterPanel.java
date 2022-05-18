@@ -7,14 +7,14 @@ import nl.andrewl.email_indexer.data.export.query.QueryExportParams;
 import nl.andrewl.email_indexer.data.export.query.QueryExporter;
 import nl.andrewl.emaildatasetbrowser.view.search.LuceneSearchPanel;
 
-public final class PdfExportParameterPanel extends ExportParameterPanel {
+public final class PdfExportParameterPanel extends QueryExportParameterPanel {
 
     public PdfExportParameterPanel(LuceneSearchPanel searchPanel) {
         super(searchPanel);
     }
 
     @Override
-    public String getKey() {
+    public String getName() {
         return "PDF File";
     }
 

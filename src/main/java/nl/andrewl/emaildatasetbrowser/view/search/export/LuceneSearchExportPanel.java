@@ -13,7 +13,7 @@ public class LuceneSearchExportPanel extends JDialog {
 
     private final JPanel contentPanel = new JPanel();
 
-    private final HashMap<String, ExportParameterPanel> parameterPanels = new HashMap<>();
+    private final HashMap<String, QueryExportParameterPanel> parameterPanels = new HashMap<>();
     private String currentExportPanel;
 
     public LuceneSearchExportPanel(Window owner, LuceneSearchPanel searchPanel) {
@@ -28,16 +28,16 @@ public class LuceneSearchExportPanel extends JDialog {
         });
         p.add(exportTypes);
 
-        ExportParameterPanel pdfPanel = new PdfExportParameterPanel(searchPanel);
-        parameterPanels.put(pdfPanel.getKey(), pdfPanel);
+        QueryExportParameterPanel pdfPanel = new PdfExportParameterPanel(searchPanel);
+        parameterPanels.put(pdfPanel.getName(), pdfPanel);
         contentPanel.add(pdfPanel);
 
-        ExportParameterPanel txtPanel = new PlainTextExportPanel(searchPanel);
-        parameterPanels.put(txtPanel.getKey(), txtPanel);
+        QueryExportParameterPanel txtPanel = new PlainTextExportPanel(searchPanel);
+        parameterPanels.put(txtPanel.getName(), txtPanel);
         contentPanel.add(txtPanel);
 
         p.add(contentPanel);
-        parameterPanels.values().forEach(panel -> exportTypes.addItem(panel.getKey()));
+        parameterPanels.values().forEach(panel -> exportTypes.addItem(panel.getName()));
         setExportPanel((String) exportTypes.getSelectedItem());
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
