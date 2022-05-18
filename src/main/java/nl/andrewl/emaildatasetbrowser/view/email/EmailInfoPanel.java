@@ -16,6 +16,7 @@ import java.util.Optional;
 public class EmailInfoPanel extends JPanel implements EmailViewListener {
 	private final EmailViewPanel parent;
 
+	private final JLabel idLabel = new JLabel();
 	private final JLabel subjectLabel = new JLabel();
 	private final JButton inReplyToButton = new JButton("None");
 	private ActionListener inReplyToActionListener;
@@ -42,7 +43,7 @@ public class EmailInfoPanel extends JPanel implements EmailViewListener {
 		labelConstraint.insets = new Insets(3, 3, 3, 3);
 		labelConstraint.gridx = 0;
 		labelConstraint.gridy = 0;
-		String[] labels = new String[]{"Subject", "In Reply To", "Sent From", "Date"};
+		String[] labels = new String[]{"Id", "Subject", "In Reply To", "Sent From", "Date"};
 		for (var l : labels) {
 			var label = new JLabel(l);
 			label.setFont(label.getFont().deriveFont(Font.BOLD));
@@ -58,7 +59,7 @@ public class EmailInfoPanel extends JPanel implements EmailViewListener {
 		fieldConstraint.fill = GridBagConstraints.HORIZONTAL;
 		fieldConstraint.gridx = 1;
 		fieldConstraint.gridy = 0;
-		Component[] values = new Component[]{subjectLabel, inReplyToButton, sentFromLabel, dateLabel};
+		Component[] values = new Component[]{idLabel, subjectLabel, inReplyToButton, sentFromLabel, dateLabel};
 		for (var v : values) {
 			this.add(v, fieldConstraint);
 			fieldConstraint.gridy++;
@@ -81,6 +82,7 @@ public class EmailInfoPanel extends JPanel implements EmailViewListener {
 
 	public void setEmail(EmailEntry email) {
 		if (email != null) {
+			this.idLabel.setText(Long.toString(email.id()));
 			this.subjectLabel.setText("<html>%s</html>".formatted(email.subject()));
 			this.dateLabel.setText(email.date().format(DateTimeFormatter.ofPattern("dd MMMM, yyyy HH:mm:ss Z")));
 			this.sentFromLabel.setText("<html>%s</html>".formatted(email.sentFrom()));
