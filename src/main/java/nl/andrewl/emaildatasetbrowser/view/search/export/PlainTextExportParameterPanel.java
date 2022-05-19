@@ -7,9 +7,9 @@ import nl.andrewl.email_indexer.data.export.query.QueryExportParams;
 import nl.andrewl.email_indexer.data.export.query.QueryExporter;
 import nl.andrewl.emaildatasetbrowser.view.search.LuceneSearchPanel;
 
-public final class PlainTextExportPanel extends QueryExportParameterPanel {
+public final class PlainTextExportParameterPanel extends QueryExportParameterPanel {
 
-	public PlainTextExportPanel(LuceneSearchPanel searchPanel) {
+	public PlainTextExportParameterPanel(LuceneSearchPanel searchPanel) {
 		super(searchPanel);
 	}
 
