@@ -3,9 +3,9 @@ package nl.andrewl.emaildatasetbrowser.view.search;
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
-import nl.andrewl.emaildatasetbrowser.control.search.ExportLuceneSearchAction;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
+import nl.andrewl.emaildatasetbrowser.view.search.export.LuceneSearchExportPanel;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -32,7 +32,6 @@ public class LuceneSearchPanel extends JPanel {
     private final DefaultMutableTreeNode resultsRoot = new DefaultMutableTreeNode();
     private final DefaultTreeModel resultsModel = new DefaultTreeModel(resultsRoot);
     private final JTree resultsTree = new JTree(resultsModel);
-
 
     public LuceneSearchPanel(EmailViewPanel emailViewPanel) {
         super(new BorderLayout());
@@ -63,8 +62,10 @@ public class LuceneSearchPanel extends JPanel {
 
         resultsTree.setRootVisible(false);
         resultsTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        resultsTree.getSelectionModel().addTreeSelectionListener(new EmailTreeSelectionListener(emailViewPanel, resultsTree));
-        JScrollPane resultsScrollPane = new JScrollPane(resultsTree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        resultsTree.getSelectionModel()
+                .addTreeSelectionListener(new EmailTreeSelectionListener(emailViewPanel, resultsTree));
+        JScrollPane resultsScrollPane = new JScrollPane(resultsTree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         add(resultsScrollPane, BorderLayout.CENTER);
 
         searchButton.addActionListener(e -> doSearch(resultsTree));
@@ -73,7 +74,12 @@ public class LuceneSearchPanel extends JPanel {
             resultsRoot.removeAllChildren();
             resultsModel.nodeStructureChanged(resultsRoot);
         });
-        exportButton.addActionListener(new ExportLuceneSearchAction(this));
+        exportButton.addActionListener((e) -> {
+            LuceneSearchExportPanel panel = new LuceneSearchExportPanel(
+                    SwingUtilities.getWindowAncestor(this),
+                    this);
+            panel.setVisible(true);
+        });
     }
 
     public void setDataset(EmailDataset dataset) {
@@ -104,7 +110,9 @@ public class LuceneSearchPanel extends JPanel {
         resultsRoot.removeAllChildren();
         resultsModel.nodeStructureChanged(resultsRoot);
         String query = getQuery();
-        if (query == null) return;
+        if (query == null) {
+            return;
+        }
 
         ProgressDialog progress = new ProgressDialog(
                 SwingUtilities.getWindowAncestor(this),
@@ -112,10 +120,10 @@ public class LuceneSearchPanel extends JPanel {
                 null,
                 true,
                 true,
-                true
-        );
+                true);
         progress.activate();
-        progress.append("Searching over all emails using query: \"%s\"\nPlease be patient. This may take a while.".formatted(query));
+        progress.append("Searching over all emails using query: \"%s\"\nPlease be patient. This may take a while."
+                .formatted(query));
         final Instant start = Instant.now();
         var future = new EmailIndexSearcher().searchAsync(dataset, queryField.getText(), getResultCount())
                 .handleAsync((emailIds, throwable) -> {
@@ -132,7 +140,8 @@ public class LuceneSearchPanel extends JPanel {
 
     private void showResults(final Instant start, ProgressDialog progress, List<Long> emailIds, JTree resultsTree) {
         Duration dur = Duration.between(start, Instant.now());
-        progress.appendF("Found %d email threads in %.3f seconds whose emails matched the query.", emailIds.size(), dur.toMillis() / 1000f);
+        progress.appendF("Found %d email threads in %.3f seconds whose emails matched the query.", emailIds.size(),
+                dur.toMillis() / 1000f);
         progress.append("Loading detailed email thread information from the database. This may take a while.");
         Instant start2 = Instant.now();
         var repo = new EmailRepository(dataset);
