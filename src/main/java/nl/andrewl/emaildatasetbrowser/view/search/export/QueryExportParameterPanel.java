@@ -1,22 +1,23 @@
 package nl.andrewl.emaildatasetbrowser.view.search.export;
 
 import java.awt.FlowLayout;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
-import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import nl.andrewl.email_indexer.data.export.query.QueryExportParams;
 import nl.andrewl.email_indexer.data.export.query.QueryExporter;
+import nl.andrewl.emaildatasetbrowser.control.DirectoryFileFilter;
+import nl.andrewl.emaildatasetbrowser.view.PathSelectField;
 import nl.andrewl.emaildatasetbrowser.view.search.LuceneSearchPanel;
 
 /**
@@ -28,9 +29,10 @@ public abstract class QueryExportParameterPanel extends JPanel {
     private final JSpinner maxResultsSpinner = new JSpinner(
             new SpinnerNumberModel(100, 1, 10000, 1));
     private final JCheckBox separateThreadsToggle = new JCheckBox("Separate mailing threads");
-    private final JTextField outputPathField = new JTextField();
-
-    private Path outputPath = null;
+    private final PathSelectField dirSelectField = new PathSelectField(JFileChooser.DIRECTORIES_ONLY, false,
+            new DirectoryFileFilter(), "Select Directory");
+    private final PathSelectField fileSelectField = new PathSelectField(JFileChooser.FILES_ONLY, true,
+            buildFileNameFilter(), "Select File");
 
     public QueryExportParameterPanel(LuceneSearchPanel searchPanel) {
         super(new FlowLayout(FlowLayout.LEFT));
@@ -41,66 +43,50 @@ public abstract class QueryExportParameterPanel extends JPanel {
         add(new JLabel("Max. result count:"));
         add(maxResultsSpinner);
 
-        JButton searchDirectoryButton = new JButton("Select Directory");
-        JButton searchFileButton = new JButton("Select File");
+        dirSelectField.setVisible(false);
+        add(dirSelectField);
+        add(fileSelectField);
+
         separateThreadsToggle.addActionListener(e -> {
-            searchDirectoryButton.setVisible(separateThreadsToggle.isSelected());
-            searchFileButton.setVisible(!separateThreadsToggle.isSelected());
-            outputPath = null;
-            updatePathField();
+            dirSelectField.setVisible(separateThreadsToggle.isSelected());
+            fileSelectField.setVisible(!separateThreadsToggle.isSelected());
         });
         add(separateThreadsToggle);
-
-        searchDirectoryButton.addActionListener(e -> {
-            JFileChooser fc = new JFileChooser();
-            fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
-                return;
-            }
-            this.outputPath = fc.getSelectedFile().toPath();
-            updatePathField();
-        });
-        searchDirectoryButton.setVisible(false);
-        add(searchDirectoryButton);
-
-        searchFileButton.addActionListener(e -> {
-            JFileChooser fc = new JFileChooser();
-            fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            fc.setFileFilter(buildFileNameFilter());
-            fc.setAcceptAllFileFilterUsed(true);
-            if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
-                return;
-            }
-            this.outputPath = fc.getSelectedFile().toPath();
-            updatePathField();
-        });
-        add(searchFileButton);
-
-        outputPathField.setEditable(false);
-        add(outputPathField);
-    }
-
-    /**
-     * Updates the displayed path.
-     */
-    private void updatePathField() {
-        if (this.outputPath != null) {
-            this.outputPathField.setText(this.outputPath.toString());
-        } else {
-            this.outputPathField.setText("");
-        }
     }
 
     /**
      * Exports the query results.
      */
     public CompletableFuture<Void> export() {
+        String query = this.searchPanel.getQuery();
+        Path outputPath = this.separateThreadsToggle.isSelected()
+                ? this.dirSelectField.getSelectedPath()
+                : this.fileSelectField.getSelectedPath();
+        if (!hasValidParameters(query, outputPath)) {
+            throw new IllegalArgumentException(
+                    "Cannot export with variables query: \"%s\" and output path: \"%s\""
+                            .formatted(this.searchPanel.getQuery(), outputPath));
+        }
         QueryExportParams params = new QueryExportParams()
                 .withQuery(this.searchPanel.getQuery())
                 .withMaxResultCount((int) this.maxResultsSpinner.getValue())
                 .withSeparateEmailThreads(this.separateThreadsToggle.isSelected());
         QueryExporter exporter = buildExporter(params);
-        return exporter.export(this.searchPanel.getDataset(), this.outputPath);
+        return exporter.export(this.searchPanel.getDataset(), outputPath);
+    }
+
+    private boolean hasValidParameters(String query, Path outputPath) {
+        // Query validation.
+        if (query == null || query == "") {
+            return false;
+        }
+        // Path validation.
+        try {
+            outputPath.toFile().getCanonicalPath();
+        } catch (IOException ignored) {
+            return false;
+        }
+        return true;
     }
 
     public abstract String getName();

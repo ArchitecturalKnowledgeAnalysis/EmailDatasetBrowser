@@ -17,7 +17,7 @@ public class LuceneSearchExportPanel extends JDialog {
     private String currentExportPanel;
 
     public LuceneSearchExportPanel(Window owner, LuceneSearchPanel searchPanel) {
-        super(owner, PANEL_TITLE, ModalityType.TOOLKIT_MODAL);
+        super(owner, PANEL_TITLE, ModalityType.APPLICATION_MODAL);
 
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.PAGE_AXIS));
@@ -52,7 +52,8 @@ public class LuceneSearchExportPanel extends JDialog {
             this.parameterPanels.get(currentExportPanel).export()
                     .whenComplete((v, throwable) -> {
                         if (throwable != null) {
-                            progress.append("Export completed exceptionally...");
+                            progress.append("Export completed exceptionally with message:");
+                            progress.append(throwable.getMessage());
                         } else {
                             progress.append("Export completed!");
                         }
@@ -77,14 +78,5 @@ public class LuceneSearchExportPanel extends JDialog {
         this.currentExportPanel = newValue;
         parameterPanels.get(newValue).setVisible(true);
         contentPanel.revalidate();
-    }
-
-    /**
-     * Begins showing the dialog. Use this instead of calling setVisible(true).
-     */
-    public void activate() {
-        new Thread(() -> {
-            setVisible(true);
-        }).start();
     }
 }

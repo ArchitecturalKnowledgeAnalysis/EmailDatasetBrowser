@@ -78,7 +78,7 @@ public class LuceneSearchPanel extends JPanel {
             LuceneSearchExportPanel panel = new LuceneSearchExportPanel(
                     SwingUtilities.getWindowAncestor(this),
                     this);
-            panel.activate();
+            panel.setVisible(true);
         });
     }
 
