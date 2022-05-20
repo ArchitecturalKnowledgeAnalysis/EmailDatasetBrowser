@@ -29,10 +29,10 @@ public abstract class QueryExportParameterPanel extends JPanel {
     private final JSpinner maxResultsSpinner = new JSpinner(
             new SpinnerNumberModel(100, 1, 10000, 1));
     private final JCheckBox separateThreadsToggle = new JCheckBox("Separate mailing threads");
-    private final PathSelectField dirSelectField = new PathSelectField(JFileChooser.DIRECTORIES_ONLY, false,
-            new DirectoryFileFilter(), "Select Directory");
-    private final PathSelectField fileSelectField = new PathSelectField(JFileChooser.FILES_ONLY, true,
-            buildFileNameFilter(), "Select File");
+    private final PathSelectField dirSelectField = new PathSelectField(JFileChooser.DIRECTORIES_ONLY, false, false,
+            new DirectoryFileFilter(), "Select Directory", "Select Export Directory", "Select");
+    private final PathSelectField fileSelectField = new PathSelectField(JFileChooser.FILES_ONLY, true, false,
+            buildFileNameFilter(), "Select File", "Select Export File", "Select");
 
     public QueryExportParameterPanel(LuceneSearchPanel searchPanel) {
         super(new FlowLayout(FlowLayout.LEFT));
