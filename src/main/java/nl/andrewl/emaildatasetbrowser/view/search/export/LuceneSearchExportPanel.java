@@ -47,7 +47,14 @@ public class LuceneSearchExportPanel extends JDialog {
 
         JButton exportButton = new JButton("Export");
         exportButton.addActionListener(e -> {
-            ProgressDialog progress = ProgressDialog.minimalText(searchPanel, "Exporting Query Results");
+            var progress = new ProgressDialog(
+                    SwingUtilities.getWindowAncestor(searchPanel),
+                    "Exporting Query Results",
+                    null,
+                    true,
+                    false,
+                    true);
+            progress.activate();
             progress.append("Generating export for query: \"%s\"".formatted(searchPanel.getQuery()));
             this.parameterPanels.get(currentExportPanel).export()
                     .whenComplete((v, throwable) -> {
@@ -67,7 +74,7 @@ public class LuceneSearchExportPanel extends JDialog {
 
         setContentPane(p);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setBounds(0, 0, 300, 225);
+        setBounds(0, 0, 400, 225);
         setLocationRelativeTo(owner);
     }
 
