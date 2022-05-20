@@ -63,12 +63,9 @@ public abstract class QueryExportParameterPanel extends JPanel {
                 ? this.dirSelectField.getSelectedPath()
                 : this.fileSelectField.getSelectedPath();
         if (!hasValidParameters(query, outputPath)) {
-            CompletableFuture<Void> cf = new CompletableFuture<>();
-            Exception ex = new IllegalArgumentException(
+            return CompletableFuture.failedFuture(new IllegalArgumentException(
                     "Cannot export with variables query: \"%s\" and output path: \"%s\""
-                            .formatted(this.searchPanel.getQuery(), outputPath));
-            cf.completeExceptionally(ex);
-            return cf;
+                            .formatted(this.searchPanel.getQuery(), outputPath)));
         }
         QueryExportParams params = new QueryExportParams()
                 .withQuery(this.searchPanel.getQuery())
