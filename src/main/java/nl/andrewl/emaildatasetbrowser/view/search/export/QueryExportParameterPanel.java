@@ -77,7 +77,7 @@ public abstract class QueryExportParameterPanel extends JPanel {
 
     private boolean hasValidParameters(String query, Path outputPath) {
         // Query validation.
-        if (query == null || query == "") {
+        if (query == null || query.isBlank()) {
             return false;
         }
         // Path validation.
