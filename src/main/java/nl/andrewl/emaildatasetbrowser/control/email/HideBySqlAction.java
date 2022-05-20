@@ -6,7 +6,6 @@ import nl.andrewl.emaildatasetbrowser.view.SwingUtils;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.sql.SQLException;
 
 public class HideBySqlAction extends AbstractAction {
 	private final EmailDatasetBrowser browser;
@@ -30,36 +29,27 @@ public class HideBySqlAction extends AbstractAction {
 			JOptionPane.showMessageDialog(browser, "SQL clause cannot be empty.");
 		} else {
 			long count = DbUtils.count(browser.getCurrentDataset().getConnection(), "SELECT COUNT(ID) FROM EMAIL WHERE HIDDEN = FALSE AND " + clause);
-			String query = "UPDATE EMAIL SET HIDDEN = TRUE WHERE " + clause;
-			if (SwingUtils.confirm(browser, "Are you sure you want to execute the following query:\n" + query + "\n" + count + " emails will be hidden.")) {
+			String query = "UPDATE EMAIL SET HIDDEN = TRUE WHERE HIDDEN = FALSE AND " + clause;
+			if (count > 0 && SwingUtils.confirm(browser, "Are you sure you want to execute the following query:\n" + query + "\n" + count + " emails will be hidden.")) {
 				DbUtils.doTransaction(browser.getCurrentDataset().getConnection(), c -> {
-					try (
-						var stmt = c.prepareStatement(query);
-						var mutStmt = c.prepareStatement(
-							"INSERT INTO MUTATION (DESCRIPTION, AFFECTED_EMAIL_COUNT) VALUES (?, ?)")
-					) {
-						int hiddenCount = stmt.executeUpdate();
-						mutStmt.setString(1, "Hiding by SQL clause.");
-						mutStmt.setLong(2, hiddenCount);
-						mutStmt.executeUpdate();
-						JOptionPane.showMessageDialog(
-								browser,
-								hiddenCount + " emails were hidden by this update.",
-								"Emails Hidden",
-								JOptionPane.INFORMATION_MESSAGE
-						);
-						browser.getEmailViewPanel().refresh();
-					} catch (SQLException e1) {
-						e1.printStackTrace();
-						c.rollback();
-						JOptionPane.showMessageDialog(
-								browser,
-								"An SQL error occurred: " + e1.getMessage(),
-								"SQL Error",
-								JOptionPane.ERROR_MESSAGE
-						);
-					}
+					long mutId = DbUtils.insertWithId(c, "INSERT INTO MUTATION (DESCRIPTION) VALUES (?)", "Hiding all by SQL clause: " + clause);
+					int hiddenCount = DbUtils.update(c, query);
+					DbUtils.update(c, "UPDATE MUTATION SET AFFECTED_EMAIL_COUNT = ? WHERE ID = ?", hiddenCount, mutId);
+					JOptionPane.showMessageDialog(
+							browser,
+							hiddenCount + " emails were hidden by this update.",
+							"Emails Hidden",
+							JOptionPane.INFORMATION_MESSAGE
+					);
+					browser.getEmailViewPanel().refresh();
 				});
+			} else if (count < 1) {
+				JOptionPane.showMessageDialog(
+						browser,
+						"No emails were found using that SQL clause.",
+						"No Emails Found",
+						JOptionPane.WARNING_MESSAGE
+				);
 			}
 		}
 	}
