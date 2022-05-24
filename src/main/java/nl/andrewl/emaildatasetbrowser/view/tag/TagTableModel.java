@@ -6,6 +6,9 @@ import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A table model for the set of tags in a dataset.
+ */
 public class TagTableModel extends AbstractTableModel {
 	private final List<Tag> tags = new ArrayList<>();
 

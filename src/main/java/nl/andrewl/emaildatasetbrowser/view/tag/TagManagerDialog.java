@@ -7,6 +7,8 @@ import nl.andrewl.emaildatasetbrowser.view.SwingUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * This dialog can be used to manage the list of tags in a dataset.
@@ -40,6 +42,20 @@ public class TagManagerDialog extends JDialog {
 				boolean itemSelected = row != -1;
 				editButton.setEnabled(itemSelected);
 				removeButton.setEnabled(itemSelected);
+			}
+		});
+		tagTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int row = tagTable.rowAtPoint(e.getPoint());
+				if (row != -1 && e.getClickCount() == 2) {
+					tagTable.setRowSelectionInterval(row, row);
+					Tag tag = tagTableModel.getTagAt(tagTable.getSelectedRow());
+					if (tag == null) return;
+					var dialog = new TagEditDialog(SwingUtilities.getWindowAncestor(tagTable), tag, ds);
+					dialog.setVisible(true);
+					refreshTags();
+				}
 			}
 		});
 		tagTable.getColumnModel().getColumn(0).setPreferredWidth(20);

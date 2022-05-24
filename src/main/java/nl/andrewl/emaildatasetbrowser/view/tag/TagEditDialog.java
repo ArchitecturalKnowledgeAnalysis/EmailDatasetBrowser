@@ -48,13 +48,16 @@ public class TagEditDialog extends JDialog {
 	private Container buildUI() {
 		JPanel mainPanel = new JPanel(new BorderLayout());
 
-		mainPanel.add(new LabelledField("Name", nameField), BorderLayout.NORTH);
+		JPanel fieldsPanel = new JPanel(new BorderLayout(5, 5));
+		fieldsPanel.add(new LabelledField("Name", nameField), BorderLayout.NORTH);
 		descriptionField.setLineWrap(true);
 		descriptionField.setWrapStyleWord(true);
-		mainPanel.add(new LabelledField(
+		fieldsPanel.add(new LabelledField(
 				"Description",
 				new JScrollPane(descriptionField, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)
 		), BorderLayout.CENTER);
+		fieldsPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		mainPanel.add(fieldsPanel, BorderLayout.CENTER);
 
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		JButton cancelButton = new JButton("Cancel");

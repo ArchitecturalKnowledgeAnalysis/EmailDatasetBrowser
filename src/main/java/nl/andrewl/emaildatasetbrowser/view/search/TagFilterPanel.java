@@ -4,6 +4,7 @@ import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.Tag;
 import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.filter.TagFilter;
+import nl.andrewl.emaildatasetbrowser.view.LabelledField;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,10 +23,12 @@ public class TagFilterPanel extends JPanel {
 	private final JList<Tag> tagList = new JList<>(tagListModel);
 
 	public TagFilterPanel(EmailDataset dataset, TagFilter currentFilter) {
-		super(new BorderLayout());
-		add(typeSelect, BorderLayout.NORTH);
+		super(new BorderLayout(5, 5));
+		add(new LabelledField("Filter Type", typeSelect), BorderLayout.NORTH);
 		tagList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		add(new JScrollPane(tagList), BorderLayout.CENTER);
+		add(new LabelledField("Tags", new JScrollPane(tagList)), BorderLayout.CENTER);
+
+		setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
 		var repo = new TagRepository(dataset);
 		tagListModel.addAll(repo.findAll());
