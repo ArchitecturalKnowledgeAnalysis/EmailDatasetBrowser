@@ -1,14 +1,15 @@
 package nl.andrewl.emaildatasetbrowser.view.search;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
-import nl.andrewl.email_indexer.data.EmailEntryPreview;
 import nl.andrewl.email_indexer.data.search.EmailSearchResult;
 import nl.andrewl.email_indexer.data.search.EmailSearcher;
 import nl.andrewl.email_indexer.data.search.SearchFilter;
 import nl.andrewl.email_indexer.data.search.filter.HiddenFilter;
+import nl.andrewl.email_indexer.data.search.filter.RootFilter;
 import nl.andrewl.email_indexer.data.search.filter.TagFilter;
-import nl.andrewl.emaildatasetbrowser.EmailListItemRenderer;
+import nl.andrewl.emaildatasetbrowser.view.BooleanSelect;
 import nl.andrewl.emaildatasetbrowser.view.SwingUtils;
+import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 
 import javax.swing.*;
@@ -21,12 +22,15 @@ import java.util.List;
  * list.
  */
 public class SimpleBrowsePanel extends JPanel {
-	private final DefaultListModel<EmailEntryPreview> emailListModel;
 	private EmailDataset currentDataset;
 	private int currentPage = 1;
-	private TagFilter currentTagFilter = TagFilter.excludeNone();
 
-	private final JComboBox<Boolean> showHiddenComboBox = new JComboBox<>(new Boolean[]{null, true, false});
+	private final EmailTreeView emailTreeView = new EmailTreeView();
+
+	private TagFilter currentTagFilter = TagFilter.excludeNone();
+	private final BooleanSelect showHiddenSelect = new BooleanSelect("All", "Only Hidden", "Only Shown");
+	private final BooleanSelect showRootSelect = new BooleanSelect("All", "Only Roots", "Only Children");
+
 	private final JButton editTagFilterButton = new JButton("Edit");
 	private final JButton nextPageButton = new JButton("Next");
 	private final JButton previousPageButton = new JButton("Prev");
@@ -36,24 +40,13 @@ public class SimpleBrowsePanel extends JPanel {
 	public SimpleBrowsePanel(EmailViewPanel emailViewPanel) {
 		super(new BorderLayout());
 		this.add(buildFilterPanel(), BorderLayout.NORTH);
+		this.add(emailTreeView, BorderLayout.CENTER);
 
-		this.emailListModel = new DefaultListModel<>();
-		JList<EmailEntryPreview> emailList = new JList<>(this.emailListModel);
-		emailList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		emailList.setCellRenderer(new EmailListItemRenderer());
-		emailList.addListSelectionListener(e -> {
-			if (e.getValueIsAdjusting()) return;
-			var selected = emailList.getSelectedValue();
-			if (selected != null) {
-				emailViewPanel.fetchAndSetEmail(selected.id());
-			}
-		});
-		JScrollPane listScroller = new JScrollPane(emailList);
-		this.add(listScroller, BorderLayout.CENTER);
+		emailTreeView.addSelectionListener(new EmailTreeSelectionListener(emailViewPanel, emailTreeView.getTree()));
 	}
 
 	public void setDataset(EmailDataset ds) {
-		this.emailListModel.clear();
+		emailTreeView.clear();
 		this.currentDataset = ds;
 
 		// Set all elements
@@ -61,8 +54,10 @@ public class SimpleBrowsePanel extends JPanel {
 
 		editTagFilterButton.setEnabled(enabled);
 
-		showHiddenComboBox.setSelectedItem(false);
-		showHiddenComboBox.setEnabled(enabled);
+		showHiddenSelect.setSelectedValue(false);
+		showHiddenSelect.setEnabled(enabled);
+		showRootSelect.setSelectedValue(null);
+		showRootSelect.setEnabled(enabled);
 
 		nextPageButton.setEnabled(enabled);
 		previousPageButton.setEnabled(enabled);
@@ -78,12 +73,14 @@ public class SimpleBrowsePanel extends JPanel {
 
 	private void doSearch() {
 		if (currentDataset == null) {
-			this.emailListModel.clear();
+			emailTreeView.clear();
 			return;
 		}
 		List<SearchFilter> filters = new ArrayList<>(2);
-		Boolean hidden = (Boolean) this.showHiddenComboBox.getSelectedItem();
+		Boolean hidden = showHiddenSelect.getSelectedValue();
 		if (hidden != null) filters.add(new HiddenFilter(hidden));
+		Boolean showRoot = showRootSelect.getSelectedValue();
+		if (showRoot != null) filters.add(new RootFilter(showRoot));
 		if (!currentTagFilter.getWhereClause().isBlank()) filters.add(currentTagFilter);
 		SwingUtils.setAllButtonsEnabled(this, false);
 		new EmailSearcher(currentDataset).findAll(this.currentPage, 20, filters)
@@ -98,9 +95,13 @@ public class SimpleBrowsePanel extends JPanel {
 			});
 	}
 
+	private void searchFromBeginning() {
+		this.currentPage = 1;
+		doSearch();
+	}
+
 	private void showResults(EmailSearchResult result) {
-		this.emailListModel.clear();
-		this.emailListModel.addAll(result.emails());
+		emailTreeView.setEmails(result.emails(), currentDataset);
 		nextPageButton.setEnabled(result.hasNextPage());
 		previousPageButton.setEnabled(result.hasPreviousPage());
 	}
@@ -112,13 +113,12 @@ public class SimpleBrowsePanel extends JPanel {
 		JPanel filterPanel = new JPanel();
 		filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.PAGE_AXIS));
 		filterPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-		filterPanel.add(buildControlPanel("Show Hidden", showHiddenComboBox));
-		showHiddenComboBox.setSelectedItem(false);
-		showHiddenComboBox.addActionListener(e -> {
-			if (currentDataset == null) return;
-			this.currentPage = 1;
-			doSearch();
-		});
+		filterPanel.add(buildControlPanel("Show Hidden", showHiddenSelect));
+		showHiddenSelect.setSelectedValue(false);
+		showHiddenSelect.addActionListener(e -> searchFromBeginning());
+		filterPanel.add(buildControlPanel("Show Root", showRootSelect));
+		showRootSelect.setSelectedValue(null);
+		showRootSelect.addActionListener(e -> searchFromBeginning());
 		filterPanel.add(buildControlPanel("Tag Filter", editTagFilterButton));
 		editTagFilterButton.addActionListener(e -> {
 			if (currentDataset == null) return;
@@ -183,6 +183,8 @@ public class SimpleBrowsePanel extends JPanel {
 		c.anchor = GridBagConstraints.LINE_END;
 		c.fill = GridBagConstraints.BOTH;
 		p.add(component);
+		// Add a lower margin to each control panel.
+		p.setBorder(BorderFactory.createEmptyBorder(0, 0, 3, 0));
 		return p;
 	}
 }

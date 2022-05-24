@@ -3,10 +3,13 @@ package nl.andrewl.emaildatasetbrowser.view.email;
 import nl.andrewl.email_indexer.data.EmailEntry;
 import nl.andrewl.email_indexer.data.Tag;
 import nl.andrewl.email_indexer.data.TagRepository;
+import nl.andrewl.emaildatasetbrowser.view.tag.TagEditDialog;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -57,6 +60,10 @@ public class TagPanel extends JPanel implements EmailViewListener {
 
 		this.add(centerPanel, BorderLayout.CENTER);
 
+		addDoubleClickToEditAction(tagList);
+		addDoubleClickToEditAction(parentTagList);
+		addDoubleClickToEditAction(childTagList);
+
 		JPanel buttonPanel = new JPanel(new BorderLayout());
 		JComboBox<Tag> tagComboBox = new JComboBox<>(this.tagComboBoxModel);
 		tagComboBox.setEditable(false);
@@ -87,6 +94,29 @@ public class TagPanel extends JPanel implements EmailViewListener {
 		this.add(buttonPanel, BorderLayout.SOUTH);
 	}
 
+	/**
+	 * Adds a double-click mouse listener to a tag list, so that we can open
+	 * an edit tag dialog for the selected tag.
+	 * @param list The list to add the listener to.
+	 */
+	private void addDoubleClickToEditAction(JList<Tag> list) {
+		list.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2 && list.getSelectedIndices().length == 1) {
+					Tag selectedTag = list.getSelectedValue();
+					var dialog = new TagEditDialog(
+							SwingUtilities.getWindowAncestor(parent),
+							selectedTag,
+							parent.getCurrentDataset()
+					);
+					dialog.setVisible(true);
+					refreshTags();
+				}
+			}
+		});
+	}
+
 	private void setEmail(EmailEntry email) {
 		this.email = email;
 		if (email != null) {
@@ -101,13 +131,13 @@ public class TagPanel extends JPanel implements EmailViewListener {
 		this.childTagListModel.removeAllElements();
 		ForkJoinPool.commonPool().execute(() -> {
 			var repo = new TagRepository(parent.getCurrentDataset());
-			var eligibleTags = repo.findAll();
+			var addableTags = repo.findAll();
 			var thisTags = repo.getTags(email.id());
-			eligibleTags.removeAll(thisTags); // Remove any tags that this email already has.
+			addableTags.removeAll(thisTags); // Remove any tags that this email already has.
 			var parentTags = repo.getAllParentTags(email.id());
 			var childTags = repo.getAllChildTags(email.id());
 			SwingUtilities.invokeLater(() -> {
-				this.tagComboBoxModel.addAll(eligibleTags);
+				this.tagComboBoxModel.addAll(addableTags);
 				this.tagListModel.addAll(thisTags);
 				this.parentTagListModel.addAll(parentTags);
 				this.childTagListModel.addAll(childTags);

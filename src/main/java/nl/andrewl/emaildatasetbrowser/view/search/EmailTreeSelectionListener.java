@@ -27,6 +27,9 @@ public class EmailTreeSelectionListener implements TreeSelectionListener {
 		if (e.getPath().getLastPathComponent() instanceof EmailTreeNode node && dataset != null) {
 			emailViewPanel.fetchAndSetEmail(node.getEmail().id());
 			node.loadReplies(dataset);
+			node.children().asIterator().forEachRemaining(childNode -> {
+				if (childNode instanceof EmailTreeNode cn) cn.loadReplies(dataset);
+			});
 			tree.expandPath(new TreePath(node.getPath()));
 		}
 	}
