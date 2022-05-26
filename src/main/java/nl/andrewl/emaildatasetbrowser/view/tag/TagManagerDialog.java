@@ -54,15 +54,16 @@ public class TagManagerDialog extends JDialog {
 					if (tag == null) return;
 					var dialog = new TagEditDialog(SwingUtilities.getWindowAncestor(tagTable), tag, ds);
 					dialog.setVisible(true);
-					refreshTags();
+					tagTableModel.refreshTags(ds);
 				}
 			}
 		});
 		tagTable.getColumnModel().getColumn(0).setPreferredWidth(20);
 		tagTable.getColumnModel().getColumn(1).setPreferredWidth(120);
-		tagTable.getColumnModel().getColumn(2).setMinWidth(200);
+		tagTable.getColumnModel().getColumn(2).setPreferredWidth(20);
+		tagTable.getColumnModel().getColumn(3).setMinWidth(200);
 		tagTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-		refreshTags();
+		tagTableModel.refreshTags(ds);
 		JScrollPane scrollPane = new JScrollPane(tagTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		mainPanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -74,28 +75,24 @@ public class TagManagerDialog extends JDialog {
 		addButton.addActionListener(e -> {
 			var dialog = new TagEditDialog(this, null, ds);
 			dialog.setVisible(true);
-			refreshTags();
+			tagTableModel.refreshTags(ds);
 		});
 		editButton.addActionListener(e -> {
 			Tag tag = tagTableModel.getTagAt(tagTable.getSelectedRow());
 			if (tag == null) return;
 			var dialog = new TagEditDialog(this, tag, ds);
 			dialog.setVisible(true);
-			refreshTags();
+			tagTableModel.refreshTags(ds);
 		});
 		removeButton.addActionListener(e -> {
 			Tag tag = tagTableModel.getTagAt(tagTable.getSelectedRow());
 			if (tag == null) return;
 			if (SwingUtils.confirm(this, "Are you sure you want to remove this tag?")) {
 				new TagRepository(ds).deleteTag(tag.id());
-				refreshTags();
+				tagTableModel.refreshTags(ds);
 			}
 		});
 
 		return mainPanel;
-	}
-
-	private void refreshTags() {
-		tagTableModel.setTags(new TagRepository(ds).findAll());
 	}
 }

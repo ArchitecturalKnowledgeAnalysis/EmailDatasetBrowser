@@ -1,20 +1,34 @@
 package nl.andrewl.emaildatasetbrowser.view.tag;
 
+import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.Tag;
+import nl.andrewl.email_indexer.data.TagRepository;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A table model for the set of tags in a dataset.
  */
 public class TagTableModel extends AbstractTableModel {
 	private final List<Tag> tags = new ArrayList<>();
+	private final Map<Tag, Long> taggedEmailCounts = new HashMap<>();
 
-	public void setTags(List<Tag> tags) {
-		this.tags.clear();
-		this.tags.addAll(tags);
+	/**
+	 * Refreshes this model's set of tags using the given dataset.
+	 * @param ds The dataset to fetch tags from.
+	 */
+	public void refreshTags(EmailDataset ds) {
+		tags.clear();
+		taggedEmailCounts.clear();
+		var repo = new TagRepository(ds);
+		tags.addAll(repo.findAll());
+		for (var tag : tags) {
+			taggedEmailCounts.put(tag, repo.countTaggedEmails(tag.id()));
+		}
 		fireTableDataChanged();
 	}
 
@@ -32,7 +46,7 @@ public class TagTableModel extends AbstractTableModel {
 
 	@Override
 	public int getColumnCount() {
-		return 3;
+		return 4;
 	}
 
 	@Override
@@ -42,7 +56,8 @@ public class TagTableModel extends AbstractTableModel {
 		return switch (columnIndex) {
 			case 0 -> tag.id();
 			case 1 -> tag.name();
-			case 2 -> tag.description();
+			case 2 -> taggedEmailCounts.get(tag);
+			case 3 -> tag.description();
 			default -> null;
 		};
 	}
@@ -52,7 +67,8 @@ public class TagTableModel extends AbstractTableModel {
 		return switch (column) {
 			case 0 -> "Id";
 			case 1 -> "Name";
-			case 2 -> "Description";
+			case 2 -> "Emails";
+			case 3 -> "Description";
 			default -> null;
 		};
 	}
