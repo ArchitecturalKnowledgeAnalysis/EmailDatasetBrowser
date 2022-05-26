@@ -121,28 +121,9 @@ public class SimpleBrowsePanel extends JPanel {
 		showRootSelect.addActionListener(e -> searchFromBeginning());
 		filterPanel.add(buildControlPanel("Tag Filter", editTagFilterButton));
 		editTagFilterButton.addActionListener(e -> {
-			if (currentDataset == null) return;
-			JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Edit Tag Filter", Dialog.ModalityType.APPLICATION_MODAL);
-			JPanel panel = new JPanel(new BorderLayout());
-			var tagFilterPanel = new TagFilterPanel(currentDataset, currentTagFilter);
-			tagFilterPanel.setPreferredSize(new Dimension(400, 400));
-			panel.add(tagFilterPanel, BorderLayout.CENTER);
-			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-			JButton cancelButton = new JButton("Cancel");
-			cancelButton.addActionListener(ev -> dialog.dispose());
-			JButton okayButton = new JButton("Okay");
-			okayButton.addActionListener(ev -> {
-				currentTagFilter = tagFilterPanel.getFilter();
-				dialog.dispose();
-				doSearch();
-			});
-			buttonPanel.add(cancelButton);
-			buttonPanel.add(okayButton);
-			panel.add(buttonPanel, BorderLayout.SOUTH);
-			dialog.setContentPane(panel);
-			dialog.pack();
-			dialog.setLocationRelativeTo(this);
-			dialog.setVisible(true);
+			if (currentDataset != null) {
+				showTagFilterDialog();
+			}
 		});
 		searchPanel.add(filterPanel);
 
@@ -186,5 +167,32 @@ public class SimpleBrowsePanel extends JPanel {
 		// Add a lower margin to each control panel.
 		p.setBorder(BorderFactory.createEmptyBorder(0, 0, 3, 0));
 		return p;
+	}
+
+	private void showTagFilterDialog() {
+		JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Edit Tag Filter", Dialog.ModalityType.APPLICATION_MODAL);
+		JPanel panel = new JPanel(new BorderLayout());
+		var tagFilterPanel = new TagFilterPanel(currentDataset, currentTagFilter);
+		tagFilterPanel.setPreferredSize(new Dimension(400, 400));
+		panel.add(tagFilterPanel, BorderLayout.CENTER);
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		JButton cancelButton = new JButton("Cancel");
+		cancelButton.addActionListener(ev -> dialog.dispose());
+		JButton clearButton = new JButton("Clear");
+		clearButton.addActionListener(ev -> tagFilterPanel.setFilter(TagFilter.excludeNone()));
+		JButton okayButton = new JButton("Okay");
+		okayButton.addActionListener(ev -> {
+			currentTagFilter = tagFilterPanel.getFilter();
+			dialog.dispose();
+			doSearch();
+		});
+		buttonPanel.add(cancelButton);
+		buttonPanel.add(clearButton);
+		buttonPanel.add(okayButton);
+		panel.add(buttonPanel, BorderLayout.SOUTH);
+		dialog.setContentPane(panel);
+		dialog.pack();
+		dialog.setLocationRelativeTo(this);
+		dialog.setVisible(true);
 	}
 }
