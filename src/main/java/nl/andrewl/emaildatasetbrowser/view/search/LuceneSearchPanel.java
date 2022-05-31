@@ -2,6 +2,7 @@ package nl.andrewl.emaildatasetbrowser.view.search;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailRepository;
+import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
@@ -26,6 +27,7 @@ public class LuceneSearchPanel extends JPanel {
     private final JTextArea queryField;
     private final JButton searchButton = new JButton("Search");
     private final JSpinner resultCountSpinner = new JSpinner(new SpinnerNumberModel(100, 1, 10000, 1));
+    private final JCheckBox hideTaggedCheckbox = new JCheckBox("Hide Tagged");
     private final JButton exportButton = new JButton("Export");
 
     public LuceneSearchPanel(EmailViewPanel emailViewPanel) {
@@ -45,6 +47,8 @@ public class LuceneSearchPanel extends JPanel {
         buttonPanel.add(searchButton);
         JButton clearButton = new JButton("Clear");
         buttonPanel.add(clearButton);
+        hideTaggedCheckbox.setToolTipText("Removes tagged emails from search results.");
+        buttonPanel.add(hideTaggedCheckbox);
         bottomPanel.add(buttonPanel);
 
         JPanel exportPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -132,11 +136,13 @@ public class LuceneSearchPanel extends JPanel {
         progress.append("Loading detailed email thread information from the database. This may take a while.");
         Instant start2 = Instant.now();
         var repo = new EmailRepository(dataset);
+        var tagRepo = new TagRepository(dataset);
         int resultCount = getResultCount();
         progress.appendF("Showing the top %d results.", resultCount);
         List<EmailTreeNode> nodes = emailIds.stream()
                 .map(id -> repo.findPreviewById(id).orElse(null))
                 .filter(Objects::nonNull)
+                .filter(email -> !this.hideTaggedCheckbox.isSelected() || tagRepo.getTags(email.id()).isEmpty())
                 .map(EmailTreeNode::new)
                 .limit(resultCount)
                 .toList();

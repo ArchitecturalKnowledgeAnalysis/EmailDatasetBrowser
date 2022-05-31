@@ -1,6 +1,8 @@
 package nl.andrewl.emaildatasetbrowser.view.search;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
+import nl.andrewl.email_indexer.data.Tag;
+import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.EmailSearchResult;
 import nl.andrewl.email_indexer.data.search.EmailSearcher;
 import nl.andrewl.email_indexer.data.search.SearchFilter;
@@ -178,6 +180,11 @@ public class SimpleBrowsePanel extends JPanel {
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		JButton cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(ev -> dialog.dispose());
+		JButton allTagsButton = new JButton("All Tags");
+		allTagsButton.addActionListener(ev -> {
+			var ids = new TagRepository(this.currentDataset).findAll().stream().map(Tag::id).toList();
+			tagFilterPanel.setFilter(TagFilter.including(ids));
+		});
 		JButton clearButton = new JButton("Clear");
 		clearButton.addActionListener(ev -> tagFilterPanel.setFilter(TagFilter.excludeNone()));
 		JButton okayButton = new JButton("Okay");
@@ -187,6 +194,7 @@ public class SimpleBrowsePanel extends JPanel {
 			doSearch();
 		});
 		buttonPanel.add(cancelButton);
+		buttonPanel.add(allTagsButton);
 		buttonPanel.add(clearButton);
 		buttonPanel.add(okayButton);
 		panel.add(buttonPanel, BorderLayout.SOUTH);
