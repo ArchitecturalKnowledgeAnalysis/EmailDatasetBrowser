@@ -24,7 +24,7 @@ import nl.andrewl.emaildatasetbrowser.view.search.LuceneSearchPanel;
  * Simple JPanel base class for Exporting queries.
  */
 public abstract class QueryExportParameterPanel extends JPanel {
-    private LuceneSearchPanel searchPanel;
+    private final LuceneSearchPanel searchPanel;
 
     private final JSpinner maxResultsSpinner = new JSpinner(
             new SpinnerNumberModel(100, 1, 10000, 1));

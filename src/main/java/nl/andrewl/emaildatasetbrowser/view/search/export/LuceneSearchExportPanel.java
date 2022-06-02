@@ -28,6 +28,10 @@ public class LuceneSearchExportPanel extends JDialog {
         });
         p.add(exportTypes);
 
+        QueryExportParameterPanel csvPanel = new CsvExportParameterPanel(searchPanel);
+        parameterPanels.put(csvPanel.getName(), csvPanel);
+        contentPanel.add(csvPanel);
+
         QueryExportParameterPanel pdfPanel = new PdfExportParameterPanel(searchPanel);
         parameterPanels.put(pdfPanel.getName(), pdfPanel);
         contentPanel.add(pdfPanel);
