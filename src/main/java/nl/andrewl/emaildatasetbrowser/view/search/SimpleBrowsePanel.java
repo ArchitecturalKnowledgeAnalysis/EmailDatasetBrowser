@@ -13,6 +13,8 @@ import nl.andrewl.emaildatasetbrowser.view.BooleanSelect;
 import nl.andrewl.emaildatasetbrowser.view.SwingUtils;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
+import nl.andrewl.emaildatasetbrowser.view.search.export.ExportPanel;
+import nl.andrewl.emaildatasetbrowser.view.search.export.exporters.SimpleExporter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,6 +38,7 @@ public class SimpleBrowsePanel extends JPanel {
 	private final JButton editTagFilterButton = new JButton("Edit");
 	private final JButton nextPageButton = new JButton("Next");
 	private final JButton previousPageButton = new JButton("Prev");
+	private final JButton exportButton = new JButton("Export Selection");
 	private final JLabel currentPageLabel = new JLabel("Page 1 of 1");
 	private final JLabel sizeLabel = new JLabel("Showing 0 of 0 results");
 
@@ -73,7 +76,7 @@ public class SimpleBrowsePanel extends JPanel {
 		}
 	}
 
-	public EmailDataset getDataset(){
+	public EmailDataset getDataset() {
 		return this.currentDataset;
 	}
 
@@ -81,9 +84,11 @@ public class SimpleBrowsePanel extends JPanel {
 		if (currentDataset == null) {
 			return;
 		}
-		SwingUtils.setAllButtonsEnabled(this, false);
-		List<SearchFilter> filters = getCurrentSearchFilter();
-		EmailDataset dataset = currentDataset;
+		ExportPanel panel = new ExportPanel(
+				SwingUtilities.getWindowAncestor(this),
+				this.getDataset(),
+				new SimpleExporter(this));
+		panel.setVisible(true);
 	}
 
 	private void doSearch() {
@@ -92,7 +97,7 @@ public class SimpleBrowsePanel extends JPanel {
 			return;
 		}
 		SwingUtils.setAllButtonsEnabled(this, false);
-		new EmailSearcher(currentDataset).findAll(this.currentPage, 20, getCurrentSearchFilter())
+		new EmailSearcher(currentDataset).findAll(this.currentPage, 20, getCurrentSearchFilters())
 				.handle((results, throwable) -> {
 					SwingUtilities.invokeLater(() -> {
 						SwingUtils.setAllButtonsEnabled(this, true);
@@ -105,7 +110,7 @@ public class SimpleBrowsePanel extends JPanel {
 				});
 	}
 
-	public List<SearchFilter> getCurrentSearchFilter() {
+	public List<SearchFilter> getCurrentSearchFilters() {
 		List<SearchFilter> filters = new ArrayList<>(2);
 		Boolean hidden = showHiddenSelect.getSelectedValue();
 		if (hidden != null)
@@ -166,6 +171,9 @@ public class SimpleBrowsePanel extends JPanel {
 		pageControlPanel.add(previousPageButton);
 		pageControlPanel.add(nextPageButton);
 		searchPanel.add(pageControlPanel);
+
+		exportButton.addActionListener(e -> doExport());
+		searchPanel.add(exportButton);
 
 		searchPanel.add(currentPageLabel);
 		searchPanel.add(sizeLabel);

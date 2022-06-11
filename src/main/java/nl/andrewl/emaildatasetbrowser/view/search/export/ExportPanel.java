@@ -37,10 +37,11 @@ public class ExportPanel extends JDialog {
         super(owner, "Export Emails", ModalityType.APPLICATION_MODAL);
         this.exportAction = exporter;
         this.dataset = dataset;
-        System.out.println("DOING STUFF YO!");
 
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
+
+        optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.PAGE_AXIS));
 
         // Adds all export types.
         addExportTarget(new PdfExportTarget());
@@ -81,7 +82,7 @@ public class ExportPanel extends JDialog {
 
         setContentPane(contentPanel);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setBounds(0, 0, 400, 225);
+        setBounds(0, 0, 400, 190);
         setLocationRelativeTo(owner);
     }
 

@@ -8,7 +8,6 @@ import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 import nl.andrewl.emaildatasetbrowser.view.search.export.ExportPanel;
-import nl.andrewl.emaildatasetbrowser.view.search.export.Exporter;
 import nl.andrewl.emaildatasetbrowser.view.search.export.exporters.LuceneSearchExporter;
 
 import javax.swing.*;

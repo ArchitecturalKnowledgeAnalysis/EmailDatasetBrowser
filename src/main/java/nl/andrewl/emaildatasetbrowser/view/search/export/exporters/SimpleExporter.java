@@ -17,7 +17,7 @@ public class SimpleExporter implements Exporter {
 
     @Override
     public QueryExportParams specifyParameters(QueryExportParams params) {
-        List<SearchFilter> filters = this.browsePanel.getCurrentSearchFilter();
+        List<SearchFilter> filters = this.browsePanel.getCurrentSearchFilters();
         // TODO add filters to params;
         return params;
     }
