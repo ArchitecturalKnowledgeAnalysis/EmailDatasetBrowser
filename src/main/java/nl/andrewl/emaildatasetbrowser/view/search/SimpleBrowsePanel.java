@@ -166,17 +166,20 @@ public class SimpleBrowsePanel extends JPanel {
 		});
 
 		JPanel pageControlPanel = new JPanel(new GridLayout(1, 2));
+		pageControlPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 		previousPageButton.setMargin(new Insets(0, 0, 0, 0));
 		nextPageButton.setMargin(new Insets(0, 0, 0, 0));
 		pageControlPanel.add(previousPageButton);
 		pageControlPanel.add(nextPageButton);
 		searchPanel.add(pageControlPanel);
 
+		JPanel footerPanel = new JPanel(new GridLayout(3, 1));
+		footerPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
+		footerPanel.add(currentPageLabel);
+		footerPanel.add(sizeLabel);
 		exportButton.addActionListener(e -> doExport());
-		searchPanel.add(exportButton);
-
-		searchPanel.add(currentPageLabel);
-		searchPanel.add(sizeLabel);
+		footerPanel.add(exportButton);
+		searchPanel.add(footerPanel);
 
 		return searchPanel;
 	}
