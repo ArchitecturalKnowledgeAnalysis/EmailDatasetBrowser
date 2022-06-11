@@ -28,7 +28,8 @@ public class ExportPanel extends JDialog {
     private final HashMap<String, ExportTarget> exportTargets = new HashMap<>();
     private ExportTarget currentTarget;
 
-    private final JPanel optionsPanel = new JPanel();
+    private final JPanel exportPanel = new JPanel();
+    private final JPanel fileSelectPanel = new JPanel();
     private final JComboBox<String> exportTypes = new JComboBox<>();;
     private final JSpinner maxResultsSpinner = new JSpinner(new SpinnerNumberModel(100, 1, 10000, 1));
     private final PathSelectField dirSelectField = new PathSelectField(JFileChooser.DIRECTORIES_ONLY, false, false,
@@ -48,54 +49,46 @@ public class ExportPanel extends JDialog {
         this.exportAction = exporter;
         this.dataset = dataset;
 
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
-
-        optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.PAGE_AXIS));
+        exportPanel.setLayout(new GridLayout(6, 1));
+        exportPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         // Adds all export types.
         addExportTarget(new PdfExportTarget());
         addExportTarget(new TxtExportTarget());
         addExportTarget(new CsvExportTarget());
         exportTypes.addActionListener(e -> updateCurrentTarget());
-        contentPanel.add(exportTypes);
-        updateCurrentTarget();
+        exportPanel.add(exportTypes);
 
-        // Maximum results counter
-        optionsPanel.add(new JLabel("Max. result count:"));
-        optionsPanel.add(maxResultsSpinner);
+        // Adds Contents
+        exportPanel.add(new JLabel("Max. result count:"));
+        exportPanel.add(maxResultsSpinner);
+        separateThreadsToggle.addActionListener(e -> updateSeparateThreadsToggle());
+        exportPanel.add(separateThreadsToggle);
 
-        // Separated mailing threads toggle.
-        separateThreadsToggle.addActionListener(e -> {
-            dirSelectField.setVisible(separateThreadsToggle.isSelected());
-            fileSelectField.setVisible(!separateThreadsToggle.isSelected());
-        });
-        optionsPanel.add(separateThreadsToggle);
-        dirSelectField.setVisible(false);
-
-        optionsPanel.add(dirSelectField);
-        optionsPanel.add(fileSelectField);
-
-        contentPanel.add(optionsPanel);
+        fileSelectPanel.setLayout(new BoxLayout(fileSelectPanel, BoxLayout.X_AXIS));
+        fileSelectPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+        fileSelectPanel.add(dirSelectField);
+        fileSelectPanel.add(fileSelectField);
+        exportPanel.add(fileSelectPanel);
 
         // Adds buttons
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
         JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(e -> dispose());
         buttonPanel.add(cancelButton);
-
         JButton exportButton = new JButton("Export");
         exportButton.addActionListener(e -> onExportClicked());
         buttonPanel.add(exportButton);
+        exportPanel.add(buttonPanel);
 
-        contentPanel.add(buttonPanel);
-
-        setContentPane(contentPanel);
+        setContentPane(exportPanel);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setBounds(0, 0, 400, 190);
+        setBounds(0, 0, 400, 225);
         setLocationRelativeTo(owner);
+        updateCurrentTarget();
+        updateSeparateThreadsToggle();
     }
-    
+
     private void addExportTarget(ExportTarget target) {
         exportTypes.addItem(target.getName());
         exportTargets.put(target.getName(), target);
@@ -104,6 +97,11 @@ public class ExportPanel extends JDialog {
     private void updateCurrentTarget() {
         this.currentTarget = exportTargets.get((String) exportTypes.getSelectedItem());
         this.fileSelectField.setFileFilter(this.currentTarget.getFileNameExtentionFilter());
+    }
+
+    private void updateSeparateThreadsToggle() {
+        dirSelectField.setVisible(this.separateThreadsToggle.isSelected());
+        fileSelectField.setVisible(!this.separateThreadsToggle.isSelected());
     }
 
     private void onExportClicked() {
