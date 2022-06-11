@@ -39,7 +39,6 @@ public class ExportPanel extends JDialog {
     private final JCheckBox separateThreadsToggle = new JCheckBox("Separate mailing threads");
 
     /**
-     * 
      * @param owner    Window that owns this object.
      * @param dataset  the dataset used to export.
      * @param exporter concrete exporter that is used.
@@ -64,7 +63,6 @@ public class ExportPanel extends JDialog {
         exportPanel.add(maxResultsSpinner);
         separateThreadsToggle.addActionListener(e -> updateSeparateThreadsToggle());
         exportPanel.add(separateThreadsToggle);
-
         fileSelectPanel.setLayout(new BoxLayout(fileSelectPanel, BoxLayout.X_AXIS));
         fileSelectPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
         fileSelectPanel.add(dirSelectField);
@@ -81,6 +79,7 @@ public class ExportPanel extends JDialog {
         buttonPanel.add(exportButton);
         exportPanel.add(buttonPanel);
 
+        // Final setup
         setContentPane(exportPanel);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setBounds(0, 0, 400, 225);
