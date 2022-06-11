@@ -7,6 +7,9 @@ import nl.andrewl.email_indexer.data.export.query.QueryExportParams;
 import nl.andrewl.email_indexer.data.export.query.QueryExporter;
 import nl.andrewl.emaildatasetbrowser.view.search.export.ExportTarget;
 
+/**
+ * Concrete implementation of ExportTarget exporting to PDF files.
+ */
 public class PdfExportTarget implements ExportTarget {
 
     @Override

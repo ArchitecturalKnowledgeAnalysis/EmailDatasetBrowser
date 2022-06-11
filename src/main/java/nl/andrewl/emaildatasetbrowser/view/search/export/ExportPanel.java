@@ -17,6 +17,10 @@ import nl.andrewl.emaildatasetbrowser.view.search.export.exporttargets.CsvExport
 import nl.andrewl.emaildatasetbrowser.view.search.export.exporttargets.PdfExportTarget;
 import nl.andrewl.emaildatasetbrowser.view.search.export.exporttargets.TxtExportTarget;
 
+/**
+ * Dialog with a number of fields relevant to exporting emails.
+ * Does not manage the type of data exported, but does manage the output format.
+ */
 public class ExportPanel extends JDialog {
 
     private final Exporter exportAction;
@@ -33,6 +37,12 @@ public class ExportPanel extends JDialog {
             new FileNameExtensionFilter("No Filter", ".*"), "Select File", "Select Export File", "Select");
     private final JCheckBox separateThreadsToggle = new JCheckBox("Separate mailing threads");
 
+    /**
+     * 
+     * @param owner    Window that owns this object.
+     * @param dataset  the dataset used to export.
+     * @param exporter concrete exporter that is used.
+     */
     public ExportPanel(Window owner, EmailDataset dataset, Exporter exporter) {
         super(owner, "Export Emails", ModalityType.APPLICATION_MODAL);
         this.exportAction = exporter;
@@ -85,7 +95,7 @@ public class ExportPanel extends JDialog {
         setBounds(0, 0, 400, 190);
         setLocationRelativeTo(owner);
     }
-
+    
     private void addExportTarget(ExportTarget target) {
         exportTypes.addItem(target.getName());
         exportTargets.put(target.getName(), target);
