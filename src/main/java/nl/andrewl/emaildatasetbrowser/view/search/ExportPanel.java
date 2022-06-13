@@ -1,4 +1,4 @@
-package nl.andrewl.emaildatasetbrowser.view.search.export;
+package nl.andrewl.emaildatasetbrowser.view.search;
 
 import java.util.HashMap;
 import java.awt.*;
@@ -12,11 +12,13 @@ import nl.andrewl.email_indexer.data.export.ExporterParameters;
 import nl.andrewl.email_indexer.data.export.datasample.datatype.TypeExporter;
 import nl.andrewl.email_indexer.data.export.datasample.sampletype.SampleExporter;
 import nl.andrewl.emaildatasetbrowser.control.DirectoryFileFilter;
+import nl.andrewl.emaildatasetbrowser.control.search.export.ExportSample;
+import nl.andrewl.emaildatasetbrowser.control.search.export.ExportType;
+import nl.andrewl.emaildatasetbrowser.control.search.export.exporttargets.CsvExportType;
+import nl.andrewl.emaildatasetbrowser.control.search.export.exporttargets.PdfExportType;
+import nl.andrewl.emaildatasetbrowser.control.search.export.exporttargets.TxtExportType;
 import nl.andrewl.emaildatasetbrowser.view.PathSelectField;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
-import nl.andrewl.emaildatasetbrowser.view.search.export.exporttargets.CsvExportType;
-import nl.andrewl.emaildatasetbrowser.view.search.export.exporttargets.PdfExportType;
-import nl.andrewl.emaildatasetbrowser.view.search.export.exporttargets.TxtExportType;
 
 /**
  * Dialog with a number of fields relevant to exporting emails.

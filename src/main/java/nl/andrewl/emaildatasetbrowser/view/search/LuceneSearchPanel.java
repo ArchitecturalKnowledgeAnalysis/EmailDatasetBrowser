@@ -4,11 +4,10 @@ import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
+import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.LuceneSearchExporter;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
-import nl.andrewl.emaildatasetbrowser.view.search.export.ExportPanel;
-import nl.andrewl.emaildatasetbrowser.view.search.export.exporters.LuceneSearchExporter;
 
 import javax.swing.*;
 import java.awt.*;

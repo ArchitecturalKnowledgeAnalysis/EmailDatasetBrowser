@@ -9,12 +9,11 @@ import nl.andrewl.email_indexer.data.search.SearchFilter;
 import nl.andrewl.email_indexer.data.search.filter.HiddenFilter;
 import nl.andrewl.email_indexer.data.search.filter.RootFilter;
 import nl.andrewl.email_indexer.data.search.filter.TagFilter;
+import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.SimpleExporter;
 import nl.andrewl.emaildatasetbrowser.view.BooleanSelect;
 import nl.andrewl.emaildatasetbrowser.view.SwingUtils;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
-import nl.andrewl.emaildatasetbrowser.view.search.export.ExportPanel;
-import nl.andrewl.emaildatasetbrowser.view.search.export.exporters.SimpleExporter;
 
 import javax.swing.*;
 import java.awt.*;

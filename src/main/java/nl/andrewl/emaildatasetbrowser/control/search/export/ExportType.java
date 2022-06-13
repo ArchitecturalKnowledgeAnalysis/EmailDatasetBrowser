@@ -1,4 +1,4 @@
-package nl.andrewl.emaildatasetbrowser.view.search.export;
+package nl.andrewl.emaildatasetbrowser.control.search.export;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 

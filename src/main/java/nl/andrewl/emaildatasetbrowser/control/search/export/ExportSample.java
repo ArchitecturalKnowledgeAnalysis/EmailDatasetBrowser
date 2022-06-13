@@ -1,4 +1,4 @@
-package nl.andrewl.emaildatasetbrowser.view.search.export;
+package nl.andrewl.emaildatasetbrowser.control.search.export;
 
 import nl.andrewl.email_indexer.data.export.ExporterParameters;
 import nl.andrewl.email_indexer.data.export.datasample.datatype.TypeExporter;
