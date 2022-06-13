@@ -6,7 +6,6 @@ import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.emaildatasetbrowser.view.tag.TagEditDialog;
 
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;

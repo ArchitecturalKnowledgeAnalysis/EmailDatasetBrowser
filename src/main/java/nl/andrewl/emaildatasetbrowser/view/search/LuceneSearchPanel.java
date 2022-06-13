@@ -4,10 +4,10 @@ import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
+import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.LuceneSearchExporter;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
-import nl.andrewl.emaildatasetbrowser.view.search.export.LuceneSearchExportPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -68,9 +68,10 @@ public class LuceneSearchPanel extends JPanel {
             emailTreeView.clear();
         });
         exportButton.addActionListener((e) -> {
-            LuceneSearchExportPanel panel = new LuceneSearchExportPanel(
+            ExportPanel panel = new ExportPanel(
                     SwingUtilities.getWindowAncestor(this),
-                    this);
+                    getDataset(),
+                    new LuceneSearchExporter(this));
             panel.setVisible(true);
         });
     }

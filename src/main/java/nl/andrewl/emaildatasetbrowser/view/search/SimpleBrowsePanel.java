@@ -9,6 +9,7 @@ import nl.andrewl.email_indexer.data.search.SearchFilter;
 import nl.andrewl.email_indexer.data.search.filter.HiddenFilter;
 import nl.andrewl.email_indexer.data.search.filter.RootFilter;
 import nl.andrewl.email_indexer.data.search.filter.TagFilter;
+import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.SimpleExporter;
 import nl.andrewl.emaildatasetbrowser.view.BooleanSelect;
 import nl.andrewl.emaildatasetbrowser.view.SwingUtils;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
@@ -36,6 +37,7 @@ public class SimpleBrowsePanel extends JPanel {
 	private final JButton editTagFilterButton = new JButton("Edit");
 	private final JButton nextPageButton = new JButton("Next");
 	private final JButton previousPageButton = new JButton("Prev");
+	private final JButton exportButton = new JButton("Export Selection");
 	private final JLabel currentPageLabel = new JLabel("Page 1 of 1");
 	private final JLabel sizeLabel = new JLabel("Showing 0 of 0 results");
 
@@ -73,28 +75,51 @@ public class SimpleBrowsePanel extends JPanel {
 		}
 	}
 
+	public EmailDataset getDataset() {
+		return this.currentDataset;
+	}
+
+	private void doExport() {
+		if (currentDataset == null) {
+			return;
+		}
+		ExportPanel panel = new ExportPanel(
+				SwingUtilities.getWindowAncestor(this),
+				this.getDataset(),
+				new SimpleExporter(this));
+		panel.setVisible(true);
+	}
+
 	private void doSearch() {
 		if (currentDataset == null) {
 			emailTreeView.clear();
 			return;
 		}
+		SwingUtils.setAllButtonsEnabled(this, false);
+		new EmailSearcher(currentDataset).findAll(this.currentPage, 20, getCurrentSearchFilters())
+				.handle((results, throwable) -> {
+					SwingUtilities.invokeLater(() -> {
+						SwingUtils.setAllButtonsEnabled(this, true);
+						showResults(results);
+						this.currentPageLabel.setText("Page %d of %d".formatted(results.page(), results.pageCount()));
+						this.sizeLabel.setText("Showing %d of %d results".formatted(results.emails().size(),
+								results.totalResultCount()));
+					});
+					return null;
+				});
+	}
+
+	public List<SearchFilter> getCurrentSearchFilters() {
 		List<SearchFilter> filters = new ArrayList<>(2);
 		Boolean hidden = showHiddenSelect.getSelectedValue();
-		if (hidden != null) filters.add(new HiddenFilter(hidden));
+		if (hidden != null)
+			filters.add(new HiddenFilter(hidden));
 		Boolean showRoot = showRootSelect.getSelectedValue();
-		if (showRoot != null) filters.add(new RootFilter(showRoot));
-		if (!currentTagFilter.getWhereClause().isBlank()) filters.add(currentTagFilter);
-		SwingUtils.setAllButtonsEnabled(this, false);
-		new EmailSearcher(currentDataset).findAll(this.currentPage, 20, filters)
-			.handle((results, throwable) -> {
-				SwingUtilities.invokeLater(() -> {
-					SwingUtils.setAllButtonsEnabled(this, true);
-					showResults(results);
-					this.currentPageLabel.setText("Page %d of %d".formatted(results.page(), results.pageCount()));
-					this.sizeLabel.setText("Showing %d of %d results".formatted(results.emails().size(), results.totalResultCount()));
-				});
-				return null;
-			});
+		if (showRoot != null)
+			filters.add(new RootFilter(showRoot));
+		if (!currentTagFilter.getWhereClause().isBlank())
+			filters.add(currentTagFilter);
+		return filters;
 	}
 
 	private void searchFromBeginning() {
@@ -129,7 +154,6 @@ public class SimpleBrowsePanel extends JPanel {
 		});
 		searchPanel.add(filterPanel);
 
-
 		// Page control panel settings.
 		nextPageButton.addActionListener(e -> {
 			this.currentPage++;
@@ -141,14 +165,20 @@ public class SimpleBrowsePanel extends JPanel {
 		});
 
 		JPanel pageControlPanel = new JPanel(new GridLayout(1, 2));
+		pageControlPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 		previousPageButton.setMargin(new Insets(0, 0, 0, 0));
 		nextPageButton.setMargin(new Insets(0, 0, 0, 0));
 		pageControlPanel.add(previousPageButton);
 		pageControlPanel.add(nextPageButton);
 		searchPanel.add(pageControlPanel);
 
-		searchPanel.add(currentPageLabel);
-		searchPanel.add(sizeLabel);
+		JPanel footerPanel = new JPanel(new GridLayout(3, 1));
+		footerPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
+		footerPanel.add(currentPageLabel);
+		footerPanel.add(sizeLabel);
+		exportButton.addActionListener(e -> doExport());
+		footerPanel.add(exportButton);
+		searchPanel.add(footerPanel);
 
 		return searchPanel;
 	}
@@ -172,7 +202,8 @@ public class SimpleBrowsePanel extends JPanel {
 	}
 
 	private void showTagFilterDialog() {
-		JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Edit Tag Filter", Dialog.ModalityType.APPLICATION_MODAL);
+		JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Edit Tag Filter",
+				Dialog.ModalityType.APPLICATION_MODAL);
 		JPanel panel = new JPanel(new BorderLayout());
 		var tagFilterPanel = new TagFilterPanel(currentDataset, currentTagFilter);
 		tagFilterPanel.setPreferredSize(new Dimension(400, 400));

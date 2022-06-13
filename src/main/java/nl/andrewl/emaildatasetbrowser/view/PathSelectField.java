@@ -27,7 +27,7 @@ public class PathSelectField extends JPanel {
 	private final int fileSelectionMode;
 	private final boolean acceptAll;
 	private final boolean allowMultiple;
-	private final FileFilter fileFilter;
+	private FileFilter fileFilter;
 	private final String title;
 	private final String buttonText;
 
@@ -197,5 +197,9 @@ public class PathSelectField extends JPanel {
 	public Path getSelectedPath() {
 		if (selectedPaths.isEmpty()) return null;
 		return selectedPaths.get(0);
+	}
+
+	public void setFileFilter(FileFilter filter) {
+		this.fileFilter = filter;
 	}
 }
