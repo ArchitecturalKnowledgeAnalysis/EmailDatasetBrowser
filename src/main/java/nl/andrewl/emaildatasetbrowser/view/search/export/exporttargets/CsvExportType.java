@@ -7,7 +7,7 @@ import nl.andrewl.email_indexer.data.export.datasample.datatype.TypeExporter;
 import nl.andrewl.emaildatasetbrowser.view.search.export.ExportType;
 
 /**
- * Concrete implementation of ExportTarget exporting to CSV files.
+ * Factory object for CSV file exporters.
  */
 public class CsvExportType implements ExportType {
 

@@ -7,7 +7,7 @@ import nl.andrewl.email_indexer.data.export.datasample.datatype.TypeExporter;
 import nl.andrewl.emaildatasetbrowser.view.search.export.ExportType;
 
 /**
- * Concrete implementation of ExportTarget exporting to PDF files.
+ * Factory object for PDF file exporters.
  */
 public class PdfExportType implements ExportType {
 

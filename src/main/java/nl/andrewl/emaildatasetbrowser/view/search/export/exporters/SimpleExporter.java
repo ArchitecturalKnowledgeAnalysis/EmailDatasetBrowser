@@ -8,8 +8,7 @@ import nl.andrewl.emaildatasetbrowser.view.search.SimpleBrowsePanel;
 import nl.andrewl.emaildatasetbrowser.view.search.export.ExportSample;
 
 /**
- * Concrete implementation of Exporter exporting data acquired in the
- * SimpleBrowsePanel.
+ * Factory object for sample exporters of the SimpleBrowsePanel.
  */
 public class SimpleExporter implements ExportSample {
     private final SimpleBrowsePanel browsePanel;

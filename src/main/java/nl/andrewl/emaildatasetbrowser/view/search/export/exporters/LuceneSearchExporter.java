@@ -8,8 +8,7 @@ import nl.andrewl.emaildatasetbrowser.view.search.LuceneSearchPanel;
 import nl.andrewl.emaildatasetbrowser.view.search.export.ExportSample;
 
 /**
- * Concrete implementation of Exporter exporting data acquired using the
- * LuceneSearch query.
+ * Factory object for sample exporters of the LuceneSearchPanel.
  */
 public class LuceneSearchExporter implements ExportSample {
     private final LuceneSearchPanel searchPanel;

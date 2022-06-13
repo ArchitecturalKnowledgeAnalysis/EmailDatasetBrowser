@@ -5,7 +5,8 @@ import nl.andrewl.email_indexer.data.export.datasample.datatype.TypeExporter;
 import nl.andrewl.email_indexer.data.export.datasample.sampletype.SampleExporter;
 
 /**
- * Generic exporter interface for different types of exporters.
+ * Generic exporter interface for factory objects of different types of
+ * exporters.
  */
 public interface ExportSample {
     /**

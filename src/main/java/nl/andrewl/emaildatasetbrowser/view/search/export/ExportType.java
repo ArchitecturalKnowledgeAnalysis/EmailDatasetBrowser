@@ -5,7 +5,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import nl.andrewl.email_indexer.data.export.datasample.datatype.TypeExporter;
 
 /**
- * Common interface for different export formats; i.e. file types.
+ * Common interface for factory objects of different export (file) types.
  */
 public interface ExportType {
     /**
@@ -24,7 +24,8 @@ public interface ExportType {
     public FileNameExtensionFilter getFileNameExtentionFilter();
 
     /**
-     * Builds the concrete exporter corresponding with this export target.
+     * Factory method for building a concrete exporter corresponding with this
+     * export type class.
      * 
      * @param params to-be-used export parameters.
      * @return built query exporter.
