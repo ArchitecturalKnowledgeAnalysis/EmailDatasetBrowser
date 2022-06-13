@@ -2,15 +2,14 @@ package nl.andrewl.emaildatasetbrowser.view.search.export.exporttargets;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import nl.andrewl.email_indexer.data.export.query.CsvQueryExporter;
-import nl.andrewl.email_indexer.data.export.query.QueryExportParams;
-import nl.andrewl.email_indexer.data.export.query.QueryExporter;
-import nl.andrewl.emaildatasetbrowser.view.search.export.ExportTarget;
+import nl.andrewl.email_indexer.data.export.datasample.datatype.CsvExporter;
+import nl.andrewl.email_indexer.data.export.datasample.datatype.TypeExporter;
+import nl.andrewl.emaildatasetbrowser.view.search.export.ExportType;
 
 /**
  * Concrete implementation of ExportTarget exporting to CSV files.
  */
-public class CsvExportTarget implements ExportTarget {
+public class CsvExportType implements ExportType {
 
     @Override
     public String getName() {
@@ -23,7 +22,7 @@ public class CsvExportTarget implements ExportTarget {
     }
 
     @Override
-    public QueryExporter buildExporter(QueryExportParams params) {
-        return new CsvQueryExporter(params);
+    public TypeExporter buildTypeExporter() {
+        return new CsvExporter();
     }
 }

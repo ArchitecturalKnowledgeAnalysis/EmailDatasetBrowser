@@ -1,17 +1,17 @@
 package nl.andrewl.emaildatasetbrowser.view.search.export.exporters;
 
-import java.util.List;
-
-import nl.andrewl.email_indexer.data.export.query.QueryExportParams;
-import nl.andrewl.email_indexer.data.search.SearchFilter;
+import nl.andrewl.email_indexer.data.export.ExporterParameters;
+import nl.andrewl.email_indexer.data.export.datasample.datatype.TypeExporter;
+import nl.andrewl.email_indexer.data.export.datasample.sampletype.FilterExporter;
+import nl.andrewl.email_indexer.data.export.datasample.sampletype.SampleExporter;
 import nl.andrewl.emaildatasetbrowser.view.search.SimpleBrowsePanel;
-import nl.andrewl.emaildatasetbrowser.view.search.export.Exporter;
+import nl.andrewl.emaildatasetbrowser.view.search.export.ExportSample;
 
 /**
  * Concrete implementation of Exporter exporting data acquired in the
  * SimpleBrowsePanel.
  */
-public class SimpleExporter implements Exporter {
+public class SimpleExporter implements ExportSample {
     private final SimpleBrowsePanel browsePanel;
 
     /**
@@ -22,9 +22,13 @@ public class SimpleExporter implements Exporter {
     }
 
     @Override
-    public QueryExportParams specifyParameters(QueryExportParams params) {
-        List<SearchFilter> filters = this.browsePanel.getCurrentSearchFilters();
-        // TODO add filters to params;
+    public ExporterParameters specifyParameters(ExporterParameters params) {
+        params.withSearchFilters(this.browsePanel.getCurrentSearchFilters());
         return params;
+    }
+
+    @Override
+    public SampleExporter buildSampleExporter(TypeExporter typeExporter, ExporterParameters params) {
+        return new FilterExporter(typeExporter, params);
     }
 }

@@ -8,14 +8,15 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
-import nl.andrewl.email_indexer.data.export.query.QueryExportParams;
-import nl.andrewl.email_indexer.data.export.query.QueryExporter;
+import nl.andrewl.email_indexer.data.export.ExporterParameters;
+import nl.andrewl.email_indexer.data.export.datasample.datatype.TypeExporter;
+import nl.andrewl.email_indexer.data.export.datasample.sampletype.SampleExporter;
 import nl.andrewl.emaildatasetbrowser.control.DirectoryFileFilter;
 import nl.andrewl.emaildatasetbrowser.view.PathSelectField;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
-import nl.andrewl.emaildatasetbrowser.view.search.export.exporttargets.CsvExportTarget;
-import nl.andrewl.emaildatasetbrowser.view.search.export.exporttargets.PdfExportTarget;
-import nl.andrewl.emaildatasetbrowser.view.search.export.exporttargets.TxtExportTarget;
+import nl.andrewl.emaildatasetbrowser.view.search.export.exporttargets.CsvExportType;
+import nl.andrewl.emaildatasetbrowser.view.search.export.exporttargets.PdfExportType;
+import nl.andrewl.emaildatasetbrowser.view.search.export.exporttargets.TxtExportType;
 
 /**
  * Dialog with a number of fields relevant to exporting emails.
@@ -23,10 +24,10 @@ import nl.andrewl.emaildatasetbrowser.view.search.export.exporttargets.TxtExport
  */
 public class ExportPanel extends JDialog {
 
-    private final Exporter exportAction;
+    private final ExportSample exporter;
     private final EmailDataset dataset;
-    private final HashMap<String, ExportTarget> exportTargets = new HashMap<>();
-    private ExportTarget currentTarget;
+    private final HashMap<String, ExportType> exportTargets = new HashMap<>();
+    private ExportType currentTarget;
 
     private final JPanel exportPanel = new JPanel();
     private final JPanel fileSelectPanel = new JPanel();
@@ -39,22 +40,22 @@ public class ExportPanel extends JDialog {
     private final JCheckBox separateThreadsToggle = new JCheckBox("Separate mailing threads");
 
     /**
-     * @param owner    Window that owns this object.
-     * @param dataset  the dataset used to export.
-     * @param exporter concrete exporter that is used.
+     * @param owner          Window that owns this object.
+     * @param dataset        the dataset used to export.
+     * @param sampleExporter concrete exporter that is used.
      */
-    public ExportPanel(Window owner, EmailDataset dataset, Exporter exporter) {
+    public ExportPanel(Window owner, EmailDataset dataset, ExportSample sampleExporter) {
         super(owner, "Export Emails", ModalityType.APPLICATION_MODAL);
-        this.exportAction = exporter;
+        this.exporter = sampleExporter;
         this.dataset = dataset;
 
         exportPanel.setLayout(new GridLayout(6, 1));
         exportPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         // Adds all export types.
-        addExportTarget(new PdfExportTarget());
-        addExportTarget(new TxtExportTarget());
-        addExportTarget(new CsvExportTarget());
+        addExportTarget(new PdfExportType());
+        addExportTarget(new TxtExportType());
+        addExportTarget(new CsvExportType());
         exportTypes.addActionListener(e -> updateCurrentTarget());
         exportPanel.add(exportTypes);
 
@@ -88,7 +89,7 @@ public class ExportPanel extends JDialog {
         updateSeparateThreadsToggle();
     }
 
-    private void addExportTarget(ExportTarget target) {
+    private void addExportTarget(ExportType target) {
         exportTypes.addItem(target.getName());
         exportTargets.put(target.getName(), target);
     }
@@ -116,18 +117,20 @@ public class ExportPanel extends JDialog {
         progress.append(String.format("Generating export with target %s ...", this.currentTarget.getName()));
 
         // Generates export parameters.
-        QueryExportParams params = new QueryExportParams()
+        ExporterParameters params = new ExporterParameters()
                 .withMaxResultCount((int) this.maxResultsSpinner.getValue())
-                .withSeparateEmailThreads(this.separateThreadsToggle.isSelected());
-        params = this.exportAction.specifyParameters(params);
-        QueryExporter exporter = this.currentTarget.buildExporter(params);
+                .withSeparateMailingThreads(this.separateThreadsToggle.isSelected());
+        params = this.exporter.specifyParameters(params);
 
-        Path outputPath = params.isSeparateEmailThreads()
+        TypeExporter typeExporter = this.currentTarget.buildTypeExporter();
+        SampleExporter sampleExporter = this.exporter.buildSampleExporter(typeExporter, params);
+
+        Path outputPath = params.mailingThreadsAreSeparate()
                 ? this.dirSelectField.getSelectedPath()
                 : this.fileSelectField.getSelectedPath();
 
         // Performs export and completes dialog.
-        exporter.export(this.dataset, outputPath)
+        sampleExporter.export(this.dataset, outputPath)
                 .whenComplete((v, throwable) -> {
                     if (throwable != null) {
                         progress.append("Export failed with message:");

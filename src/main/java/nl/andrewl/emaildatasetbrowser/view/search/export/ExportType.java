@@ -2,13 +2,12 @@ package nl.andrewl.emaildatasetbrowser.view.search.export;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import nl.andrewl.email_indexer.data.export.query.QueryExportParams;
-import nl.andrewl.email_indexer.data.export.query.QueryExporter;
+import nl.andrewl.email_indexer.data.export.datasample.datatype.TypeExporter;
 
 /**
  * Common interface for different export formats; i.e. file types.
  */
-public interface ExportTarget {
+public interface ExportType {
     /**
      * The name of this target in natural language.
      * 
@@ -30,5 +29,5 @@ public interface ExportTarget {
      * @param params to-be-used export parameters.
      * @return built query exporter.
      */
-    public QueryExporter buildExporter(QueryExportParams params);
+    public TypeExporter buildTypeExporter();
 }

@@ -2,15 +2,14 @@ package nl.andrewl.emaildatasetbrowser.view.search.export.exporttargets;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import nl.andrewl.email_indexer.data.export.query.PdfQueryExporter;
-import nl.andrewl.email_indexer.data.export.query.QueryExportParams;
-import nl.andrewl.email_indexer.data.export.query.QueryExporter;
-import nl.andrewl.emaildatasetbrowser.view.search.export.ExportTarget;
+import nl.andrewl.email_indexer.data.export.datasample.datatype.PdfExporter;
+import nl.andrewl.email_indexer.data.export.datasample.datatype.TypeExporter;
+import nl.andrewl.emaildatasetbrowser.view.search.export.ExportType;
 
 /**
  * Concrete implementation of ExportTarget exporting to PDF files.
  */
-public class PdfExportTarget implements ExportTarget {
+public class PdfExportType implements ExportType {
 
     @Override
     public String getName() {
@@ -23,7 +22,7 @@ public class PdfExportTarget implements ExportTarget {
     }
 
     @Override
-    public QueryExporter buildExporter(QueryExportParams params) {
-        return new PdfQueryExporter(params);
+    public TypeExporter buildTypeExporter() {
+        return new PdfExporter();
     }
 }
