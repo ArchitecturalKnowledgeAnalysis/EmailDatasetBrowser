@@ -61,8 +61,10 @@ public class LuceneSearchPanel extends JPanel {
         exportPanel.add(exportButton);
         bottomPanel.add(exportPanel);
 
+        JPanel progressPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         showProgressButton.setSelected(true);
-        bottomPanel.add(showProgressButton);
+        progressPanel.add(showProgressButton);
+        bottomPanel.add(progressPanel);
 
         inputPanel.add(bottomPanel, BorderLayout.SOUTH);
         add(inputPanel, BorderLayout.NORTH);
