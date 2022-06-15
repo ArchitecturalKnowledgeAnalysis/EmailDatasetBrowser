@@ -6,18 +6,16 @@ import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
 import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.LuceneSearchExporter;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
+import nl.andrewl.emaildatasetbrowser.view.common.ResponsiveJText;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 
 import javax.swing.*;
-
 import java.awt.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
 /**
  * A panel for executing Lucene search queries and examining the results.
@@ -40,7 +38,8 @@ public class LuceneSearchPanel extends JPanel {
         JPanel inputPanel = new JPanel(new BorderLayout());
         queryField = new JTextArea();
         queryField.setLineWrap(true);
-        queryField.addKeyListener(new SearchKeyListener());
+        ResponsiveJText rTextField = new ResponsiveJText(queryField);
+        rTextField.addKeyListener((e) -> doSearch());
         var queryScrollPane = new JScrollPane(queryField);
         queryScrollPane.setPreferredSize(new Dimension(-1, 100));
         inputPanel.add(queryScrollPane, BorderLayout.CENTER);
@@ -169,28 +168,5 @@ public class LuceneSearchPanel extends JPanel {
             }
             emailTreeView.setEmailNodes(nodes);
         });
-    }
-
-    /**
-     * Listens to key events done in the querypanel.
-     */
-    private class SearchKeyListener implements KeyListener {
-        @Override
-        public void keyTyped(KeyEvent e) {
-            // ignored
-        }
-
-        @Override
-        public void keyPressed(KeyEvent e) {
-            // ignored
-        }
-
-        @Override
-        public void keyReleased(KeyEvent e) {
-            // Performs search when ctrl + enter is typed.
-            if (e.getKeyCode() == KeyEvent.VK_ENTER && e.getModifiersEx() == KeyEvent.CTRL_DOWN_MASK) {
-                doSearch();
-            }
-        }
     }
 }
