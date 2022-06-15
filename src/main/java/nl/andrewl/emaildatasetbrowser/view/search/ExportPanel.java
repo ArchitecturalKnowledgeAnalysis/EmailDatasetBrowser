@@ -31,12 +31,10 @@ public class ExportPanel extends JDialog {
     private final HashMap<String, ExportType> exportTargets = new HashMap<>();
     private ExportType currentTarget;
 
-    private final JPanel exportPanel = new JPanel();
-    private final JPanel fileSelectPanel = new JPanel();
-    private final JComboBox<String> exportTypes = new JComboBox<>();;
+    private final JComboBox<String> exportTypes = new JComboBox<>();
     private final JSpinner maxResultsSpinner = new JSpinner(new SpinnerNumberModel(100, 1, 10000, 1));
     private final PathSelectField dirSelectField = new PathSelectField(JFileChooser.DIRECTORIES_ONLY, false, false,
-            new DirectoryFileFilter(), "Select Directory", "Select Export Directory", "Select");;
+            new DirectoryFileFilter(), "Select Directory", "Select Export Directory", "Select");
     private final PathSelectField fileSelectField = new PathSelectField(JFileChooser.FILES_ONLY, true, false,
             new FileNameExtensionFilter("No Filter", ".*"), "Select File", "Select Export File", "Select");
     private final JCheckBox separateThreadsToggle = new JCheckBox("Separate mailing threads");
@@ -51,6 +49,7 @@ public class ExportPanel extends JDialog {
         this.exporter = sampleExporter;
         this.dataset = dataset;
 
+        JPanel exportPanel = new JPanel();
         exportPanel.setLayout(new GridLayout(6, 1));
         exportPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
@@ -66,6 +65,7 @@ public class ExportPanel extends JDialog {
         exportPanel.add(maxResultsSpinner);
         separateThreadsToggle.addActionListener(e -> updateSeparateThreadsToggle());
         exportPanel.add(separateThreadsToggle);
+        JPanel fileSelectPanel = new JPanel();
         fileSelectPanel.setLayout(new BoxLayout(fileSelectPanel, BoxLayout.X_AXIS));
         fileSelectPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
         fileSelectPanel.add(dirSelectField);
@@ -114,8 +114,10 @@ public class ExportPanel extends JDialog {
                 null,
                 true,
                 false,
-                true);
-        progress.activate();
+                true,
+                false
+        );
+        progress.start();
         progress.append(String.format("Generating export with target %s ...", this.currentTarget.getName()));
 
         // Generates export parameters.

@@ -9,25 +9,30 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
+
 /**
  * A dialog that can be used to show the progress of an ongoing task by
  * periodically posting messages to the dialog's log text component.
  */
-public class ProgressDialog extends JDialog implements Consumer<String> {
+public class ProgressDialog extends Thread implements Consumer<String> {
 	private static final int MIN_OPEN_TIME = 2000;
 
+	private final JDialog dialog;
 	private final JTextArea textBox;
 	private final JButton doneButton;
 	private final JButton cancelButton;
 	private Runnable cancelAction;
 	private Instant lastAppendAt;
+	private final boolean delayClose;
 
 	public ProgressDialog(Window owner, String title, String description) {
-		this(owner, title, description, true, true, true);
+		this(owner, title, description, true, true, true, true);
 	}
 
-	public ProgressDialog(Window owner, String title, String description, boolean showText, boolean showCancel, boolean showDone) {
-		super(owner, title, ModalityType.APPLICATION_MODAL);
+	public ProgressDialog(Window owner, String title, String description, boolean showText, boolean showCancel, boolean showDone, boolean delayClose) {
+		this.dialog = new JDialog(owner, title, Dialog.ModalityType.APPLICATION_MODAL);
+		this.delayClose = delayClose;
 
 		JPanel p = new JPanel(new BorderLayout());
 		if (description != null) {
@@ -54,7 +59,7 @@ public class ProgressDialog extends JDialog implements Consumer<String> {
 			cancelButton = new JButton("Cancel");
 			cancelButton.addActionListener(e -> {
 				if (cancelAction != null) cancelAction.run();
-				dispose();
+				dialog.dispose();
 			});
 			buttonPanel.add(cancelButton);
 		} else {
@@ -63,17 +68,17 @@ public class ProgressDialog extends JDialog implements Consumer<String> {
 		if (showDone) {
 			doneButton = new JButton("Done");
 			doneButton.setEnabled(false);
-			doneButton.addActionListener(e -> dispose());
+			doneButton.addActionListener(e -> dialog.dispose());
 			buttonPanel.add(doneButton);
 		} else {
 			doneButton = null;
 		}
 		if (showCancel || showDone) p.add(buttonPanel, BorderLayout.SOUTH);
 
-		setContentPane(p);
-		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-		pack();
-		setLocationRelativeTo(owner);
+		dialog.setContentPane(p);
+		dialog.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		dialog.pack();
+		dialog.setLocationRelativeTo(owner);
 	}
 
 	public static ProgressDialog minimal(Component component, String title, String description) {
@@ -83,9 +88,10 @@ public class ProgressDialog extends JDialog implements Consumer<String> {
 				description,
 				false,
 				false,
-				false
+				false,
+				true
 		);
-		dialog.activate();
+		dialog.start();
 		return dialog;
 	}
 
@@ -96,19 +102,20 @@ public class ProgressDialog extends JDialog implements Consumer<String> {
 				null,
 				true,
 				false,
-				false
+				false,
+				true
 		);
-		dialog.activate();
+		dialog.start();
 		return dialog;
 	}
 
-	/**
-	 * Begins showing the dialog. Use this instead of calling setVisible(true).
-	 */
-	public void activate() {
-		new Thread(() -> {
-			setVisible(true);
-		}).start();
+	public JDialog getDialog() {
+		return this.dialog;
+	}
+
+	@Override
+	public void run() {
+		dialog.setVisible(true);
 	}
 
 	/**
@@ -179,16 +186,20 @@ public class ProgressDialog extends JDialog implements Consumer<String> {
 	}
 
 	private void closeAutomatically() {
-		if (lastAppendAt == null) {
-			CompletableFuture.delayedExecutor(MIN_OPEN_TIME, TimeUnit.MILLISECONDS).execute(this::dispose);
+		if (!delayClose) {
+			dialog.dispose();
 		} else {
-			Instant now = Instant.now();
-			Duration timeSinceLastAppend = Duration.between(lastAppendAt, now);
-			if (timeSinceLastAppend.toMillis() < MIN_OPEN_TIME) {
-				long timeToWait = MIN_OPEN_TIME - timeSinceLastAppend.toMillis();
-				CompletableFuture.delayedExecutor(timeToWait, TimeUnit.MILLISECONDS).execute(this::dispose);
+			if (lastAppendAt == null) {
+				CompletableFuture.delayedExecutor(MIN_OPEN_TIME, TimeUnit.MILLISECONDS).execute(dialog::dispose);
 			} else {
-				dispose();
+				Instant now = Instant.now();
+				Duration timeSinceLastAppend = Duration.between(lastAppendAt, now);
+				if (timeSinceLastAppend.toMillis() < MIN_OPEN_TIME) {
+					long timeToWait = MIN_OPEN_TIME - timeSinceLastAppend.toMillis();
+					CompletableFuture.delayedExecutor(timeToWait, TimeUnit.MILLISECONDS).execute(dialog::dispose);
+				} else {
+					dialog.dispose();
+				}
 			}
 		}
 	}

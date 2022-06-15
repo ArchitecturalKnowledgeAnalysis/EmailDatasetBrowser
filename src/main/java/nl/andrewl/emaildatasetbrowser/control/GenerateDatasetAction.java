@@ -53,7 +53,7 @@ public class GenerateDatasetAction extends AbstractAction {
 			Path dsDir = datasetDirField.getSelectedPath();
 			dialog.dispose();
 			ProgressDialog progressDialog = new ProgressDialog(browser, "Generating...", "Generating the dataset.");
-			progressDialog.activate();
+			progressDialog.start();
 			Status status = new Status().withMessageConsumer(progressDialog);
 			new EmailDatasetGenerator(status).generate(paths, dsDir).handle((unused, throwable) -> {
 				progressDialog.done();
