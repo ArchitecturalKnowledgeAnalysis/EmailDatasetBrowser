@@ -10,6 +10,7 @@ import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.time.Duration;
 import java.time.Instant;
@@ -31,6 +32,7 @@ public class LuceneSearchPanel extends JPanel {
     private final JSpinner resultCountSpinner = new JSpinner(new SpinnerNumberModel(100, 1, 10000, 1));
     private final JCheckBox hideTaggedCheckbox = new JCheckBox("Hide Tagged");
     private final JButton exportButton = new JButton("Export");
+    private final JCheckBox showProgressButton = new JCheckBox("Show Progress Dialog");
 
     public LuceneSearchPanel(EmailViewPanel emailViewPanel) {
         super(new BorderLayout());
@@ -58,6 +60,9 @@ public class LuceneSearchPanel extends JPanel {
         exportPanel.add(resultCountSpinner);
         exportPanel.add(exportButton);
         bottomPanel.add(exportPanel);
+
+        showProgressButton.setSelected(true);
+        bottomPanel.add(showProgressButton);
 
         inputPanel.add(bottomPanel, BorderLayout.SOUTH);
         add(inputPanel, BorderLayout.NORTH);
@@ -116,7 +121,9 @@ public class LuceneSearchPanel extends JPanel {
                 true,
                 true,
                 false);
-        progress.activate();
+        if (showProgressButton.isSelected()) {
+            progress.activate();
+        }
         progress.append("Searching over all emails using query: \"%s\"\nPlease be patient. This may take a while."
                 .formatted(query));
         final Instant start = Instant.now();
