@@ -55,6 +55,7 @@ public class EmailDatasetBrowser extends JFrame {
 				closeDataset().thenRun(() -> dispose());
 			}
 		});
+		SwingUtilities.invokeLater(() -> new DatasetOpenAction(this).tryOpenLastDataset());
 	}
 
 	public EmailDataset getCurrentDataset() {
