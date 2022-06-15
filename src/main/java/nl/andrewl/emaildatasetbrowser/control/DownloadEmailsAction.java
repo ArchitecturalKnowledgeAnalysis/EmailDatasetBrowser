@@ -61,7 +61,7 @@ public class DownloadEmailsAction extends AbstractAction {
 			Path outputDir = dirField.getSelectedPath();
 			dialog.dispose();
 			ProgressDialog progressDialog = new ProgressDialog(owner, "Downloading...", "Downloading emails");
-			progressDialog.activate();
+			progressDialog.start();
 			fetcher.download(
 					outputDir,
 					domainField.getText(),
@@ -73,7 +73,7 @@ public class DownloadEmailsAction extends AbstractAction {
 				progressDialog.done();
 				if (throwable == null) {
 					JOptionPane.showMessageDialog(
-							progressDialog,
+							progressDialog.getDialog(),
 							"MBox files downloaded successfully.",
 							"Done",
 							JOptionPane.INFORMATION_MESSAGE

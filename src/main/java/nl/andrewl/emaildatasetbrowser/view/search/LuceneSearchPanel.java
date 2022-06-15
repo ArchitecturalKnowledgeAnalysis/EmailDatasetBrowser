@@ -126,9 +126,11 @@ public class LuceneSearchPanel extends JPanel {
                 null,
                 true,
                 true,
-                false);
+                false,
+                false
+            );
         if (showProgressButton.isSelected()) {
-            progress.activate();
+            progress.start();
         }
         progress.append("Searching over all emails using query: \"%s\"\nPlease be patient. This may take a while."
                 .formatted(query));

@@ -36,9 +36,10 @@ public class DatasetOpenAction extends AbstractAction {
 					null,
 					true,
 					false,
-					false
+					false,
+					true
 			);
-			progress.activate();
+			progress.start();
 			progress.append("Opening dataset from " + f.getAbsolutePath());
 			Path datasetPath = f.toPath();
 			prefs.put(PREF_OPEN_DIR, datasetPath.getParent().toAbsolutePath().toString());

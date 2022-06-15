@@ -30,7 +30,7 @@ public class EmailDatasetBrowser extends JFrame {
 
 	public EmailDatasetBrowser () {
 		super("Email Dataset Browser");
-		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		this.emailViewPanel = new EmailViewPanel();
 		this.browsePanel = new SimpleBrowsePanel(emailViewPanel);
 		this.searchPanel = new LuceneSearchPanel(emailViewPanel);
@@ -52,7 +52,7 @@ public class EmailDatasetBrowser extends JFrame {
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				closeDataset().join();
+				closeDataset().thenRun(() -> dispose());
 			}
 		});
 	}
@@ -137,10 +137,11 @@ public class EmailDatasetBrowser extends JFrame {
 				"Closing the current dataset.",
 				true,
 				false,
-				false
+				false,
+				true
 		);
+		dialog.start();
 		dialog.appendF("Closing the currently open dataset at %s", currentDataset.getOpenDir());
-		dialog.activate();
 		return currentDataset.close().handle((unused, throwable) -> {
 			if (throwable != null) {
 				throwable.printStackTrace();
