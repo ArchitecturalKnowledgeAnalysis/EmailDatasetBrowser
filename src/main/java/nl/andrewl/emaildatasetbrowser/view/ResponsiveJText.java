@@ -1,4 +1,4 @@
-package nl.andrewl.emaildatasetbrowser.view.common;
+package nl.andrewl.emaildatasetbrowser.view;
 
 import javax.swing.JTextArea;
 import javax.swing.JTextField;

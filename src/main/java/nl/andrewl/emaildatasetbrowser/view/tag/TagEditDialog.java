@@ -4,8 +4,8 @@ import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.Tag;
 import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.emaildatasetbrowser.view.LabelledField;
-import nl.andrewl.emaildatasetbrowser.view.common.ResponsiveJText;
-import nl.andrewl.emaildatasetbrowser.view.common.ResponsiveJText.KeyEventType;
+import nl.andrewl.emaildatasetbrowser.view.ResponsiveJText;
+import nl.andrewl.emaildatasetbrowser.view.ResponsiveJText.KeyEventType;
 
 import javax.swing.*;
 import java.awt.*;
