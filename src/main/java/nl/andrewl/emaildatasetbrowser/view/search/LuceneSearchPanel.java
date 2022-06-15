@@ -7,7 +7,7 @@ import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
 import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.LuceneSearchExporter;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
-import nl.andrewl.emaildatasetbrowser.view.common.ResponsiveJText;
+import nl.andrewl.emaildatasetbrowser.view.ResponsiveJText;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 
