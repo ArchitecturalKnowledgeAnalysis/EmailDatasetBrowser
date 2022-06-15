@@ -4,6 +4,7 @@ import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
+import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.LuceneSearchExporter;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.common.ResponsiveJText;
@@ -21,6 +22,8 @@ import java.util.Objects;
  * A panel for executing Lucene search queries and examining the results.
  */
 public class LuceneSearchPanel extends JPanel {
+    private final String PREFERENCES_SHOW_PROGRESS = "lucenesearch_show_progress";
+
     private EmailDataset dataset;
 
     private final EmailTreeView emailTreeView = new EmailTreeView();
@@ -38,8 +41,7 @@ public class LuceneSearchPanel extends JPanel {
         JPanel inputPanel = new JPanel(new BorderLayout());
         queryField = new JTextArea();
         queryField.setLineWrap(true);
-        ResponsiveJText rTextField = new ResponsiveJText(queryField);
-        rTextField.addKeyListener((e) -> doSearch());
+        new ResponsiveJText(queryField).addKeyListener((e) -> doSearch());
         var queryScrollPane = new JScrollPane(queryField);
         queryScrollPane.setPreferredSize(new Dimension(-1, 100));
         inputPanel.add(queryScrollPane, BorderLayout.CENTER);
@@ -61,7 +63,10 @@ public class LuceneSearchPanel extends JPanel {
         bottomPanel.add(exportPanel);
 
         JPanel progressPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        showProgressButton.setSelected(true);
+        showProgressButton
+                .setSelected(EmailDatasetBrowser.getPreferences().getBoolean(PREFERENCES_SHOW_PROGRESS, true));
+        showProgressButton.addActionListener((e) -> EmailDatasetBrowser.getPreferences()
+                .putBoolean(PREFERENCES_SHOW_PROGRESS, ((JToggleButton) e.getSource()).isSelected()));
         progressPanel.add(showProgressButton);
         bottomPanel.add(progressPanel);
 
