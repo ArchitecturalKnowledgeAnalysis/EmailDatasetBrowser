@@ -1,6 +1,8 @@
 package nl.andrewl.emaildatasetbrowser;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
+import nl.andrewl.email_indexer.data.EmailRepository;
+import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.emaildatasetbrowser.control.*;
 import nl.andrewl.emaildatasetbrowser.control.email.*;
 import nl.andrewl.emaildatasetbrowser.control.tag.ManageTagsAction;
@@ -13,7 +15,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.prefs.Preferences;
 
@@ -47,12 +49,12 @@ public class EmailDatasetBrowser extends JFrame {
 		this.setPreferredSize(new Dimension(1000, 600));
 		this.pack();
 		this.setLocationRelativeTo(null);
-		this.setDataset(null).join();
+		setDataset(null);
 
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				closeDataset().thenRun(() -> dispose());
+				closeDataset(null).thenRun(() -> dispose());
 			}
 		});
 	}
@@ -61,29 +63,11 @@ public class EmailDatasetBrowser extends JFrame {
 		return this.currentDataset;
 	}
 
-	/**
-	 * Sets the dataset that this browser will render. If the browser already
-	 * has a dataset open, it will close that one first.
-	 * @param ds The dataset to use.
-	 */
-	public CompletableFuture<Void> setDataset(EmailDataset ds) {
-		try {
-			if (ds != null && ds.getVersion() < 2) {
-				return CompletableFuture.failedFuture(new IllegalArgumentException("Cannot load old dataset versions."));
-			}
-		} catch (IOException e) {
-			return CompletableFuture.failedFuture(e);
-		}
-		CompletableFuture<Void> cf = CompletableFuture.completedFuture(null);
-		if (currentDataset != null) {
-			cf = cf.thenCompose(unused -> closeDataset());
-		}
-		return cf.thenAccept(unused -> {
-			this.currentDataset = ds;
-			browsePanel.setDataset(ds);
-			searchPanel.setDataset(ds);
-			emailViewPanel.setDataset(ds);
-		});
+	private void setDataset(EmailDataset ds) {
+		currentDataset = ds;
+		browsePanel.setDataset(ds);
+		searchPanel.setDataset(ds);
+		emailViewPanel.setDataset(ds);
 	}
 
 	public EmailViewPanel getEmailViewPanel() {
@@ -129,19 +113,57 @@ public class EmailDatasetBrowser extends JFrame {
 		return menuBar;
 	}
 
-	private CompletableFuture<Void> closeDataset() {
-		if (currentDataset == null) return CompletableFuture.completedFuture(null);
+	public CompletableFuture<Void> openDataset(Path dsPath) {
 		ProgressDialog dialog = new ProgressDialog(
 				this,
-				"Closing Dataset",
-				"Closing the current dataset.",
+				"Opening Dataset",
+				"Opening dataset at " + dsPath.toAbsolutePath(),
 				true,
 				false,
 				false,
 				true
 		);
 		dialog.start();
+		return closeDataset(dialog)
+				.thenCompose(unused -> EmailDataset.open(dsPath))
+				.handle((dataset, throwable) -> {
+					if (throwable != null) {
+						dialog.append("Could not display dataset in the browser: " + throwable.getMessage());
+					} else {
+						setDataset(dataset);
+
+						var repo = new EmailRepository(dataset);
+						var tagRepo = new TagRepository(dataset);
+						String message = "Opened dataset from %s with\n%d emails,\n%d tags,\n%d tagged emails".formatted(
+								dataset.getOpenDir(),
+								repo.countEmails(),
+								tagRepo.countTags(),
+								repo.countTaggedEmails()
+						);
+						dialog.append(message);
+					}
+					dialog.done();
+					return null;
+				});
+	}
+
+	public CompletableFuture<Void> closeDataset(ProgressDialog existingDialog) {
+		if (currentDataset == null) return CompletableFuture.completedFuture(null);
+		ProgressDialog dialog = existingDialog;
+		if (existingDialog == null) {
+			dialog = new ProgressDialog(
+					this,
+					"Closing Dataset",
+					"Closing the current dataset.",
+					true,
+					false,
+					false,
+					true
+			);
+			dialog.start();
+		}
 		dialog.appendF("Closing the currently open dataset at %s", currentDataset.getOpenDir());
+		final ProgressDialog finalDialog = dialog;
 		return currentDataset.close().handle((unused, throwable) -> {
 			if (throwable != null) {
 				throwable.printStackTrace();
@@ -152,10 +174,13 @@ public class EmailDatasetBrowser extends JFrame {
 						JOptionPane.ERROR_MESSAGE
 				);
 			} else {
-				dialog.append("Dataset closed successfully.");
+				finalDialog.append("Dataset closed successfully.");
 			}
-			dialog.done();
-			currentDataset = null;
+			// If no existing dialog was provided, mark ours as done.
+			if (existingDialog == null) {
+				finalDialog.done();
+			}
+			setDataset(null);
 			return null;
 		});
 	}

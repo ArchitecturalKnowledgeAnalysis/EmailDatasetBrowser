@@ -57,6 +57,7 @@ public class SimpleBrowsePanel extends JPanel {
 		boolean enabled = ds != null;
 
 		editTagFilterButton.setEnabled(enabled);
+		currentTagFilter = TagFilter.excludeNone();
 
 		showHiddenSelect.setSelectedValue(false);
 		showHiddenSelect.setEnabled(enabled);
@@ -67,6 +68,7 @@ public class SimpleBrowsePanel extends JPanel {
 		previousPageButton.setEnabled(enabled);
 		currentPageLabel.setText("Page 1 of 1");
 		sizeLabel.setText("Showing 0 of 0 results");
+		exportButton.setEnabled(enabled);
 
 		// Set the dataset after updating all controls.
 		if (ds != null) {

@@ -15,6 +15,6 @@ public class CloseDatasetAction extends AbstractAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		browser.setDataset(null);
+		browser.closeDataset(null);
 	}
 }

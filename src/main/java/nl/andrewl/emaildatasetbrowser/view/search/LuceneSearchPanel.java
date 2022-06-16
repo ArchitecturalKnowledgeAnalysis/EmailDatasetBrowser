@@ -22,13 +22,16 @@ import java.awt.event.KeyListener;
  * A panel for executing Lucene search queries and examining the results.
  */
 public class LuceneSearchPanel extends JPanel {
+    private static final int DEFAULT_RESULT_COUNT = 100;
+    private static final int MAX_RESULT_COUNT = 10000;
+
     private EmailDataset dataset;
 
     private final EmailTreeView emailTreeView = new EmailTreeView();
 
     private final JTextArea queryField;
     private final JButton searchButton = new JButton("Search");
-    private final JSpinner resultCountSpinner = new JSpinner(new SpinnerNumberModel(100, 1, 10000, 1));
+    private final JSpinner resultCountSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_RESULT_COUNT, 1, MAX_RESULT_COUNT, 1));
     private final JCheckBox hideTaggedCheckbox = new JCheckBox("Hide Tagged");
     private final JButton exportButton = new JButton("Export");
 
@@ -82,6 +85,9 @@ public class LuceneSearchPanel extends JPanel {
     public void setDataset(EmailDataset dataset) {
         this.dataset = dataset;
         emailTreeView.clear();
+        queryField.setText(null);
+        resultCountSpinner.setValue(DEFAULT_RESULT_COUNT);
+        hideTaggedCheckbox.setSelected(false);
         searchButton.setEnabled(dataset != null);
         exportButton.setEnabled(dataset != null);
     }
