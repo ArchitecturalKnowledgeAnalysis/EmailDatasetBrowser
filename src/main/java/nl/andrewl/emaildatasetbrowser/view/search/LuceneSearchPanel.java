@@ -4,16 +4,13 @@ import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
-import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.LuceneSearchExporter;
-import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.ResponsiveJText;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -22,8 +19,6 @@ import java.util.Objects;
  * A panel for executing Lucene search queries and examining the results.
  */
 public class LuceneSearchPanel extends JPanel {
-    private final String PREFERENCES_SHOW_PROGRESS = "lucenesearch_show_progress";
-
     private EmailDataset dataset;
 
     private final EmailTreeView emailTreeView = new EmailTreeView();
@@ -33,7 +28,6 @@ public class LuceneSearchPanel extends JPanel {
     private final JSpinner resultCountSpinner = new JSpinner(new SpinnerNumberModel(100, 1, 10000, 1));
     private final JCheckBox hideTaggedCheckbox = new JCheckBox("Hide Tagged");
     private final JButton exportButton = new JButton("Export");
-    private final JCheckBox showProgressButton = new JCheckBox("Show Progress Dialog");
 
     public LuceneSearchPanel(EmailViewPanel emailViewPanel) {
         super(new BorderLayout());
@@ -61,14 +55,6 @@ public class LuceneSearchPanel extends JPanel {
         exportPanel.add(resultCountSpinner);
         exportPanel.add(exportButton);
         bottomPanel.add(exportPanel);
-
-        JPanel progressPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        showProgressButton
-                .setSelected(EmailDatasetBrowser.getPreferences().getBoolean(PREFERENCES_SHOW_PROGRESS, true));
-        showProgressButton.addActionListener((e) -> EmailDatasetBrowser.getPreferences()
-                .putBoolean(PREFERENCES_SHOW_PROGRESS, ((JToggleButton) e.getSource()).isSelected()));
-        progressPanel.add(showProgressButton);
-        bottomPanel.add(progressPanel);
 
         inputPanel.add(bottomPanel, BorderLayout.SOUTH);
         add(inputPanel, BorderLayout.NORTH);
@@ -120,44 +106,27 @@ public class LuceneSearchPanel extends JPanel {
             return;
         }
 
-        ProgressDialog progress = new ProgressDialog(
-                SwingUtilities.getWindowAncestor(this),
-                "Searching",
-                null,
-                true,
-                true,
-                false,
-                false
-            );
-        if (showProgressButton.isSelected()) {
-            progress.start();
-        }
-        progress.append("Searching over all emails using query: \"%s\"\nPlease be patient. This may take a while."
-                .formatted(query));
         final Instant start = Instant.now();
-        var future = new EmailIndexSearcher().searchAsync(dataset, queryField.getText(), getResultCount())
+        new EmailIndexSearcher().searchAsync(dataset, queryField.getText(), getResultCount())
                 .handleAsync((emailIds, throwable) -> {
                     if (throwable != null) {
-                        progress.append("An error occurred: " + throwable);
+                        String errorMessage = "Search terminated with error:\n%s"
+                                .formatted(throwable.getMessage());
+                        JOptionPane errorPane = new JOptionPane(errorMessage, JOptionPane.ERROR_MESSAGE);
+                        JDialog dialog = errorPane.createDialog("Search Error");
+                        dialog.setAlwaysOnTop(true);
+                        dialog.setVisible(true);
                     } else {
-                        showResults(start, progress, emailIds);
+                        showResults(start, emailIds);
                     }
-                    progress.done();
                     return null;
                 });
-        progress.onCancel(() -> future.cancel(true));
     }
 
-    private void showResults(final Instant start, ProgressDialog progress, List<Long> emailIds) {
-        Duration dur = Duration.between(start, Instant.now());
-        progress.appendF("Found %d email threads in %.3f seconds whose emails matched the query.", emailIds.size(),
-                dur.toMillis() / 1000f);
-        progress.append("Loading detailed email thread information from the database. This may take a while.");
-        Instant start2 = Instant.now();
+    private void showResults(final Instant start, List<Long> emailIds) {
         var repo = new EmailRepository(dataset);
         var tagRepo = new TagRepository(dataset);
         int resultCount = getResultCount();
-        progress.appendF("Showing the top %d results.", resultCount);
         List<EmailTreeNode> nodes = emailIds.stream()
                 .map(id -> repo.findPreviewById(id).orElse(null))
                 .filter(Objects::nonNull)
@@ -165,8 +134,6 @@ public class LuceneSearchPanel extends JPanel {
                 .map(EmailTreeNode::new)
                 .limit(resultCount)
                 .toList();
-        dur = Duration.between(start2, Instant.now());
-        progress.appendF("Loaded email thread information from the database in %.3f seconds.", dur.toMillis() / 1000f);
         SwingUtilities.invokeLater(() -> {
             int i = 1;
             for (var node : nodes) {
