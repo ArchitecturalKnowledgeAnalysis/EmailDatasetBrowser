@@ -5,12 +5,14 @@ import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
 import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.LuceneSearchExporter;
-import nl.andrewl.emaildatasetbrowser.view.ResponsiveJText;
+import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener;
+import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener.KeyEventType;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -35,7 +37,9 @@ public class LuceneSearchPanel extends JPanel {
         JPanel inputPanel = new JPanel(new BorderLayout());
         queryField = new JTextArea();
         queryField.setLineWrap(true);
-        new ResponsiveJText(queryField).addKeyListener((e) -> doSearch());
+        ConcreteKeyEventListener rText = new ConcreteKeyEventListener()
+                .addKeyListener(KeyEventType.KEY_RELEASED, KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK, (e) -> doSearch());
+        queryField.addKeyListener(rText);
         var queryScrollPane = new JScrollPane(queryField);
         queryScrollPane.setPreferredSize(new Dimension(-1, 100));
         inputPanel.add(queryScrollPane, BorderLayout.CENTER);

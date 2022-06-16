@@ -1,8 +1,5 @@
 package nl.andrewl.emaildatasetbrowser.view;
 
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
@@ -13,7 +10,7 @@ import java.util.function.Consumer;
  * Implements generalized listener for JTextField and JTextArea components.
  * Allowing you to only listen to the events you're interested in.
  */
-public class ResponsiveJText implements KeyListener {
+public class ConcreteKeyEventListener implements KeyListener {
     private record Listener(int key, int keyMask, Consumer<KeyEvent> event) {
     }
 
@@ -23,34 +20,12 @@ public class ResponsiveJText implements KeyListener {
         KEY_RELEASED
     }
 
-    private final int DEFAULT_KEY = KeyEvent.VK_ENTER;
-    private final int DEFAULT_MASK = KeyEvent.CTRL_DOWN_MASK;
-
     private final HashMap<KeyEventType, ArrayList<Listener>> listeners = new HashMap<>();
 
-    private ResponsiveJText() {
+    public ConcreteKeyEventListener() {
         for (KeyEventType key : KeyEventType.values()) {
             listeners.put(key, new ArrayList<>());
         }
-    }
-
-    public ResponsiveJText(JTextArea textArea) {
-        this();
-        textArea.addKeyListener(this);
-    }
-
-    public ResponsiveJText(JTextField textField) {
-        this();
-        textField.addKeyListener(this);
-    }
-
-    /**
-     * Adds listener event the default key + mask are pressed.
-     * 
-     * @param event event that is invoked when the event is triggered.
-     */
-    public ResponsiveJText addKeyListener(Consumer<KeyEvent> event) {
-        return addKeyListener(KeyEventType.KEY_RELEASED, DEFAULT_KEY, DEFAULT_MASK, event);
     }
 
     /**
@@ -60,7 +35,7 @@ public class ResponsiveJText implements KeyListener {
      * @param key       key that is listened for.
      * @param event     event that is invoked when the event is triggered.
      */
-    public ResponsiveJText addKeyListener(KeyEventType eventType, int key, Consumer<KeyEvent> event) {
+    public ConcreteKeyEventListener addKeyListener(KeyEventType eventType, int key, Consumer<KeyEvent> event) {
         return addKeyListener(eventType, key, 0, event);
     }
 
@@ -72,7 +47,8 @@ public class ResponsiveJText implements KeyListener {
      * @param keyMask   key mask that must be active when listening.
      * @param event     event that is invoked when the event is triggered.
      */
-    public ResponsiveJText addKeyListener(KeyEventType eventType, int key, int keyMask, Consumer<KeyEvent> event) {
+    public ConcreteKeyEventListener addKeyListener(KeyEventType eventType, int key, int keyMask,
+            Consumer<KeyEvent> event) {
         listeners.get(eventType).add(new Listener(key, keyMask, event));
         return this;
     }

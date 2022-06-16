@@ -4,8 +4,8 @@ import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.Tag;
 import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.emaildatasetbrowser.view.LabelledField;
-import nl.andrewl.emaildatasetbrowser.view.ResponsiveJText;
-import nl.andrewl.emaildatasetbrowser.view.ResponsiveJText.KeyEventType;
+import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener;
+import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener.KeyEventType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -44,7 +44,8 @@ public class TagEditDialog extends JDialog {
 	}
 
 	public String getDescription() {
-		if (descriptionField.getText() != null && descriptionField.getText().isBlank()) return null;
+		if (descriptionField.getText() != null && descriptionField.getText().isBlank())
+			return null;
 		return descriptionField.getText().trim();
 	}
 
@@ -53,9 +54,11 @@ public class TagEditDialog extends JDialog {
 
 		JPanel fieldsPanel = new JPanel(new BorderLayout(5, 5));
 		fieldsPanel.add(new LabelledField("Name", nameField), BorderLayout.NORTH);
-		new ResponsiveJText(nameField)
-				.addKeyListener((e) -> onOkayClicked())
+		ConcreteKeyEventListener nameKeyListener = new ConcreteKeyEventListener()
+				.addKeyListener(KeyEventType.KEY_RELEASED, KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK,
+						(e) -> onOkayClicked())
 				.addKeyListener(KeyEventType.KEY_RELEASED, KeyEvent.VK_ENTER, (e) -> descriptionField.grabFocus());
+		nameField.addKeyListener(nameKeyListener);
 
 		descriptionField.setLineWrap(true);
 		descriptionField.setWrapStyleWord(true);
@@ -64,7 +67,10 @@ public class TagEditDialog extends JDialog {
 				new JScrollPane(descriptionField, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)),
 				BorderLayout.CENTER);
-		new ResponsiveJText(descriptionField).addKeyListener((e) -> onOkayClicked());
+		ConcreteKeyEventListener descriptionKeyListener = new ConcreteKeyEventListener()
+				.addKeyListener(KeyEventType.KEY_RELEASED, KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK,
+						(e) -> onOkayClicked());
+		descriptionField.addKeyListener(descriptionKeyListener);
 		fieldsPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		mainPanel.add(fieldsPanel, BorderLayout.CENTER);
 
