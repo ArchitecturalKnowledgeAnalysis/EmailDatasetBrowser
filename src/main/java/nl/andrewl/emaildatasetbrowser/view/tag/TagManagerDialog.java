@@ -3,6 +3,7 @@ package nl.andrewl.emaildatasetbrowser.view.tag;
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.Tag;
 import nl.andrewl.email_indexer.data.TagRepository;
+import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.view.SwingUtils;
 
 import javax.swing.*;
@@ -22,18 +23,18 @@ public class TagManagerDialog extends JDialog {
 
 	private final EmailDataset ds;
 
-	public TagManagerDialog(Window owner, EmailDataset ds) {
-		super(owner, "Tag Manager", ModalityType.APPLICATION_MODAL);
+	public TagManagerDialog(EmailDatasetBrowser browser, EmailDataset ds) {
+		super(browser, "Tag Manager", ModalityType.APPLICATION_MODAL);
 		this.ds = ds;
 
-		setContentPane(buildUI());
+		setContentPane(buildUI(browser));
 		setPreferredSize(new Dimension(500, 500));
 		pack();
-		setLocationRelativeTo(owner);
+		setLocationRelativeTo(browser);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 	}
 
-	private Container buildUI() {
+	private Container buildUI(EmailDatasetBrowser browser) {
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		tagTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tagTable.getSelectionModel().addListSelectionListener(e -> {
@@ -52,7 +53,7 @@ public class TagManagerDialog extends JDialog {
 					tagTable.setRowSelectionInterval(row, row);
 					Tag tag = tagTableModel.getTagAt(tagTable.getSelectedRow());
 					if (tag == null) return;
-					var dialog = new TagEditDialog(SwingUtilities.getWindowAncestor(tagTable), tag, ds);
+					var dialog = new TagEditDialog(browser, tag, ds);
 					dialog.setVisible(true);
 					tagTableModel.refreshTags(ds);
 				}
@@ -73,14 +74,14 @@ public class TagManagerDialog extends JDialog {
 		buttonPanel.add(removeButton);
 		mainPanel.add(buttonPanel, BorderLayout.NORTH);
 		addButton.addActionListener(e -> {
-			var dialog = new TagEditDialog(this, null, ds);
+			var dialog = new TagEditDialog(browser, null, ds);
 			dialog.setVisible(true);
 			tagTableModel.refreshTags(ds);
 		});
 		editButton.addActionListener(e -> {
 			Tag tag = tagTableModel.getTagAt(tagTable.getSelectedRow());
 			if (tag == null) return;
-			var dialog = new TagEditDialog(this, tag, ds);
+			var dialog = new TagEditDialog(browser, tag, ds);
 			dialog.setVisible(true);
 			tagTableModel.refreshTags(ds);
 		});

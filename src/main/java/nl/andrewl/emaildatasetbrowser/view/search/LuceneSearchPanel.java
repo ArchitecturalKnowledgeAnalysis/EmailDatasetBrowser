@@ -5,6 +5,7 @@ import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
 import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.LuceneSearchExporter;
+import nl.andrewl.emaildatasetbrowser.view.DatasetChangeListener;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
@@ -21,7 +22,7 @@ import java.awt.event.KeyListener;
 /**
  * A panel for executing Lucene search queries and examining the results.
  */
-public class LuceneSearchPanel extends JPanel {
+public class LuceneSearchPanel extends JPanel implements DatasetChangeListener {
     private static final int DEFAULT_RESULT_COUNT = 100;
     private static final int MAX_RESULT_COUNT = 10000;
 
@@ -168,6 +169,11 @@ public class LuceneSearchPanel extends JPanel {
             }
             emailTreeView.setEmailNodes(nodes);
         });
+    }
+
+    @Override
+    public void datasetChanged(EmailDataset ds) {
+        setDataset(ds);
     }
 
     /**

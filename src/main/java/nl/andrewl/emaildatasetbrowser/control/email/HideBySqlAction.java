@@ -41,7 +41,7 @@ public class HideBySqlAction extends AbstractAction {
 							"Emails Hidden",
 							JOptionPane.INFORMATION_MESSAGE
 					);
-					browser.getEmailViewPanel().refresh();
+					browser.notifyListeners();
 				});
 			} else if (count < 1) {
 				JOptionPane.showMessageDialog(

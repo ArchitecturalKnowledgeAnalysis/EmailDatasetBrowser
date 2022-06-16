@@ -43,7 +43,7 @@ public class ViewSelectionAction extends AbstractAction {
 						"Invalid list of ids. Should contain at least one id."
 				);
 			} else {
-				var viewer = new EmailSelectionViewer(emailIds, browser.getCurrentDataset());
+				var viewer = new EmailSelectionViewer(emailIds, browser);
 				viewer.setVisible(true);
 			}
 		}

@@ -3,6 +3,8 @@ package nl.andrewl.emaildatasetbrowser.view.email;
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailEntry;
 import nl.andrewl.email_indexer.data.EmailRepository;
+import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
+import nl.andrewl.emaildatasetbrowser.view.DatasetChangeListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,14 +15,16 @@ import java.util.Set;
  * A panel that displays all information about an email. This is the main user
  * interface for interacting with a specific email.
  */
-public class EmailViewPanel extends JPanel {
+public class EmailViewPanel extends JPanel implements DatasetChangeListener {
 	private EmailDataset currentDataset = null;
 	private EmailEntry email;
+	private final EmailDatasetBrowser browser;
 	private final EmailInfoPanel infoPanel;
 	private final Set<EmailViewListener> listeners = new HashSet<>();
 
-	public EmailViewPanel() {
+	public EmailViewPanel(EmailDatasetBrowser browser) {
 		super(new BorderLayout());
+		this.browser = browser;
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		EmailBodyPanel bodyPanel = new EmailBodyPanel();
 		splitPane.add(bodyPanel);
@@ -49,6 +53,10 @@ public class EmailViewPanel extends JPanel {
 		return this.currentDataset;
 	}
 
+	public EmailDatasetBrowser getBrowser() {
+		return browser;
+	}
+
 	public EmailEntry getEmail() {
 		return email;
 	}
@@ -73,5 +81,10 @@ public class EmailViewPanel extends JPanel {
 
 	public EmailInfoPanel getInfoPanel() {
 		return infoPanel;
+	}
+
+	@Override
+	public void datasetChanged(EmailDataset ds) {
+		setDataset(ds);
 	}
 }

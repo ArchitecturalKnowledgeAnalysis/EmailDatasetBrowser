@@ -6,6 +6,7 @@ import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.emaildatasetbrowser.control.*;
 import nl.andrewl.emaildatasetbrowser.control.email.*;
 import nl.andrewl.emaildatasetbrowser.control.tag.ManageTagsAction;
+import nl.andrewl.emaildatasetbrowser.view.DatasetChangeListener;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 import nl.andrewl.emaildatasetbrowser.view.search.LuceneSearchPanel;
@@ -15,7 +16,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.lang.ref.WeakReference;
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.prefs.Preferences;
 
@@ -26,16 +30,24 @@ public class EmailDatasetBrowser extends JFrame {
 	public static final String PREFERENCES_NODE_NAME = "email_dataset_browser_prefs";
 
 	private final EmailViewPanel emailViewPanel;
-	private final SimpleBrowsePanel browsePanel;
-	private final LuceneSearchPanel searchPanel;
 	private EmailDataset currentDataset = null;
+
+	/**
+	 * A set of listeners that are updated when the state of the browser app
+	 * changes. This is a set of weak references, to prevent any dangling
+	 * reference memory leaks.
+	 */
+	private final Set<WeakReference<DatasetChangeListener>> datasetChangeListeners = new HashSet<>();
 
 	public EmailDatasetBrowser () {
 		super("Email Dataset Browser");
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-		this.emailViewPanel = new EmailViewPanel();
-		this.browsePanel = new SimpleBrowsePanel(emailViewPanel);
-		this.searchPanel = new LuceneSearchPanel(emailViewPanel);
+		this.emailViewPanel = new EmailViewPanel(this);
+		SimpleBrowsePanel browsePanel = new SimpleBrowsePanel(emailViewPanel);
+		LuceneSearchPanel searchPanel = new LuceneSearchPanel(emailViewPanel);
+		datasetChangeListeners.add(new WeakReference<>(emailViewPanel));
+		datasetChangeListeners.add(new WeakReference<>(browsePanel));
+		datasetChangeListeners.add(new WeakReference<>(searchPanel));
 
 		JTabbedPane searchPane = new JTabbedPane();
 		searchPane.add("Browse", browsePanel);
@@ -65,21 +77,7 @@ public class EmailDatasetBrowser extends JFrame {
 
 	private void setDataset(EmailDataset ds) {
 		currentDataset = ds;
-		browsePanel.setDataset(ds);
-		searchPanel.setDataset(ds);
-		emailViewPanel.setDataset(ds);
-	}
-
-	public EmailViewPanel getEmailViewPanel() {
-		return emailViewPanel;
-	}
-
-	public SimpleBrowsePanel getBrowsePanel() {
-		return browsePanel;
-	}
-
-	public LuceneSearchPanel getSearchPanel() {
-		return searchPanel;
+		notifyListeners();
 	}
 
 	private JMenuBar buildMenu() {
@@ -113,6 +111,35 @@ public class EmailDatasetBrowser extends JFrame {
 		return menuBar;
 	}
 
+	private void cleanListeners() {
+		datasetChangeListeners.removeIf(ls -> ls.get() == null);
+	}
+
+	public void notifyListeners() {
+		datasetChangeListeners.forEach(ls -> {
+			DatasetChangeListener listener = ls.get();
+			if (listener != null) listener.datasetChanged(currentDataset);
+		});
+	}
+
+	public void notifyTagsChanged() {
+		datasetChangeListeners.forEach(ls -> {
+			DatasetChangeListener listener = ls.get();
+			if (listener != null) listener.tagsChanged(currentDataset);
+		});
+	}
+
+	public void addListener(DatasetChangeListener listener) {
+		datasetChangeListeners.add(new WeakReference<>(listener));
+		cleanListeners();
+	}
+
+	/**
+	 * Opens a dataset in the app. If this app already has a dataset loaded,
+	 * then the current dataset will be closed first.
+	 * @param dsPath The path to the dataset.
+	 * @return A future that completes when the dataset is opened.
+	 */
 	public CompletableFuture<Void> openDataset(Path dsPath) {
 		ProgressDialog dialog = new ProgressDialog(
 				this,
@@ -147,6 +174,14 @@ public class EmailDatasetBrowser extends JFrame {
 				});
 	}
 
+	/**
+	 * Closes this app's opened dataset, if one is opened.
+	 * @param existingDialog A dialog to append progress messages to. If this
+	 *                       is null, then the app will make a new dialog to
+	 *                       display messages instead.
+	 * @return A future that completes when the app no longer has any dataset
+	 * open.
+	 */
 	public CompletableFuture<Void> closeDataset(ProgressDialog existingDialog) {
 		if (currentDataset == null) return CompletableFuture.completedFuture(null);
 		ProgressDialog dialog = existingDialog;
@@ -168,7 +203,7 @@ public class EmailDatasetBrowser extends JFrame {
 			if (throwable != null) {
 				throwable.printStackTrace();
 				JOptionPane.showMessageDialog(
-						emailViewPanel,
+						this,
 						"An error occurred while closing the database:\n" + throwable.getMessage(),
 						"Error",
 						JOptionPane.ERROR_MESSAGE
@@ -185,6 +220,11 @@ public class EmailDatasetBrowser extends JFrame {
 		});
 	}
 
+	/**
+	 * Gets the preferences root for this app. Use this as a basis for any
+	 * preferences in this app.
+	 * @return The root preference node.
+	 */
 	public static Preferences getPreferences() {
 		return Preferences.userRoot().node(PREFERENCES_NODE_NAME);
 	}

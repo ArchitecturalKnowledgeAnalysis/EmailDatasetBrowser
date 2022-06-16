@@ -3,6 +3,7 @@ package nl.andrewl.emaildatasetbrowser.view.tag;
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.Tag;
 import nl.andrewl.email_indexer.data.TagRepository;
+import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.view.LabelledField;
 
 import javax.swing.*;
@@ -14,15 +15,16 @@ import java.util.Optional;
  * A dialog for editing a single tag, or creating a new one.
  */
 public class TagEditDialog extends JDialog {
-
+	private final EmailDatasetBrowser browser;
 	private final JTextField nameField = new JTextField();
 	private final JTextArea descriptionField = new JTextArea();
 
 	private final Tag tag;
 	private final EmailDataset ds;
 
-	public TagEditDialog(Window owner, Tag tag, EmailDataset ds) {
-		super(owner, "Edit Tag", ModalityType.APPLICATION_MODAL);
+	public TagEditDialog(EmailDatasetBrowser browser, Tag tag, EmailDataset ds) {
+		super(browser, "Edit Tag", ModalityType.APPLICATION_MODAL);
+		this.browser = browser;
 		this.ds = ds;
 		this.tag = tag;
 		if (tag != null) {
@@ -32,7 +34,7 @@ public class TagEditDialog extends JDialog {
 		setContentPane(buildUI());
 		setPreferredSize(new Dimension(400, 300));
 		pack();
-		setLocationRelativeTo(owner);
+		setLocationRelativeTo(browser);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 	}
 
@@ -108,5 +110,6 @@ public class TagEditDialog extends JDialog {
 		} else {
 			repo.createTag(getName(), getDescription());
 		}
+		browser.notifyTagsChanged();
 	}
 }
