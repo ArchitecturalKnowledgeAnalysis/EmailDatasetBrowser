@@ -29,7 +29,8 @@ import java.util.prefs.Preferences;
  */
 public class EmailDatasetBrowser extends JFrame {
 	public static final String PREFERENCES_NODE_NAME = "email_dataset_browser_prefs";
-	private static final String PREF_LAST_DS = "dataset_last_dataset_path";
+	public static final String PREF_LOAD_LAST_DS = "dataset_load_last_dataset";
+	public static final String PREF_LAST_DS = "dataset_last_dataset_path";
 
 	private final EmailViewPanel emailViewPanel;
 	private EmailDataset currentDataset = null;
@@ -71,7 +72,9 @@ public class EmailDatasetBrowser extends JFrame {
 				closeDataset(null, false).thenRun(() -> dispose());
 			}
 		});
-		SwingUtilities.invokeLater(() -> tryOpenLastDataset());
+		if (getPreferences().getBoolean(PREF_LOAD_LAST_DS, false)) {
+			SwingUtilities.invokeLater(() -> tryOpenLastDataset());
+		}
 	}
 
 	public EmailDataset getCurrentDataset() {
@@ -92,6 +95,7 @@ public class EmailDatasetBrowser extends JFrame {
 		fileMenu.add(new JMenuItem(new RegenerateIndexesAction(this)));
 		fileMenu.add(new JMenuItem(new ExportDatasetAction(this)));
 		fileMenu.add(new JMenuItem(new CloseDatasetAction(this)));
+		fileMenu.add(new JMenuItem(new OpenSettingsAction(this)));
 		menuBar.add(fileMenu);
 
 		JMenu filterMenu = new JMenu("Filter");
