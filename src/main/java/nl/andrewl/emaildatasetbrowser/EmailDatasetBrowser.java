@@ -125,16 +125,14 @@ public class EmailDatasetBrowser extends JFrame {
 	public void notifyListeners() {
 		datasetChangeListeners.forEach(ls -> {
 			DatasetChangeListener listener = ls.get();
-			if (listener != null)
-				listener.datasetChanged(currentDataset);
+			if (listener != null) listener.datasetChanged(currentDataset);
 		});
 	}
 
 	public void notifyTagsChanged() {
 		datasetChangeListeners.forEach(ls -> {
 			DatasetChangeListener listener = ls.get();
-			if (listener != null)
-				listener.tagsChanged(currentDataset);
+			if (listener != null) listener.tagsChanged(currentDataset);
 		});
 	}
 
