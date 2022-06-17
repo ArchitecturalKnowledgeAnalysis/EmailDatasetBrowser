@@ -23,10 +23,6 @@ public class ManageTagsAction extends AbstractAction {
 		if (browser.getCurrentDataset() != null) {
 			var dialog = new TagManagerDialog(browser, browser.getCurrentDataset());
 			dialog.setVisible(true);
-			// After tags might have been changed, refresh the browser's email tag panel.
-			if (browser.getEmailViewPanel().getEmail() != null) {
-				browser.getEmailViewPanel().getInfoPanel().getTagPanel().refreshTags();
-			}
 		}
 	}
 }

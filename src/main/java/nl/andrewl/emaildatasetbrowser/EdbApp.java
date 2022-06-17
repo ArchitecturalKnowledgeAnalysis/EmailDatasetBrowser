@@ -1,7 +1,6 @@
 package nl.andrewl.emaildatasetbrowser;
 
 import com.formdev.flatlaf.FlatDarkLaf;
-import nl.andrewl.email_indexer.data.EmailDataset;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,13 +25,11 @@ public class EdbApp {
 			System.err.println(path + " doesn't exist.");
 			System.exit(1);
 		}
-		EmailDataset.open(path)
+		browser.openDataset(path)
 				.exceptionally(throwable -> {
 					throwable.printStackTrace();
 					System.exit(1);
 					return null;
-				})
-				.thenCompose(browser::setDataset)
-				.join();
+				});
 	}
 }

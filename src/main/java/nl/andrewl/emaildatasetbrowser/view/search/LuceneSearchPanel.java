@@ -5,8 +5,8 @@ import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
 import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.LuceneSearchExporter;
-import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener;
-import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener.KeyEventType;
+import nl.andrewl.emaildatasetbrowser.view.DatasetChangeListener;
+import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 
@@ -20,14 +20,17 @@ import java.util.Objects;
 /**
  * A panel for executing Lucene search queries and examining the results.
  */
-public class LuceneSearchPanel extends JPanel {
+public class LuceneSearchPanel extends JPanel implements DatasetChangeListener {
+    private static final int DEFAULT_RESULT_COUNT = 100;
+    private static final int MAX_RESULT_COUNT = 10000;
+
     private EmailDataset dataset;
 
     private final EmailTreeView emailTreeView = new EmailTreeView();
 
     private final JTextArea queryField;
     private final JButton searchButton = new JButton("Search");
-    private final JSpinner resultCountSpinner = new JSpinner(new SpinnerNumberModel(100, 1, 10000, 1));
+    private final JSpinner resultCountSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_RESULT_COUNT, 1, MAX_RESULT_COUNT, 1));
     private final JCheckBox hideTaggedCheckbox = new JCheckBox("Hide Tagged");
     private final JButton exportButton = new JButton("Export");
 
@@ -83,6 +86,9 @@ public class LuceneSearchPanel extends JPanel {
     public void setDataset(EmailDataset dataset) {
         this.dataset = dataset;
         emailTreeView.clear();
+        queryField.setText(null);
+        resultCountSpinner.setValue(DEFAULT_RESULT_COUNT);
+        hideTaggedCheckbox.setSelected(false);
         searchButton.setEnabled(dataset != null);
         exportButton.setEnabled(dataset != null);
     }
@@ -146,5 +152,33 @@ public class LuceneSearchPanel extends JPanel {
             }
             emailTreeView.setEmailNodes(nodes);
         });
+    }
+
+    @Override
+    public void datasetChanged(EmailDataset ds) {
+        setDataset(ds);
+    }
+
+    /**
+     * Listens to key events done in the querypanel.
+     */
+    private class SearchKeyListener implements KeyListener {
+        @Override
+        public void keyTyped(KeyEvent e) {
+            // ignored
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            // ignored
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            // Performs search when ctrl + enter is typed.
+            if (e.getKeyCode() == KeyEvent.VK_ENTER && e.getModifiersEx() == KeyEvent.CTRL_DOWN_MASK) {
+                doSearch();
+            }
+        }
     }
 }

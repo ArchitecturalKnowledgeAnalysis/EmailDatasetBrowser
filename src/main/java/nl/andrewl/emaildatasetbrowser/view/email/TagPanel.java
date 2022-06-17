@@ -1,21 +1,22 @@
 package nl.andrewl.emaildatasetbrowser.view.email;
 
+import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailEntry;
 import nl.andrewl.email_indexer.data.Tag;
 import nl.andrewl.email_indexer.data.TagRepository;
+import nl.andrewl.emaildatasetbrowser.view.DatasetChangeListener;
 import nl.andrewl.emaildatasetbrowser.view.tag.TagEditDialog;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.concurrent.ForkJoinPool;
 
 /**
  * Panel that's used to manage the tags belonging to a single email entry. It
  * shows the list of tags, and provides facilities to modify that list.
  */
-public class TagPanel extends JPanel implements EmailViewListener {
+public class TagPanel extends JPanel implements EmailViewListener, DatasetChangeListener {
 	private final EmailViewPanel parent;
 	private final DefaultListModel<Tag> tagListModel = new DefaultListModel<>();
 	private final DefaultListModel<Tag> parentTagListModel = new DefaultListModel<>();
@@ -27,6 +28,7 @@ public class TagPanel extends JPanel implements EmailViewListener {
 	public TagPanel(EmailViewPanel parent) {
 		super(new BorderLayout());
 		this.parent = parent;
+		parent.getBrowser().addListener(this);
 		this.setBorder(BorderFactory.createTitledBorder("Tags"));
 		this.removeButton.setEnabled(false);
 
@@ -95,7 +97,9 @@ public class TagPanel extends JPanel implements EmailViewListener {
 
 	/**
 	 * Adds a double-click mouse listener to a tag list, so that we can open
-	 * an edit tag dialog for the selected tag.
+	 * an edit tag dialog for the selected tag. Note that because this tag
+	 * panel is a DatasetChangeListener, the set of tags is refreshed
+	 * automatically, so we do not call it after the dialog closes.
 	 * @param list The list to add the listener to.
 	 */
 	private void addDoubleClickToEditAction(JList<Tag> list) {
@@ -104,13 +108,8 @@ public class TagPanel extends JPanel implements EmailViewListener {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2 && list.getSelectedIndices().length == 1) {
 					Tag selectedTag = list.getSelectedValue();
-					var dialog = new TagEditDialog(
-							SwingUtilities.getWindowAncestor(parent),
-							selectedTag,
-							parent.getCurrentDataset()
-					);
+					var dialog = new TagEditDialog(parent.getBrowser(), selectedTag, parent.getCurrentDataset());
 					dialog.setVisible(true);
-					refreshTags();
 				}
 			}
 		});
@@ -126,9 +125,8 @@ public class TagPanel extends JPanel implements EmailViewListener {
 	public void refreshTags() {
 		this.tagListModel.clear();
 		this.tagComboBoxModel.removeAllElements();
-		this.parentTagListModel.removeAllElements();
-		this.childTagListModel.removeAllElements();
-		ForkJoinPool.commonPool().execute(() -> {
+		this.parentTagListModel.clear();
+		this.childTagListModel.clear();
 			var repo = new TagRepository(parent.getCurrentDataset());
 			var addableTags = repo.findAll();
 			var thisTags = repo.getTags(email.id());
@@ -140,19 +138,29 @@ public class TagPanel extends JPanel implements EmailViewListener {
 				this.tagListModel.addAll(thisTags);
 				this.parentTagListModel.addAll(parentTags);
 				this.childTagListModel.addAll(childTags);
+				this.repaint();
 			});
-		});
 	}
 
 	private void onTagSelected(JComboBox<Tag> tagComboBox) {
 		Tag tag = (Tag) tagComboBox.getSelectedItem();
 		if (tag == null) return;
 		new TagRepository(parent.getCurrentDataset()).addTag(email.id(), tag.id());
-		parent.refresh();
+		refreshTags();
 	}
 
 	@Override
 	public void emailUpdated(EmailEntry email) {
 		setEmail(email);
+	}
+
+	@Override
+	public void datasetChanged(EmailDataset ds) {
+		setEmail(null);
+	}
+
+	@Override
+	public void tagsChanged(EmailDataset ds) {
+		refreshTags();
 	}
 }

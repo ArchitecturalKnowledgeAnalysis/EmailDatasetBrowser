@@ -11,6 +11,7 @@ import nl.andrewl.email_indexer.data.search.filter.RootFilter;
 import nl.andrewl.email_indexer.data.search.filter.TagFilter;
 import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.SimpleExporter;
 import nl.andrewl.emaildatasetbrowser.view.BooleanSelect;
+import nl.andrewl.emaildatasetbrowser.view.DatasetChangeListener;
 import nl.andrewl.emaildatasetbrowser.view.SwingUtils;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
@@ -24,7 +25,7 @@ import java.util.List;
  * Panel for browsing the dataset using some filters and a paginated results
  * list.
  */
-public class SimpleBrowsePanel extends JPanel {
+public class SimpleBrowsePanel extends JPanel implements DatasetChangeListener {
 	private EmailDataset currentDataset;
 	private int currentPage = 1;
 
@@ -57,6 +58,7 @@ public class SimpleBrowsePanel extends JPanel {
 		boolean enabled = ds != null;
 
 		editTagFilterButton.setEnabled(enabled);
+		currentTagFilter = TagFilter.excludeNone();
 
 		showHiddenSelect.setSelectedValue(false);
 		showHiddenSelect.setEnabled(enabled);
@@ -67,6 +69,7 @@ public class SimpleBrowsePanel extends JPanel {
 		previousPageButton.setEnabled(enabled);
 		currentPageLabel.setText("Page 1 of 1");
 		sizeLabel.setText("Showing 0 of 0 results");
+		exportButton.setEnabled(enabled);
 
 		// Set the dataset after updating all controls.
 		if (ds != null) {
@@ -233,5 +236,10 @@ public class SimpleBrowsePanel extends JPanel {
 		dialog.pack();
 		dialog.setLocationRelativeTo(this);
 		dialog.setVisible(true);
+	}
+
+	@Override
+	public void datasetChanged(EmailDataset ds) {
+		setDataset(ds);
 	}
 }

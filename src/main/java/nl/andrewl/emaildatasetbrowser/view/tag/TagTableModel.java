@@ -3,6 +3,7 @@ package nl.andrewl.emaildatasetbrowser.view.tag;
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.Tag;
 import nl.andrewl.email_indexer.data.TagRepository;
+import nl.andrewl.emaildatasetbrowser.view.DatasetChangeListener;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.Map;
 /**
  * A table model for the set of tags in a dataset.
  */
-public class TagTableModel extends AbstractTableModel {
+public class TagTableModel extends AbstractTableModel implements DatasetChangeListener {
 	private final List<Tag> tags = new ArrayList<>();
 	private final Map<Tag, Long> taggedEmailCounts = new HashMap<>();
 
@@ -76,5 +77,15 @@ public class TagTableModel extends AbstractTableModel {
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
 		return false;
+	}
+
+	@Override
+	public void datasetChanged(EmailDataset ds) {
+		refreshTags(ds);
+	}
+
+	@Override
+	public void tagsChanged(EmailDataset ds) {
+		refreshTags(ds);
 	}
 }
