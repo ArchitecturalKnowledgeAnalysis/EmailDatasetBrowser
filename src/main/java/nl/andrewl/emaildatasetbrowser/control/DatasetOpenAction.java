@@ -32,7 +32,7 @@ public class DatasetOpenAction extends AbstractAction {
 		if (!file.exists()) {
 			return;
 		}
-		openDataset(file);
+		browser.openDataset(file.toPath());
 	}
 
 	@Override

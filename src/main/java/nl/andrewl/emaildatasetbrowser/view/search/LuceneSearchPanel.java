@@ -5,8 +5,9 @@ import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
 import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.LuceneSearchExporter;
+import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener;
 import nl.andrewl.emaildatasetbrowser.view.DatasetChangeListener;
-import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
+import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener.KeyEventType;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 
@@ -157,28 +158,5 @@ public class LuceneSearchPanel extends JPanel implements DatasetChangeListener {
     @Override
     public void datasetChanged(EmailDataset ds) {
         setDataset(ds);
-    }
-
-    /**
-     * Listens to key events done in the querypanel.
-     */
-    private class SearchKeyListener implements KeyListener {
-        @Override
-        public void keyTyped(KeyEvent e) {
-            // ignored
-        }
-
-        @Override
-        public void keyPressed(KeyEvent e) {
-            // ignored
-        }
-
-        @Override
-        public void keyReleased(KeyEvent e) {
-            // Performs search when ctrl + enter is typed.
-            if (e.getKeyCode() == KeyEvent.VK_ENTER && e.getModifiersEx() == KeyEvent.CTRL_DOWN_MASK) {
-                doSearch();
-            }
-        }
     }
 }
