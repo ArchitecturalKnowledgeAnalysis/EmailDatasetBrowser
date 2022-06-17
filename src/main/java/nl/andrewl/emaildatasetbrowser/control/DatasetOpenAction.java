@@ -10,29 +10,12 @@ import java.util.prefs.Preferences;
 
 public class DatasetOpenAction extends AbstractAction {
 	private static final String PREF_OPEN_DIR = "dataset_open_dir";
-	private static final String PREF_LAST_DS = "dataset_last_dataset_path";
 
 	private final EmailDatasetBrowser browser;
 
 	public DatasetOpenAction(EmailDatasetBrowser browser) {
 		super("Open Dataset");
 		this.browser = browser;
-	}
-
-	/**
-	 * Attempts to open the last opened dataset using the set preferences.
-	 */
-	public void tryOpenLastDataset() {
-		Preferences prefs = EmailDatasetBrowser.getPreferences();
-		String lastPath = prefs.get(PREF_LAST_DS, null);
-		if (lastPath == null) {
-			return;
-		}
-		File file = Path.of(lastPath).toFile();
-		if (!file.exists()) {
-			return;
-		}
-		browser.openDataset(file.toPath());
 	}
 
 	@Override
