@@ -117,12 +117,13 @@ public class TagPanel extends JPanel implements EmailViewListener, DatasetChange
 
 	private void setEmail(EmailEntry email) {
 		this.email = email;
-		if (email != null) {
-			refreshTags();
-		}
+		refreshTags();
 	}
 
 	public void refreshTags() {
+		if (this.email == null) {
+			return;
+		}
 		this.tagListModel.clear();
 		this.tagComboBoxModel.removeAllElements();
 		this.parentTagListModel.clear();

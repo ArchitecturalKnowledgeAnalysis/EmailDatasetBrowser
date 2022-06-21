@@ -5,19 +5,18 @@ import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
 import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.LuceneSearchExporter;
+import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener;
 import nl.andrewl.emaildatasetbrowser.view.DatasetChangeListener;
-import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
+import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener.KeyEventType;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.time.Duration;
+import java.awt.event.*;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
 /**
  * A panel for executing Lucene search queries and examining the results.
@@ -42,7 +41,9 @@ public class LuceneSearchPanel extends JPanel implements DatasetChangeListener {
         JPanel inputPanel = new JPanel(new BorderLayout());
         queryField = new JTextArea();
         queryField.setLineWrap(true);
-        queryField.addKeyListener(new SearchKeyListener());
+        ConcreteKeyEventListener rText = new ConcreteKeyEventListener()
+                .addKeyListener(KeyEventType.KEY_RELEASED, KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK, (e) -> doSearch());
+        queryField.addKeyListener(rText);
         var queryScrollPane = new JScrollPane(queryField);
         queryScrollPane.setPreferredSize(new Dimension(-1, 100));
         inputPanel.add(queryScrollPane, BorderLayout.CENTER);
@@ -116,42 +117,27 @@ public class LuceneSearchPanel extends JPanel implements DatasetChangeListener {
             return;
         }
 
-        ProgressDialog progress = new ProgressDialog(
-                SwingUtilities.getWindowAncestor(this),
-                "Searching",
-                null,
-                true,
-                true,
-                false,
-                false
-        );
-        progress.start();
-        progress.append("Searching over all emails using query: \"%s\"\nPlease be patient. This may take a while."
-                .formatted(query));
         final Instant start = Instant.now();
-        var future = new EmailIndexSearcher().searchAsync(dataset, queryField.getText(), getResultCount())
+        new EmailIndexSearcher().searchAsync(dataset, queryField.getText(), getResultCount())
                 .handleAsync((emailIds, throwable) -> {
                     if (throwable != null) {
-                        progress.append("An error occurred: " + throwable);
+                        String errorMessage = "Search terminated with error:\n%s"
+                                .formatted(throwable.getMessage());
+                        JOptionPane errorPane = new JOptionPane(errorMessage, JOptionPane.ERROR_MESSAGE);
+                        JDialog dialog = errorPane.createDialog("Search Error");
+                        dialog.setAlwaysOnTop(true);
+                        dialog.setVisible(true);
                     } else {
-                        showResults(start, progress, emailIds);
+                        showResults(start, emailIds);
                     }
-                    progress.done();
                     return null;
                 });
-        progress.onCancel(() -> future.cancel(true));
     }
 
-    private void showResults(final Instant start, ProgressDialog progress, List<Long> emailIds) {
-        Duration dur = Duration.between(start, Instant.now());
-        progress.appendF("Found %d email threads in %.3f seconds whose emails matched the query.", emailIds.size(),
-                dur.toMillis() / 1000f);
-        progress.append("Loading detailed email thread information from the database. This may take a while.");
-        Instant start2 = Instant.now();
+    private void showResults(final Instant start, List<Long> emailIds) {
         var repo = new EmailRepository(dataset);
         var tagRepo = new TagRepository(dataset);
         int resultCount = getResultCount();
-        progress.appendF("Showing the top %d results.", resultCount);
         List<EmailTreeNode> nodes = emailIds.stream()
                 .map(id -> repo.findPreviewById(id).orElse(null))
                 .filter(Objects::nonNull)
@@ -159,8 +145,6 @@ public class LuceneSearchPanel extends JPanel implements DatasetChangeListener {
                 .map(EmailTreeNode::new)
                 .limit(resultCount)
                 .toList();
-        dur = Duration.between(start2, Instant.now());
-        progress.appendF("Loaded email thread information from the database in %.3f seconds.", dur.toMillis() / 1000f);
         SwingUtilities.invokeLater(() -> {
             int i = 1;
             for (var node : nodes) {
@@ -174,28 +158,5 @@ public class LuceneSearchPanel extends JPanel implements DatasetChangeListener {
     @Override
     public void datasetChanged(EmailDataset ds) {
         setDataset(ds);
-    }
-
-    /**
-     * Listens to key events done in the querypanel.
-     */
-    private class SearchKeyListener implements KeyListener {
-        @Override
-        public void keyTyped(KeyEvent e) {
-            // ignored
-        }
-
-        @Override
-        public void keyPressed(KeyEvent e) {
-            // ignored
-        }
-
-        @Override
-        public void keyReleased(KeyEvent e) {
-            // Performs search when ctrl + enter is typed.
-            if (e.getKeyCode() == KeyEvent.VK_ENTER && e.getModifiersEx() == KeyEvent.CTRL_DOWN_MASK) {
-                doSearch();
-            }
-        }
     }
 }

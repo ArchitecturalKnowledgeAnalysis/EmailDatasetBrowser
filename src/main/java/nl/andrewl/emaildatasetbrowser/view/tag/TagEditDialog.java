@@ -5,9 +5,12 @@ import nl.andrewl.email_indexer.data.Tag;
 import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.view.LabelledField;
+import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener;
+import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener.KeyEventType;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -43,7 +46,8 @@ public class TagEditDialog extends JDialog {
 	}
 
 	public String getDescription() {
-		if (descriptionField.getText() != null && descriptionField.getText().isBlank()) return null;
+		if (descriptionField.getText() != null && descriptionField.getText().isBlank())
+			return null;
 		return descriptionField.getText().trim();
 	}
 
@@ -52,12 +56,23 @@ public class TagEditDialog extends JDialog {
 
 		JPanel fieldsPanel = new JPanel(new BorderLayout(5, 5));
 		fieldsPanel.add(new LabelledField("Name", nameField), BorderLayout.NORTH);
+		ConcreteKeyEventListener nameKeyListener = new ConcreteKeyEventListener()
+				.addKeyListener(KeyEventType.KEY_RELEASED, KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK,
+						(e) -> onOkayClicked())
+				.addKeyListener(KeyEventType.KEY_RELEASED, KeyEvent.VK_ENTER, (e) -> descriptionField.grabFocus());
+		nameField.addKeyListener(nameKeyListener);
+
 		descriptionField.setLineWrap(true);
 		descriptionField.setWrapStyleWord(true);
 		fieldsPanel.add(new LabelledField(
 				"Description",
-				new JScrollPane(descriptionField, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)
-		), BorderLayout.CENTER);
+				new JScrollPane(descriptionField, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)),
+				BorderLayout.CENTER);
+		ConcreteKeyEventListener descriptionKeyListener = new ConcreteKeyEventListener()
+				.addKeyListener(KeyEventType.KEY_RELEASED, KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK,
+						(e) -> onOkayClicked());
+		descriptionField.addKeyListener(descriptionKeyListener);
 		fieldsPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		mainPanel.add(fieldsPanel, BorderLayout.CENTER);
 
@@ -65,16 +80,19 @@ public class TagEditDialog extends JDialog {
 		JButton cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(e -> dispose());
 		JButton okayButton = new JButton("Okay");
-		okayButton.addActionListener(e -> {
-			if (!validateTag()) return;
-			onSubmit();
-			dispose();
-		});
+		okayButton.addActionListener((e) -> onOkayClicked());
 		buttonPanel.add(cancelButton);
 		buttonPanel.add(okayButton);
 		mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
 		return mainPanel;
+	}
+
+	private void onOkayClicked() {
+		if (!validateTag())
+			return;
+		onSubmit();
+		dispose();
 	}
 
 	private boolean validateTag() {
