@@ -1,4 +1,4 @@
-package nl.andrewl.emaildatasetbrowser.view.search;
+package nl.andrewl.emaildatasetbrowser.view.search.tagfilter;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.Tag;
@@ -15,16 +15,13 @@ import java.util.List;
  * searching over the dataset. You can think of it as a fancy multi-select.
  */
 public class TagFilterPanel extends JPanel {
-	private static final String INCLUDE = "Include Selected";
-	private static final String EXCLUDE = "Exclude Selected";
-
-	private final JComboBox<String> typeSelect = new JComboBox<>(new String[]{INCLUDE, EXCLUDE});
 	private final DefaultListModel<Tag> tagListModel = new DefaultListModel<>();
 	private final JList<Tag> tagList = new JList<>(tagListModel);
+	private final TagFilter.Type filterType;
 
-	public TagFilterPanel(EmailDataset dataset, TagFilter currentFilter) {
+	public TagFilterPanel(EmailDataset dataset, TagFilter currentFilter, TagFilter.Type filterType) {
 		super(new BorderLayout(5, 5));
-		add(new LabelledField("Filter Type", typeSelect), BorderLayout.NORTH);
+		this.filterType = filterType;
 		tagList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		add(new LabelledField("Tags", new JScrollPane(tagList)), BorderLayout.CENTER);
 
@@ -37,10 +34,6 @@ public class TagFilterPanel extends JPanel {
 	}
 
 	public void setFilter(TagFilter filter) {
-		typeSelect.setSelectedItem(switch (filter.type()) {
-			case INCLUDE_ANY -> INCLUDE;
-			case EXCLUDE_ANY -> EXCLUDE;
-		});
 		int[] selectedIndices = new int[filter.tagIds().size()];
 		int idx = 0;
 		for (int tagId : filter.tagIds()) {
@@ -55,14 +48,7 @@ public class TagFilterPanel extends JPanel {
 	}
 
 	public TagFilter getFilter() {
-		String selected = (String) typeSelect.getSelectedItem();
-		if (selected == null) selected = EXCLUDE;
-		TagFilter.Type type = switch (selected) {
-			case INCLUDE -> TagFilter.Type.INCLUDE_ANY;
-			case EXCLUDE -> TagFilter.Type.EXCLUDE_ANY;
-			default -> TagFilter.Type.EXCLUDE_ANY;
-		};
 		List<Integer> selectedIds = tagList.getSelectedValuesList().stream().map(Tag::id).toList();
-		return new TagFilter(selectedIds, type);
+		return new TagFilter(selectedIds, filterType);
 	}
 }
