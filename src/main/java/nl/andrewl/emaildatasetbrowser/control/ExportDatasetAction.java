@@ -36,7 +36,6 @@ public class ExportDatasetAction extends AbstractAction {
 				} else {
 					Path file = fc.getSelectedFile().toPath();
 					ProgressDialog progress = ProgressDialog.minimalText(browser, "Exporting");
-					progress.start();
 					progress.append("Exporting dataset to " + file.toAbsolutePath());
 					long start = System.currentTimeMillis();
 					// TODO: Add a choice of exports instead of just zip.
