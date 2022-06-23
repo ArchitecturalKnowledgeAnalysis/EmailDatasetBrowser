@@ -7,6 +7,7 @@ import nl.andrewl.email_indexer.data.search.SearchFilter;
 import nl.andrewl.email_indexer.data.search.filter.HiddenFilter;
 import nl.andrewl.email_indexer.data.search.filter.RootFilter;
 import nl.andrewl.email_indexer.data.search.filter.TagFilter;
+import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.SimpleExporter;
 import nl.andrewl.emaildatasetbrowser.view.BooleanSelect;
 import nl.andrewl.emaildatasetbrowser.view.DatasetChangeListener;
@@ -25,6 +26,8 @@ import java.util.List;
  * list.
  */
 public class SimpleBrowsePanel extends JPanel implements DatasetChangeListener {
+	public final static String PREF_BROWSE_PAGE_SIZE = "pref_browse_page_size";
+
 	private EmailDataset currentDataset;
 	private int currentPage = 1;
 
@@ -101,7 +104,8 @@ public class SimpleBrowsePanel extends JPanel implements DatasetChangeListener {
 			return;
 		}
 		SwingUtils.setAllButtonsEnabled(this, false);
-		new EmailSearcher(currentDataset).findAll(this.currentPage, 20, getCurrentSearchFilters())
+		int pagesize = EmailDatasetBrowser.getPreferences().getInt(PREF_BROWSE_PAGE_SIZE, 20);
+		new EmailSearcher(currentDataset).findAll(this.currentPage, pagesize, getCurrentSearchFilters())
 				.handle((results, throwable) -> {
 					SwingUtilities.invokeLater(() -> {
 						SwingUtils.setAllButtonsEnabled(this, true);
@@ -155,12 +159,12 @@ public class SimpleBrowsePanel extends JPanel implements DatasetChangeListener {
 		filterPanel.add(buildControlPanel("Tag Filter", editTagFilterButton));
 		editTagFilterButton.addActionListener(e -> {
 			if (currentDataset != null) {
-				TagFilterDialog dialog = new TagFilterDialog(SwingUtilities.getWindowAncestor(this), this, includeFilter, excludeFilter,
-				(ti, te) -> {
-					this.includeFilter = ti;
-					this.excludeFilter = te;
-					doSearch();
-				});
+				TagFilterDialog dialog = new TagFilterDialog(SwingUtilities.getWindowAncestor(this), this,
+						includeFilter, excludeFilter, (ti, te) -> {
+							this.includeFilter = ti;
+							this.excludeFilter = te;
+							doSearch();
+						});
 				dialog.setVisible(true);
 			}
 		});
