@@ -9,11 +9,11 @@ import java.awt.Font;
  * Simple label that allows you to select its contents.
  */
 public class SelectableLabel extends JTextPane {
-    private final Font DEFAULT_FONT;
+    private final Font font;
 
     public SelectableLabel() {
         Font font = UIManager.getFont("Label.font");
-        DEFAULT_FONT = (font != null) ? font : new Font("Tahoma", Font.PLAIN, 11);
+        this.font = (font != null) ? font : new Font("Tahoma", Font.PLAIN, 11);
         build();
     }
 
@@ -25,6 +25,6 @@ public class SelectableLabel extends JTextPane {
         setBorder(null);
 
         putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
-        setFont(DEFAULT_FONT);
+        setFont(font);
     }
 }
