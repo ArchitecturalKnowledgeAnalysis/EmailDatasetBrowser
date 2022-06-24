@@ -2,6 +2,7 @@ package nl.andrewl.emaildatasetbrowser.view.email;
 
 import nl.andrewl.email_indexer.data.EmailEntry;
 import nl.andrewl.email_indexer.data.EmailRepository;
+import nl.andrewl.emaildatasetbrowser.view.common.SelectableLabel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,12 +17,12 @@ import java.util.Optional;
 public class EmailInfoPanel extends JPanel implements EmailViewListener {
 	private final EmailViewPanel parent;
 
-	private final JLabel idLabel = new JLabel();
-	private final JLabel subjectLabel = new JLabel();
+	private final SelectableLabel idLabel = new SelectableLabel();
+	private final SelectableLabel subjectLabel = new SelectableLabel();
 	private final JButton inReplyToButton = new JButton("None");
 	private ActionListener inReplyToActionListener;
-	private final JLabel dateLabel = new JLabel();
-	private final JLabel sentFromLabel = new JLabel();
+	private final SelectableLabel dateLabel = new SelectableLabel();
+	private final SelectableLabel sentFromLabel = new SelectableLabel();
 	private final TagPanel tagPanel;
 	private final RepliesPanel repliesPanel;
 
