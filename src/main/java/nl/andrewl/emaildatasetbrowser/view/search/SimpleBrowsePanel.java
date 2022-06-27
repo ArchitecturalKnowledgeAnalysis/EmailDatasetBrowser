@@ -1,20 +1,20 @@
 package nl.andrewl.emaildatasetbrowser.view.search;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
-import nl.andrewl.email_indexer.data.Tag;
-import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.EmailSearchResult;
 import nl.andrewl.email_indexer.data.search.EmailSearcher;
 import nl.andrewl.email_indexer.data.search.SearchFilter;
 import nl.andrewl.email_indexer.data.search.filter.HiddenFilter;
 import nl.andrewl.email_indexer.data.search.filter.RootFilter;
 import nl.andrewl.email_indexer.data.search.filter.TagFilter;
+import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.SimpleExporter;
 import nl.andrewl.emaildatasetbrowser.view.BooleanSelect;
 import nl.andrewl.emaildatasetbrowser.view.DatasetChangeListener;
 import nl.andrewl.emaildatasetbrowser.view.SwingUtils;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
+import nl.andrewl.emaildatasetbrowser.view.search.tagfilter.TagFilterDialog;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,12 +26,16 @@ import java.util.List;
  * list.
  */
 public class SimpleBrowsePanel extends JPanel implements DatasetChangeListener {
+	public final static String PREF_BROWSE_PAGE_SIZE = "pref_browse_page_size";
+
 	private EmailDataset currentDataset;
 	private int currentPage = 1;
 
+	private TagFilter includeFilter = TagFilter.excludeNone();
+	private TagFilter excludeFilter = TagFilter.excludeNone();
+
 	private final EmailTreeView emailTreeView = new EmailTreeView();
 
-	private TagFilter currentTagFilter = TagFilter.excludeNone();
 	private final BooleanSelect showHiddenSelect = new BooleanSelect("All", "Only Hidden", "Only Shown");
 	private final BooleanSelect showRootSelect = new BooleanSelect("All", "Only Roots", "Only Children");
 
@@ -58,7 +62,8 @@ public class SimpleBrowsePanel extends JPanel implements DatasetChangeListener {
 		boolean enabled = ds != null;
 
 		editTagFilterButton.setEnabled(enabled);
-		currentTagFilter = TagFilter.excludeNone();
+		includeFilter = TagFilter.excludeNone();
+		excludeFilter = TagFilter.excludeNone();
 
 		showHiddenSelect.setSelectedValue(false);
 		showHiddenSelect.setEnabled(enabled);
@@ -99,7 +104,8 @@ public class SimpleBrowsePanel extends JPanel implements DatasetChangeListener {
 			return;
 		}
 		SwingUtils.setAllButtonsEnabled(this, false);
-		new EmailSearcher(currentDataset).findAll(this.currentPage, 20, getCurrentSearchFilters())
+		int pagesize = EmailDatasetBrowser.getPreferences().getInt(PREF_BROWSE_PAGE_SIZE, 20);
+		new EmailSearcher(currentDataset).findAll(this.currentPage, pagesize, getCurrentSearchFilters())
 				.handle((results, throwable) -> {
 					SwingUtilities.invokeLater(() -> {
 						SwingUtils.setAllButtonsEnabled(this, true);
@@ -120,8 +126,10 @@ public class SimpleBrowsePanel extends JPanel implements DatasetChangeListener {
 		Boolean showRoot = showRootSelect.getSelectedValue();
 		if (showRoot != null)
 			filters.add(new RootFilter(showRoot));
-		if (!currentTagFilter.getWhereClause().isBlank())
-			filters.add(currentTagFilter);
+		if (!includeFilter.getWhereClause().isBlank())
+			filters.add(includeFilter);
+		if (!excludeFilter.getWhereClause().isBlank())
+			filters.add(excludeFilter);
 		return filters;
 	}
 
@@ -139,7 +147,6 @@ public class SimpleBrowsePanel extends JPanel implements DatasetChangeListener {
 	private JPanel buildFilterPanel() {
 		JPanel searchPanel = new JPanel();
 		searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.PAGE_AXIS));
-
 		JPanel filterPanel = new JPanel();
 		filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.PAGE_AXIS));
 		filterPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -152,7 +159,13 @@ public class SimpleBrowsePanel extends JPanel implements DatasetChangeListener {
 		filterPanel.add(buildControlPanel("Tag Filter", editTagFilterButton));
 		editTagFilterButton.addActionListener(e -> {
 			if (currentDataset != null) {
-				showTagFilterDialog();
+				TagFilterDialog dialog = new TagFilterDialog(SwingUtilities.getWindowAncestor(this), this,
+						includeFilter, excludeFilter, (ti, te) -> {
+							this.includeFilter = ti;
+							this.excludeFilter = te;
+							doSearch();
+						});
+				dialog.setVisible(true);
 			}
 		});
 		searchPanel.add(filterPanel);
@@ -202,40 +215,6 @@ public class SimpleBrowsePanel extends JPanel implements DatasetChangeListener {
 		// Add a lower margin to each control panel.
 		p.setBorder(BorderFactory.createEmptyBorder(0, 0, 3, 0));
 		return p;
-	}
-
-	private void showTagFilterDialog() {
-		JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Edit Tag Filter",
-				Dialog.ModalityType.APPLICATION_MODAL);
-		JPanel panel = new JPanel(new BorderLayout());
-		var tagFilterPanel = new TagFilterPanel(currentDataset, currentTagFilter);
-		tagFilterPanel.setPreferredSize(new Dimension(400, 400));
-		panel.add(tagFilterPanel, BorderLayout.CENTER);
-		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		JButton cancelButton = new JButton("Cancel");
-		cancelButton.addActionListener(ev -> dialog.dispose());
-		JButton allTagsButton = new JButton("All Tags");
-		allTagsButton.addActionListener(ev -> {
-			var ids = new TagRepository(this.currentDataset).findAll().stream().map(Tag::id).toList();
-			tagFilterPanel.setFilter(TagFilter.including(ids));
-		});
-		JButton clearButton = new JButton("Clear");
-		clearButton.addActionListener(ev -> tagFilterPanel.setFilter(TagFilter.excludeNone()));
-		JButton okayButton = new JButton("Okay");
-		okayButton.addActionListener(ev -> {
-			currentTagFilter = tagFilterPanel.getFilter();
-			dialog.dispose();
-			doSearch();
-		});
-		buttonPanel.add(cancelButton);
-		buttonPanel.add(allTagsButton);
-		buttonPanel.add(clearButton);
-		buttonPanel.add(okayButton);
-		panel.add(buttonPanel, BorderLayout.SOUTH);
-		dialog.setContentPane(panel);
-		dialog.pack();
-		dialog.setLocationRelativeTo(this);
-		dialog.setVisible(true);
 	}
 
 	@Override
