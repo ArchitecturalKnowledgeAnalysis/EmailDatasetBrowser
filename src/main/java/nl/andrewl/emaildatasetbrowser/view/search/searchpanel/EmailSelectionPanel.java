@@ -17,8 +17,10 @@ import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener;
 import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener.KeyEventType;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 
+/**
+ * Search panel using email ids.
+ */
 public final class EmailSelectionPanel extends SearchPanel {
-
     private JTextArea queryField;
 
     public EmailSelectionPanel(EmailViewPanel emailViewPanel) {
@@ -46,7 +48,7 @@ public final class EmailSelectionPanel extends SearchPanel {
 
     @Override
     protected ExportSample buildExporter() {
-        // This method isn't called as the export 
+        // This method isn't called as the export
         // button is disabled in the constructor.
         // TODO: Implement this, if ever needed.
         throw new RuntimeException("Method not implemented yet...");

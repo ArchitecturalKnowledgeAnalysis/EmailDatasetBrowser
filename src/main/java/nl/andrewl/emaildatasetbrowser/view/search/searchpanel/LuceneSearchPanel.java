@@ -18,6 +18,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Search panel using Lucene Search Queries.
+ */
 public final class LuceneSearchPanel extends SearchPanel {
 
     private JTextArea queryField;

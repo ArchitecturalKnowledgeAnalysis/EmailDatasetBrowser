@@ -32,6 +32,7 @@ public class SimpleBrowsePanel extends SearchPanel {
 
 	public SimpleBrowsePanel(EmailViewPanel emailViewPanel) {
 		super(emailViewPanel);
+		SwingUtilities.invokeLater(() -> doSearch());
 	}
 
 	@Override

@@ -12,6 +12,9 @@ import nl.andrewl.emaildatasetbrowser.view.search.ExportPanel;
 import java.awt.*;
 import javax.swing.*;
 
+/**
+ * Abstract super class for different types of database search panels.
+ */
 public abstract class SearchPanel extends JPanel implements DatasetChangeListener {
     public final static String PREF_BROWSE_PAGE_SIZE = "pref_browse_page_size";
 
@@ -121,11 +124,21 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
         panel.setVisible(true);
     }
 
+    /**
+     * Resets the page and performs search.
+     */
     protected void searchFromBeginning() {
         this.currentPage = 1;
         doSearch();
     }
 
+    /**
+     * Disables/enables page navigation buttons.
+     * 
+     * @param nextButton if true, the next button is toggled, other wise the
+     *                   previous button is.
+     * @param enabled    if true, the targeted button is enabled.
+     */
     protected void toggleChangePageButton(boolean nextButton, boolean enabled) {
         if (nextButton) {
             this.nextPageButton.setEnabled(enabled);
@@ -138,7 +151,7 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
      * Factory method allowing the implementing class to add custom search
      * parameters to the searchpanel UI.
      * 
-     * @param parent the container object for all added Swing objects.
+     * @return The built parameter panel.
      */
     protected abstract JPanel buildParameterPanel();
 
