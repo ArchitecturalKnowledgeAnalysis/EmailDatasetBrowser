@@ -134,6 +134,7 @@ public class SimpleBrowsePanel extends SearchPanel {
 		emailTreeView.setEmails(result.emails(), getDataset());
 		toggleChangePageButton(true, result.hasNextPage());
 		toggleChangePageButton(false, result.hasPreviousPage());
+		setTotalEmails((int) result.totalResultCount());
 	}
 
 	private void onEditTagFilterClicked() {

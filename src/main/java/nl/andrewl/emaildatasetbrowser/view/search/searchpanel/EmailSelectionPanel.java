@@ -76,6 +76,7 @@ public final class EmailSelectionPanel extends SearchPanel {
                         .map(id -> repo.findPreviewById(id).orElse(null))
                         .filter(Objects::nonNull).toList();
                 emailTreeView.setEmails(emails, getDataset());
+                setTotalEmails(emails.size());
             }
         }
     }

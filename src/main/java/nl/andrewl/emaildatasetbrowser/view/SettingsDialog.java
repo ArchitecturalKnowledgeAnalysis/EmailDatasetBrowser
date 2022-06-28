@@ -30,7 +30,7 @@ public class SettingsDialog extends JDialog {
         p.add(buildSettingsCheckbox(EmailTreeSelectionListener.PREF_AUTO_OPEN, true,
                 "Automatically expand email in tree-view"));
 
-        p.add(buildSettingsSpinner(SimpleBrowsePanel.PREF_BROWSE_PAGE_SIZE, 20, 1, 100, 1, "Simple browse page size"));
+        p.add(buildSettingsSpinner(SimpleBrowsePanel.PREF_BROWSE_PAGE_SIZE, 20, 1, 100, 1, "Browse page size"));
 
         setContentPane(p);
 

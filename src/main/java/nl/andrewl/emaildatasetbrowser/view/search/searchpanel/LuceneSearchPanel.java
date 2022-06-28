@@ -14,7 +14,6 @@ import nl.andrewl.emaildatasetbrowser.view.search.EmailTreeNode;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,7 +21,6 @@ import java.util.Objects;
  * Search panel using Lucene Search Queries.
  */
 public final class LuceneSearchPanel extends SearchPanel {
-
     private JTextArea queryField;
 
     public LuceneSearchPanel(EmailViewPanel emailViewPanel) {
@@ -34,9 +32,9 @@ public final class LuceneSearchPanel extends SearchPanel {
         JPanel inputPanel = new JPanel();
         inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.PAGE_AXIS));
         inputPanel.add(new JLabel("Lucene Query:"));
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(5,0,5,0));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
         queryField = new JTextArea();
-        queryField.setMargin(new Insets(5,5,5,5));
+        queryField.setMargin(new Insets(5, 5, 5, 5));
         queryField.setLineWrap(true);
         ConcreteKeyEventListener rText = new ConcreteKeyEventListener()
                 .addKeyListener(KeyEventType.KEY_RELEASED, KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK,
@@ -60,7 +58,6 @@ public final class LuceneSearchPanel extends SearchPanel {
         if (query == null) {
             return;
         }
-        final Instant start = Instant.now();
         new EmailIndexSearcher().searchAsync(getDataset(), queryField.getText(), getPageSize())
                 .handleAsync((emailIds, throwable) -> {
                     if (throwable != null) {
@@ -71,7 +68,7 @@ public final class LuceneSearchPanel extends SearchPanel {
                         dialog.setAlwaysOnTop(true);
                         dialog.setVisible(true);
                     } else {
-                        showResults(start, emailIds);
+                        showResults(emailIds);
                     }
                     return null;
                 });
@@ -92,7 +89,7 @@ public final class LuceneSearchPanel extends SearchPanel {
         return query.trim();
     }
 
-    private void showResults(final Instant start, List<Long> emailIds) {
+    private void showResults(List<Long> emailIds) {
         EmailDataset dataset = getDataset();
         var repo = new EmailRepository(dataset);
         int resultCount = EmailDatasetBrowser.getPreferences().getInt(SimpleBrowsePanel.PREF_BROWSE_PAGE_SIZE, 100);
@@ -109,6 +106,7 @@ public final class LuceneSearchPanel extends SearchPanel {
                 node.loadReplies(dataset);
             }
             emailTreeView.setEmailNodes(nodes);
+            setTotalEmails(nodes.size());
         });
     }
 }

@@ -26,7 +26,8 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
     private final JButton searchButton = new JButton("Search");
     private final JButton exportButton = new JButton("Export");
     private final JButton clearButton = new JButton("Clear");
-    private final JLabel currentPageLabel = new JLabel("Page 1 of 1");
+    private final JLabel currentPageLabel = new JLabel("Page: 0 (0 - 0)");
+    private final JLabel totalEmailsLabel = new JLabel("Total emails: 0");
 
     private EmailDataset dataset;
 
@@ -49,7 +50,7 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
     }
 
     protected int getPageSize() {
-        return EmailDatasetBrowser.getPreferences().getInt(PREF_BROWSE_PAGE_SIZE, 25);
+        return EmailDatasetBrowser.getPreferences().getInt(PREF_BROWSE_PAGE_SIZE, 20);
     }
 
     public void setDataset(EmailDataset dataset) {
@@ -94,14 +95,14 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
     }
 
     private JPanel buildPageNavigationPanel() {
-        JPanel navigationParent = new JPanel(new GridLayout(2, 1));
-        navigationParent.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
-        navigationParent.add(currentPageLabel);
-        JPanel pageControlPanel = new JPanel(new GridLayout(1, 2));
+        JPanel navigationPanel = new JPanel(new GridLayout(2, 2));
+        navigationPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
+        navigationPanel.add(currentPageLabel);
+        navigationPanel.add(totalEmailsLabel);
         previousPageButton.setMargin(new Insets(0, 0, 0, 2));
         nextPageButton.setMargin(new Insets(0, 2, 0, 0));
-        pageControlPanel.add(previousPageButton);
-        pageControlPanel.add(nextPageButton);
+        navigationPanel.add(previousPageButton);
+        navigationPanel.add(nextPageButton);
         previousPageButton.setEnabled(false);
         nextPageButton.setEnabled(false);
         nextPageButton.addActionListener(e -> {
@@ -112,8 +113,7 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
             this.currentPage--;
             doSearch();
         });
-        navigationParent.add(pageControlPanel);
-        return navigationParent;
+        return navigationPanel;
     }
 
     private void doExport() {
@@ -145,6 +145,10 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
         } else {
             previousPageButton.setEnabled(enabled);
         }
+    }
+
+    protected void setTotalEmails(int totalEmails) {
+        this.totalEmailsLabel.setText("Total emails: %s".formatted(totalEmails));
     }
 
     /**
