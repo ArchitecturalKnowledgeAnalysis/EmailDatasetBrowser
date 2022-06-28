@@ -38,6 +38,7 @@ public class ExportPanel extends JDialog {
     private final PathSelectField fileSelectField = new PathSelectField(JFileChooser.FILES_ONLY, true, false,
             new FileNameExtensionFilter("No Filter", ".*"), "Select File", "Select Export File", "Select");
     private final JCheckBox separateThreadsToggle = new JCheckBox("Separate mailing threads");
+    private final JCheckBox exportRepliesToggle = new JCheckBox("Export email replies");
 
     /**
      * @param owner          Window that owns this object.
@@ -50,7 +51,7 @@ public class ExportPanel extends JDialog {
         this.dataset = dataset;
 
         JPanel exportPanel = new JPanel();
-        exportPanel.setLayout(new GridLayout(6, 1));
+        exportPanel.setLayout(new GridLayout(7, 1));
         exportPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         // Adds all export types.
@@ -65,6 +66,7 @@ public class ExportPanel extends JDialog {
         exportPanel.add(maxResultsSpinner);
         separateThreadsToggle.addActionListener(e -> updateSeparateThreadsToggle());
         exportPanel.add(separateThreadsToggle);
+        exportPanel.add(exportRepliesToggle);
         JPanel fileSelectPanel = new JPanel();
         fileSelectPanel.setLayout(new BoxLayout(fileSelectPanel, BoxLayout.X_AXIS));
         fileSelectPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
@@ -85,7 +87,7 @@ public class ExportPanel extends JDialog {
         // Final setup
         setContentPane(exportPanel);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setBounds(0, 0, 400, 225);
+        setBounds(0, 0, 400, 250);
         setLocationRelativeTo(owner);
         updateCurrentTarget();
         updateSeparateThreadsToggle();
@@ -123,6 +125,7 @@ public class ExportPanel extends JDialog {
         // Generates export parameters.
         ExporterParameters params = new ExporterParameters()
                 .withMaxResultCount((int) this.maxResultsSpinner.getValue())
+                .withExportReplies(this.exportRepliesToggle.isSelected())
                 .withSeparateMailingThreads(this.separateThreadsToggle.isSelected());
         params = this.exporter.specifyParameters(params);
 
