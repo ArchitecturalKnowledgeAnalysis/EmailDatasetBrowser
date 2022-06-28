@@ -15,14 +15,20 @@ import nl.andrewl.emaildatasetbrowser.view.search.EmailTreeSelectionListener;
 import nl.andrewl.emaildatasetbrowser.view.search.ExportPanel;
 
 public abstract class SearchPanel extends JPanel implements DatasetChangeListener {
+    public final static String PREF_BROWSE_PAGE_SIZE = "pref_browse_page_size";
+
     protected final EmailViewPanel emailViewPanel;
 
     protected final EmailTreeView emailTreeView = new EmailTreeView();
+    private final JButton nextPageButton = new JButton("Next");
+    private final JButton previousPageButton = new JButton("Prev");
     private final JButton searchButton = new JButton("Search");
     private final JButton exportButton = new JButton("Export");
     private final JButton clearButton = new JButton("Clear");
 
     private EmailDataset dataset;
+
+    private int currentPage = 1;
 
     public SearchPanel(EmailViewPanel emailViewPanel) {
         super(new BorderLayout());
@@ -43,6 +49,10 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
         return dataset;
     }
 
+    protected int getCurrentPage() {
+        return this.currentPage;
+    }
+
     @Override
     public void datasetChanged(EmailDataset ds) {
         setDataset(ds);
@@ -60,16 +70,45 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
         buttonPanel.add(exportButton);
         inputPanel.add(buttonPanel);
 
-        searchButton.addActionListener(e -> doSearch());
-        clearButton.addActionListener(e -> onClearClicked());
-        exportButton.addActionListener((e) -> {
-            ExportPanel panel = new ExportPanel(
-                    SwingUtilities.getWindowAncestor(this),
-                    getDataset(),
-                    buildExporter());
-            panel.setVisible(true);
+        // TODO: add paging controls add data.
+
+        searchButton.addActionListener(e -> {
+            if (this.dataset != null) {
+                doSearch();
+            }
+        });
+        clearButton.addActionListener(e -> {
+            if (this.dataset != null) {
+                onClearClicked();
+            }
+        });
+        exportButton.addActionListener(e -> {
+            if (this.dataset != null) {
+                doExport();
+            }
         });
         return inputPanel;
+    }
+
+    private void doExport() {
+        ExportPanel panel = new ExportPanel(
+                SwingUtilities.getWindowAncestor(this),
+                getDataset(),
+                buildExporter());
+        panel.setVisible(true);
+    }
+
+    protected void searchFromBeginning() {
+        this.currentPage = 1;
+        doSearch();
+    }
+
+    protected void toggleChangePageButton(boolean nextButton, boolean enabled) {
+        if (nextButton) {
+            this.nextPageButton.setEnabled(enabled);
+        } else {
+            previousPageButton.setEnabled(enabled);
+        }
     }
 
     /**

@@ -18,7 +18,6 @@ import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener.KeyEventType
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 import nl.andrewl.emaildatasetbrowser.view.search.EmailTreeNode;
 
-// TODO: add back in the filter for hidden items.
 public final class LuceneSearchPanel extends SearchPanel {
 
     private JTextArea queryField;
