@@ -6,7 +6,6 @@ import nl.andrewl.email_indexer.data.search.SearchFilter;
 import nl.andrewl.email_indexer.data.search.filter.HiddenFilter;
 import nl.andrewl.email_indexer.data.search.filter.RootFilter;
 import nl.andrewl.email_indexer.data.search.filter.TagFilter;
-import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.control.search.export.ExportSample;
 import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.SimpleExporter;
 import nl.andrewl.emaildatasetbrowser.view.BooleanSelect;
@@ -67,10 +66,9 @@ public class SimpleBrowsePanel extends SearchPanel {
 
 	@Override
 	protected void doSearch() {
-		emailTreeView.clear();
+		super.doSearch();
 		SwingUtils.setAllButtonsEnabled(this, false);
-		int pagesize = EmailDatasetBrowser.getPreferences().getInt(PREF_BROWSE_PAGE_SIZE, 20);
-		new EmailSearcher(getDataset()).findAll(getCurrentPage(), pagesize, getCurrentSearchFilters())
+		new EmailSearcher(getDataset()).findAll(getCurrentPage(), getPageSize(), getCurrentSearchFilters())
 				.handle((results, throwable) -> {
 					SwingUtilities.invokeLater(() -> {
 						SwingUtils.setAllButtonsEnabled(this, true);

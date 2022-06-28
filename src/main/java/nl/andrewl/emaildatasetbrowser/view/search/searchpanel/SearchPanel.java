@@ -1,18 +1,16 @@
 package nl.andrewl.emaildatasetbrowser.view.search.searchpanel;
 
-import java.awt.*;
-
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-
 import nl.andrewl.email_indexer.data.EmailDataset;
+import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.control.search.export.ExportSample;
 import nl.andrewl.emaildatasetbrowser.view.DatasetChangeListener;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 import nl.andrewl.emaildatasetbrowser.view.search.EmailTreeSelectionListener;
 import nl.andrewl.emaildatasetbrowser.view.search.ExportPanel;
+
+import java.awt.*;
+import javax.swing.*;
 
 public abstract class SearchPanel extends JPanel implements DatasetChangeListener {
     public final static String PREF_BROWSE_PAGE_SIZE = "pref_browse_page_size";
@@ -25,6 +23,7 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
     private final JButton searchButton = new JButton("Search");
     private final JButton exportButton = new JButton("Export");
     private final JButton clearButton = new JButton("Clear");
+    private final JLabel currentPageLabel = new JLabel("Page 1 of 1");
 
     private EmailDataset dataset;
 
@@ -38,19 +37,24 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
         add(emailTreeView, BorderLayout.CENTER);
     }
 
-    public void setDataset(EmailDataset dataset) {
-        this.dataset = dataset;
-        emailTreeView.clear();
-        searchButton.setEnabled(dataset != null);
-        exportButton.setEnabled(dataset != null);
-    }
-
     public EmailDataset getDataset() {
         return dataset;
     }
 
     protected int getCurrentPage() {
         return this.currentPage;
+    }
+
+    protected int getPageSize() {
+        return EmailDatasetBrowser.getPreferences().getInt(PREF_BROWSE_PAGE_SIZE, 25);
+    }
+
+    public void setDataset(EmailDataset dataset) {
+        this.dataset = dataset;
+        emailTreeView.clear();
+        searchButton.setEnabled(dataset != null);
+        clearButton.setEnabled(dataset != null);
+        exportButton.setEnabled(dataset != null);
     }
 
     @Override
@@ -62,32 +66,47 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
         // Sets up the concrete implementation's parameter panel.
         JPanel inputPanel = new JPanel(new BorderLayout());
         inputPanel.add(buildParameterPanel(), BorderLayout.NORTH);
+        inputPanel.add(buildControlButtonPanel(), BorderLayout.CENTER);
+        inputPanel.add(buildPageNavigationPanel(), BorderLayout.SOUTH);
+        return inputPanel;
+    }
 
-        // Sets up the shared panel.
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    private JPanel buildControlButtonPanel() {
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 3));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
+        searchButton.setMargin(new Insets(0, 0, 0, 2));
+        clearButton.setMargin(new Insets(0, 2, 0, 2));
+        clearButton.setMargin(new Insets(0, 2, 0, 0));
         buttonPanel.add(searchButton);
         buttonPanel.add(clearButton);
         buttonPanel.add(exportButton);
-        inputPanel.add(buttonPanel);
+        searchButton.addActionListener(e -> doSearch());
+        clearButton.addActionListener(e -> onClearClicked());
+        exportButton.addActionListener(e -> doExport());
+        return buttonPanel;
+    }
 
-        // TODO: add paging controls add data.
-
-        searchButton.addActionListener(e -> {
-            if (this.dataset != null) {
-                doSearch();
-            }
+    private JPanel buildPageNavigationPanel() {
+        JPanel navigationParent = new JPanel(new GridLayout(2, 1));
+        navigationParent.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
+        navigationParent.add(currentPageLabel);
+        JPanel pageControlPanel = new JPanel(new GridLayout(1, 2));
+        previousPageButton.setMargin(new Insets(0, 0, 0, 2));
+        nextPageButton.setMargin(new Insets(0, 2, 0, 0));
+        pageControlPanel.add(previousPageButton);
+        pageControlPanel.add(nextPageButton);
+        previousPageButton.setEnabled(false);
+        nextPageButton.setEnabled(false);
+        nextPageButton.addActionListener(e -> {
+            this.currentPage++;
+            doSearch();
         });
-        clearButton.addActionListener(e -> {
-            if (this.dataset != null) {
-                onClearClicked();
-            }
+        previousPageButton.addActionListener(e -> {
+            this.currentPage--;
+            doSearch();
         });
-        exportButton.addActionListener(e -> {
-            if (this.dataset != null) {
-                doExport();
-            }
-        });
-        return inputPanel;
+        navigationParent.add(pageControlPanel);
+        return navigationParent;
     }
 
     private void doExport() {
@@ -127,7 +146,12 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
     /**
      * Called when the search button is clicked.
      */
-    protected abstract void doSearch();
+    protected void doSearch() {
+        emailTreeView.clear();
+        int pageSize = getPageSize();
+        currentPageLabel.setText(
+                "Page %s (%s - %s)".formatted(currentPage, (currentPage - 1) * pageSize + 1, currentPage * pageSize));
+    }
 
     /**
      * Called when the clear button is clicked.

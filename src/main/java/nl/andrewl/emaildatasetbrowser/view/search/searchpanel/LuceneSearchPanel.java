@@ -1,12 +1,5 @@
 package nl.andrewl.emaildatasetbrowser.view.search.searchpanel;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import java.time.Instant;
-import java.util.List;
-import java.util.Objects;
-
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
@@ -17,6 +10,13 @@ import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener;
 import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener.KeyEventType;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 import nl.andrewl.emaildatasetbrowser.view.search.EmailTreeNode;
+
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.time.Instant;
+import java.util.List;
+import java.util.Objects;
 
 public final class LuceneSearchPanel extends SearchPanel {
 
@@ -30,7 +30,9 @@ public final class LuceneSearchPanel extends SearchPanel {
     protected JPanel buildParameterPanel() {
         JPanel inputPanel = new JPanel();
         inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.PAGE_AXIS));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(5,0,5,0));
         queryField = new JTextArea();
+        queryField.setMargin(new Insets(5,5,5,5));
         queryField.setLineWrap(true);
         ConcreteKeyEventListener rText = new ConcreteKeyEventListener()
                 .addKeyListener(KeyEventType.KEY_RELEASED, KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK,
@@ -49,15 +51,13 @@ public final class LuceneSearchPanel extends SearchPanel {
 
     @Override
     protected void doSearch() {
-        emailTreeView.clear();
+        super.doSearch();
         String query = getQuery();
         if (query == null) {
             return;
         }
-
         final Instant start = Instant.now();
-        int resultCount = EmailDatasetBrowser.getPreferences().getInt(SimpleBrowsePanel.PREF_BROWSE_PAGE_SIZE, 100);
-        new EmailIndexSearcher().searchAsync(getDataset(), queryField.getText(), resultCount)
+        new EmailIndexSearcher().searchAsync(getDataset(), queryField.getText(), getPageSize())
                 .handleAsync((emailIds, throwable) -> {
                     if (throwable != null) {
                         String errorMessage = "Search terminated with error:\n%s"
