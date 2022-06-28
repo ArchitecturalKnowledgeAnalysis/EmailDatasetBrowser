@@ -1,4 +1,4 @@
-package nl.andrewl.emaildatasetbrowser.view.search;
+package nl.andrewl.emaildatasetbrowser.view.search.searchpanel;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.search.EmailSearchResult;
@@ -14,6 +14,8 @@ import nl.andrewl.emaildatasetbrowser.view.DatasetChangeListener;
 import nl.andrewl.emaildatasetbrowser.view.SwingUtils;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailTreeView;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
+import nl.andrewl.emaildatasetbrowser.view.search.EmailTreeSelectionListener;
+import nl.andrewl.emaildatasetbrowser.view.search.ExportPanel;
 import nl.andrewl.emaildatasetbrowser.view.search.tagfilter.TagFilterDialog;
 
 import javax.swing.*;

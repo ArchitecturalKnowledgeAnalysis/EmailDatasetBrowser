@@ -12,7 +12,7 @@ import java.util.prefs.Preferences;
 
 import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.view.search.EmailTreeSelectionListener;
-import nl.andrewl.emaildatasetbrowser.view.search.SimpleBrowsePanel;
+import nl.andrewl.emaildatasetbrowser.view.search.searchpanel.SimpleBrowsePanel;
 
 public class SettingsDialog extends JDialog {
     private final Preferences prefs;

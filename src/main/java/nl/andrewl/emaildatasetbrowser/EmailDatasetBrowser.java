@@ -9,8 +9,8 @@ import nl.andrewl.emaildatasetbrowser.control.tag.ManageTagsAction;
 import nl.andrewl.emaildatasetbrowser.view.DatasetChangeListener;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
-import nl.andrewl.emaildatasetbrowser.view.search.LuceneSearchPanel;
-import nl.andrewl.emaildatasetbrowser.view.search.SimpleBrowsePanel;
+import nl.andrewl.emaildatasetbrowser.view.search.searchpanel.LuceneSearchPanel;
+import nl.andrewl.emaildatasetbrowser.view.search.searchpanel.SimpleBrowsePanel;
 
 import javax.swing.*;
 import java.awt.*;

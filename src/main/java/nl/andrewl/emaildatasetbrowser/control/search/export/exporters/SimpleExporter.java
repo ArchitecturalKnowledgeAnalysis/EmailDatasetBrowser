@@ -5,7 +5,7 @@ import nl.andrewl.email_indexer.data.export.datasample.datatype.TypeExporter;
 import nl.andrewl.email_indexer.data.export.datasample.sampletype.FilterExporter;
 import nl.andrewl.email_indexer.data.export.datasample.sampletype.SampleExporter;
 import nl.andrewl.emaildatasetbrowser.control.search.export.ExportSample;
-import nl.andrewl.emaildatasetbrowser.view.search.SimpleBrowsePanel;
+import nl.andrewl.emaildatasetbrowser.view.search.searchpanel.SimpleBrowsePanel;
 
 /**
  * Factory object for sample exporters of the SimpleBrowsePanel.

@@ -5,7 +5,7 @@ import nl.andrewl.email_indexer.data.Tag;
 import nl.andrewl.email_indexer.data.TagRepository;
 import nl.andrewl.email_indexer.data.search.filter.TagFilter;
 import nl.andrewl.emaildatasetbrowser.view.LabelledField;
-import nl.andrewl.emaildatasetbrowser.view.search.SimpleBrowsePanel;
+import nl.andrewl.emaildatasetbrowser.view.search.searchpanel.SimpleBrowsePanel;
 
 import java.awt.*;
 import javax.swing.*;
