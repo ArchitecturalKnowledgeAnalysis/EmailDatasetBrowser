@@ -1,5 +1,6 @@
 package nl.andrewl.emaildatasetbrowser.view.search.searchpanel;
 
+import nl.andrewl.email_indexer.data.EmailDataset;
 import nl.andrewl.email_indexer.data.search.EmailSearchResult;
 import nl.andrewl.email_indexer.data.search.EmailSearcher;
 import nl.andrewl.email_indexer.data.search.SearchFilter;
@@ -32,7 +33,14 @@ public class SimpleBrowsePanel extends SearchPanel {
 
 	public SimpleBrowsePanel(EmailViewPanel emailViewPanel) {
 		super(emailViewPanel);
-		SwingUtilities.invokeLater(() -> doSearch());
+	}
+
+	@Override
+	public void setDataset(EmailDataset dataset) {
+		super.setDataset(dataset);
+		if (dataset != null) {
+			SwingUtilities.invokeLater(() -> doSearch());
+		}
 	}
 
 	@Override
