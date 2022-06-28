@@ -30,6 +30,7 @@ public final class LuceneSearchPanel extends SearchPanel {
     protected JPanel buildParameterPanel() {
         JPanel inputPanel = new JPanel();
         inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.PAGE_AXIS));
+        inputPanel.add(new JLabel("Lucene Query:"));
         inputPanel.setBorder(BorderFactory.createEmptyBorder(5,0,5,0));
         queryField = new JTextArea();
         queryField.setMargin(new Insets(5,5,5,5));

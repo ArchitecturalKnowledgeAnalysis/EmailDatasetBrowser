@@ -62,6 +62,10 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
         setDataset(ds);
     }
 
+    protected void disableExport() {
+        exportButton.setVisible(false);
+    }
+
     private JPanel buildSearchPanel() {
         // Sets up the concrete implementation's parameter panel.
         JPanel inputPanel = new JPanel(new BorderLayout());
