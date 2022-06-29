@@ -56,6 +56,7 @@ public class EmailDatasetBrowser extends JFrame {
 		datasetChangeListeners.add(new WeakReference<>(selectionPanel));
 
 		JTabbedPane searchPane = new JTabbedPane();
+		searchPane.setPreferredSize(new Dimension(300, 600));
 		searchPane.add("Browse", browsePanel);
 		searchPane.add("Lucene Search", searchPanel);
 		searchPane.add("ID Selection", selectionPanel);
