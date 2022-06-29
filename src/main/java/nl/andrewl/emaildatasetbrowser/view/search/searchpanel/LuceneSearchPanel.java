@@ -6,13 +6,10 @@ import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
 import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
 import nl.andrewl.emaildatasetbrowser.control.search.export.ExportSample;
 import nl.andrewl.emaildatasetbrowser.control.search.export.exporters.LuceneSearchExporter;
-import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener;
-import nl.andrewl.emaildatasetbrowser.view.ConcreteKeyEventListener.KeyEventType;
+import nl.andrewl.emaildatasetbrowser.view.common.LabelledSearchField;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 import nl.andrewl.emaildatasetbrowser.view.search.EmailTreeNode;
 
-import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 import java.util.List;
 import java.util.Objects;
@@ -21,7 +18,7 @@ import java.util.Objects;
  * Search panel using Lucene Search Queries.
  */
 public final class LuceneSearchPanel extends SearchPanel {
-    private JTextArea queryField;
+    private LabelledSearchField queryField;
 
     public LuceneSearchPanel(EmailViewPanel emailViewPanel) {
         super(emailViewPanel);
@@ -29,21 +26,10 @@ public final class LuceneSearchPanel extends SearchPanel {
 
     @Override
     protected JPanel buildParameterPanel() {
-        JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.PAGE_AXIS));
-        inputPanel.add(new JLabel("Lucene Query:"));
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
-        queryField = new JTextArea();
-        queryField.setMargin(new Insets(5, 5, 5, 5));
-        queryField.setLineWrap(true);
-        ConcreteKeyEventListener rText = new ConcreteKeyEventListener()
-                .addKeyListener(KeyEventType.KEY_RELEASED, KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK,
-                        (e) -> doSearch());
-        queryField.addKeyListener(rText);
-        var queryScrollPane = new JScrollPane(queryField);
-        queryScrollPane.setPreferredSize(new Dimension(-1, 100));
-        inputPanel.add(queryScrollPane, BorderLayout.CENTER);
-        return inputPanel;
+        queryField = new LabelledSearchField(
+                "Comma-Separated List of email IDs:",
+                (e) -> doSearch());
+        return queryField;
     }
 
     @Override
@@ -58,7 +44,7 @@ public final class LuceneSearchPanel extends SearchPanel {
         if (query == null) {
             return;
         }
-        new EmailIndexSearcher().searchAsync(getDataset(), queryField.getText(), getPageSize())
+        new EmailIndexSearcher().searchAsync(getDataset(), queryField.getQueryField().getText(), getPageSize())
                 .handleAsync((emailIds, throwable) -> {
                     if (throwable != null) {
                         String errorMessage = "Search terminated with error:\n%s"
@@ -77,12 +63,12 @@ public final class LuceneSearchPanel extends SearchPanel {
 
     @Override
     protected void onClearClicked() {
-        queryField.setText(null);
+        queryField.getQueryField().setText(null);
         emailTreeView.clear();
     }
 
     public String getQuery() {
-        String query = queryField.getText();
+        String query = queryField.getQueryField().getText();
         if (query == null || query.isBlank()) {
             return null;
         }
