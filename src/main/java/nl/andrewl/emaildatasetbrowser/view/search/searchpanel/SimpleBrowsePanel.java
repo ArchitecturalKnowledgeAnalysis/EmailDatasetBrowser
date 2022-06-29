@@ -49,7 +49,7 @@ public class SimpleBrowsePanel extends SearchPanel {
 		searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.PAGE_AXIS));
 		JPanel filterPanel = new JPanel();
 		filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.PAGE_AXIS));
-		filterPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		filterPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
 
 		showHiddenSelect = new BooleanSelect("All", "Only Hidden", "Only Shown");
 		filterPanel.add(buildControlPanel("Show Hidden", showHiddenSelect));

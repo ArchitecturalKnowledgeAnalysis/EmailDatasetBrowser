@@ -38,6 +38,7 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
         this.emailViewPanel = emailViewPanel;
         this.add(this.buildSearchPanel(), BorderLayout.NORTH);
         emailTreeView.addSelectionListener(new EmailTreeSelectionListener(emailViewPanel, emailTreeView.getTree()));
+        emailTreeView.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 0));
         add(emailTreeView, BorderLayout.CENTER);
     }
 
@@ -81,7 +82,7 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
 
     private JPanel buildControlButtonPanel() {
         JPanel buttonPanel = new JPanel(new GridLayout(1, 3));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 0));
         searchButton.setMargin(new Insets(0, 0, 0, 2));
         clearButton.setMargin(new Insets(0, 2, 0, 2));
         clearButton.setMargin(new Insets(0, 2, 0, 0));
@@ -96,7 +97,7 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
 
     private JPanel buildPageNavigationPanel() {
         JPanel navigationPanel = new JPanel(new GridLayout(2, 2));
-        navigationPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
+        navigationPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 0));
         navigationPanel.add(currentPageLabel);
         navigationPanel.add(totalEmailsLabel);
         previousPageButton.setMargin(new Insets(0, 0, 0, 2));
