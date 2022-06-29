@@ -1,18 +1,17 @@
 package nl.andrewl.emaildatasetbrowser.view.search.searchpanel;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.swing.*;
-
 import nl.andrewl.email_indexer.data.EmailEntryPreview;
 import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.emaildatasetbrowser.control.search.export.ExportSample;
 import nl.andrewl.emaildatasetbrowser.view.common.LabelledSearchField;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
+
+import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Search panel using email ids.
