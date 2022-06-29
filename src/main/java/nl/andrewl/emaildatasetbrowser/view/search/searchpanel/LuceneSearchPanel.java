@@ -27,7 +27,7 @@ public final class LuceneSearchPanel extends SearchPanel {
     @Override
     protected JPanel buildParameterPanel() {
         queryField = new LabelledSearchField(
-                "Comma-Separated List of email IDs:",
+                "Search Query:",
                 (e) -> doSearch());
         return queryField;
     }
