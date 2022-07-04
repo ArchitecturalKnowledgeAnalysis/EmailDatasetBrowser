@@ -6,7 +6,9 @@ import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 public class ExportDatasetAction extends AbstractAction {
 	private final EmailDatasetBrowser browser;
@@ -23,35 +25,7 @@ public class ExportDatasetAction extends AbstractAction {
 			Path parentDir = ds.getOpenDir().getParent();
 			String fileName = ds.getOpenDir().getFileName().toString() + ".zip";
 			Path dsPath = parentDir.resolve(fileName);
-			JFileChooser fc = new JFileChooser(dsPath.toFile());
-			int result = fc.showSaveDialog(browser);
-			if (result == JFileChooser.APPROVE_OPTION) {
-				if (!fc.getSelectedFile().toPath().getFileName().toString().toLowerCase().endsWith(".zip")) {
-					JOptionPane.showMessageDialog(
-							browser,
-							"Please save as a .zip file.",
-							"Invalid File",
-							JOptionPane.WARNING_MESSAGE
-					);
-				} else {
-					Path file = fc.getSelectedFile().toPath();
-					ProgressDialog progress = ProgressDialog.minimalText(browser, "Exporting");
-					progress.append("Exporting dataset to " + file.toAbsolutePath());
-					long start = System.currentTimeMillis();
-					// TODO: Add a choice of exports instead of just zip.
-					new ZipExporter().export(browser.getCurrentDataset(), file)
-							.handle((unused, throwable) -> {
-								if (throwable != null) {
-									progress.append("An error occurred: " + throwable.getMessage());
-								} else {
-									long dur = System.currentTimeMillis() - start;
-									progress.append("Export completed in %.1f seconds.".formatted((float) dur / 1000.0f));
-								}
-								progress.done();
-								return null;
-							});
-				}
-			}
+			promptUserForExportFile(dsPath).ifPresent(this::doExport);
 		} else {
 			JOptionPane.showMessageDialog(
 					browser,
@@ -60,5 +34,51 @@ public class ExportDatasetAction extends AbstractAction {
 					JOptionPane.WARNING_MESSAGE
 			);
 		}
+	}
+
+	private Optional<Path> promptUserForExportFile(Path defaultFile) {
+		JFileChooser fc = new JFileChooser(defaultFile.toFile());
+		int result = fc.showSaveDialog(browser);
+		if (result == JFileChooser.APPROVE_OPTION) {
+			if (!fc.getSelectedFile().toPath().getFileName().toString().toLowerCase().endsWith(".zip")) {
+				JOptionPane.showMessageDialog(
+						browser,
+						"Please save as a .zip file.",
+						"Invalid File",
+						JOptionPane.WARNING_MESSAGE
+				);
+				return Optional.empty();
+			}
+			Path file = fc.getSelectedFile().toPath();
+			// Add a confirmation to ensure that if the file exists, it's not immediately overwritten.
+			if (Files.exists(file)) {
+				int confirmChoice = JOptionPane.showConfirmDialog(
+						browser,
+						"Are you sure you want to overwrite the ZIP file at\n" + file.toAbsolutePath(),
+						"Confirm ZIP Export Overwrite",
+						JOptionPane.OK_CANCEL_OPTION
+				);
+				if (confirmChoice != JOptionPane.OK_OPTION) return Optional.empty();
+			}
+			return Optional.of(file);
+		}
+		return Optional.empty();
+	}
+
+	private void doExport(Path file) {
+		ProgressDialog progress = ProgressDialog.minimalText(browser, "Exporting");
+		progress.append("Exporting dataset to " + file.toAbsolutePath());
+		long start = System.currentTimeMillis();
+		new ZipExporter().export(browser.getCurrentDataset(), file)
+				.handle((unused, throwable) -> {
+					if (throwable != null) {
+						progress.append("An error occurred: " + throwable.getMessage());
+					} else {
+						long dur = System.currentTimeMillis() - start;
+						progress.append("Export completed in %.1f seconds.".formatted((float) dur / 1000.0f));
+					}
+					progress.done();
+					return null;
+				});
 	}
 }
