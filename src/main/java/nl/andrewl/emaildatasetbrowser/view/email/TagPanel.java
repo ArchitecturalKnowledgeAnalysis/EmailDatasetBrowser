@@ -128,6 +128,7 @@ public class TagPanel extends JPanel implements EmailViewListener, DatasetChange
 		this.tagComboBoxModel.removeAllElements();
 		this.parentTagListModel.clear();
 		this.childTagListModel.clear();
+		if (parent.getCurrentDataset() != null) {
 			var repo = new TagRepository(parent.getCurrentDataset());
 			var addableTags = repo.findAll();
 			var thisTags = repo.getTags(email.id());
@@ -141,6 +142,7 @@ public class TagPanel extends JPanel implements EmailViewListener, DatasetChange
 				this.childTagListModel.addAll(childTags);
 				this.repaint();
 			});
+		}
 	}
 
 	private void onTagSelected(JComboBox<Tag> tagComboBox) {

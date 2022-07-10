@@ -34,6 +34,10 @@ public class EmailTreeView extends JPanel {
 	}
 
 	public void setEmails(List<EmailEntryPreview> emails, EmailDataset ds) {
+		setEmails(emails, ds, false);
+	}
+
+	public void setEmails(List<EmailEntryPreview> emails, EmailDataset ds, boolean selectFirst) {
 		rootNode.removeAllChildren();
 		emails.stream().map(email -> {
 			var node = new EmailTreeNode(email);
@@ -42,13 +46,24 @@ public class EmailTreeView extends JPanel {
 		}).forEachOrdered(rootNode::add);
 		treeModel.nodeStructureChanged(rootNode);
 		tree.expandPath(new TreePath(rootNode.getPath()));
+		if (selectFirst && emails.size() > 0) {
+			EmailTreeNode firstNode = (EmailTreeNode) rootNode.getChildAt(0);
+			tree.setSelectionPath(new TreePath(firstNode.getPath()));
+		}
 	}
 
 	public void setEmailNodes(List<EmailTreeNode> nodes) {
+		setEmailNodes(nodes, false);
+	}
+
+	public void setEmailNodes(List<EmailTreeNode> nodes, boolean selectFirst) {
 		rootNode.removeAllChildren();
 		nodes.forEach(rootNode::add);
 		treeModel.nodeStructureChanged(rootNode);
 		tree.expandPath(new TreePath(rootNode.getPath()));
+		if (selectFirst && nodes.size() > 0) {
+			tree.setSelectionPath(new TreePath(nodes.get(0).getPath()));
+		}
 	}
 
 	public void clear() {

@@ -29,7 +29,6 @@ public class SimpleBrowsePanel extends SearchPanel {
 
 	private BooleanSelect showHiddenSelect;
 	private BooleanSelect showRootSelect;
-	private JButton editTagFilterButton;
 
 	public SimpleBrowsePanel(EmailViewPanel emailViewPanel) {
 		super(emailViewPanel);
@@ -37,9 +36,13 @@ public class SimpleBrowsePanel extends SearchPanel {
 
 	@Override
 	public void setDataset(EmailDataset dataset) {
-		super.setDataset(dataset);
+		try {// Wrap this in a try-catch to catch any weird NPEs that occur due to event propagation order.
+			super.setDataset(dataset);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		if (dataset != null) {
-			SwingUtilities.invokeLater(() -> doSearch());
+			SwingUtilities.invokeLater(this::doSearch);
 		}
 	}
 
@@ -61,7 +64,7 @@ public class SimpleBrowsePanel extends SearchPanel {
 		showRootSelect.setSelectedValue(null);
 		showRootSelect.addActionListener(e -> searchFromBeginning());
 
-		editTagFilterButton = new JButton("Edit");
+		JButton editTagFilterButton = new JButton("Edit");
 		filterPanel.add(buildControlPanel("Tag Filter", editTagFilterButton));
 		editTagFilterButton.addActionListener(e -> onEditTagFilterClicked());
 		searchPanel.add(filterPanel);
@@ -131,7 +134,7 @@ public class SimpleBrowsePanel extends SearchPanel {
 	}
 
 	private void showResults(EmailSearchResult result) {
-		emailTreeView.setEmails(result.emails(), getDataset());
+		emailTreeView.setEmails(result.emails(), getDataset(), true);
 		toggleChangePageButton(true, result.hasNextPage());
 		toggleChangePageButton(false, result.hasPreviousPage());
 		setTotalEmails((int) result.totalResultCount());

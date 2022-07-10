@@ -67,7 +67,7 @@ public class EmailViewPanel extends JPanel implements DatasetChangeListener {
 	}
 
 	public void fetchAndSetEmail(long id) {
-		if (this.currentDataset != null) {
+		if (currentDataset != null) {
 			new EmailRepository(currentDataset).findEmailById(id)
 					.ifPresentOrElse(this::setEmail, () -> setEmail(null));
 		} else {

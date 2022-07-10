@@ -25,10 +25,12 @@ public class TagTableModel extends AbstractTableModel implements DatasetChangeLi
 	public void refreshTags(EmailDataset ds) {
 		tags.clear();
 		taggedEmailCounts.clear();
-		var repo = new TagRepository(ds);
-		tags.addAll(repo.findAll());
-		for (var tag : tags) {
-			taggedEmailCounts.put(tag, repo.countTaggedEmails(tag.id()));
+		if (ds != null) {
+			var repo = new TagRepository(ds);
+			tags.addAll(repo.findAll());
+			for (var tag : tags) {
+				taggedEmailCounts.put(tag, repo.countTaggedEmails(tag.id()));
+			}
 		}
 		fireTableDataChanged();
 	}

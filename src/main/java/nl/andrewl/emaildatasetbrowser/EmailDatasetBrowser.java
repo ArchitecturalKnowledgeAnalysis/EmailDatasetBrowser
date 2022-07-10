@@ -74,11 +74,13 @@ public class EmailDatasetBrowser extends JFrame {
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				closeDataset(null, false).thenRun(() -> dispose());
+				closeDataset(null, false).thenRun(() -> {
+					dispose();
+				});
 			}
 		});
 		if (getPreferences().getBoolean(PREF_LOAD_LAST_DS, false)) {
-			SwingUtilities.invokeLater(() -> tryOpenLastDataset());
+			SwingUtilities.invokeLater(this::tryOpenLastDataset);
 		}
 	}
 

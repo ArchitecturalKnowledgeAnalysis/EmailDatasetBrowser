@@ -56,6 +56,8 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
 
     public void setDataset(EmailDataset dataset) {
         this.dataset = dataset;
+        // Update the view panel first so that it doesn't get triggered by the tree view without first updating its dataset.
+        emailViewPanel.datasetChanged(dataset);
         emailTreeView.clear();
         searchButton.setEnabled(dataset != null);
         clearButton.setEnabled(dataset != null);
@@ -90,7 +92,12 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
         buttonPanel.add(clearButton);
         buttonPanel.add(exportButton);
         searchButton.addActionListener(e -> doSearch());
-        clearButton.addActionListener(e -> onClearClicked());
+        clearButton.addActionListener(e -> {
+            currentPageLabel.setText("Page: 0 (0 - 0)");
+            totalEmailsLabel.setText("Total emails: 0");
+            emailViewPanel.setEmail(null);
+            onClearClicked();
+        });
         exportButton.addActionListener(e -> doExport());
         return buttonPanel;
     }
