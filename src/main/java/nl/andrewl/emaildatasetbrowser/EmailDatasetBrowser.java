@@ -9,8 +9,9 @@ import nl.andrewl.emaildatasetbrowser.control.tag.ManageTagsAction;
 import nl.andrewl.emaildatasetbrowser.view.DatasetChangeListener;
 import nl.andrewl.emaildatasetbrowser.view.ProgressDialog;
 import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
-import nl.andrewl.emaildatasetbrowser.view.search.LuceneSearchPanel;
-import nl.andrewl.emaildatasetbrowser.view.search.SimpleBrowsePanel;
+import nl.andrewl.emaildatasetbrowser.view.search.searchpanel.EmailSelectionPanel;
+import nl.andrewl.emaildatasetbrowser.view.search.searchpanel.LuceneSearchPanel;
+import nl.andrewl.emaildatasetbrowser.view.search.searchpanel.SimpleBrowsePanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -48,13 +49,17 @@ public class EmailDatasetBrowser extends JFrame {
 		this.emailViewPanel = new EmailViewPanel(this);
 		SimpleBrowsePanel browsePanel = new SimpleBrowsePanel(emailViewPanel);
 		LuceneSearchPanel searchPanel = new LuceneSearchPanel(emailViewPanel);
+		EmailSelectionPanel selectionPanel = new EmailSelectionPanel(emailViewPanel);
 		datasetChangeListeners.add(new WeakReference<>(emailViewPanel));
 		datasetChangeListeners.add(new WeakReference<>(browsePanel));
 		datasetChangeListeners.add(new WeakReference<>(searchPanel));
+		datasetChangeListeners.add(new WeakReference<>(selectionPanel));
 
 		JTabbedPane searchPane = new JTabbedPane();
+		searchPane.setPreferredSize(new Dimension(300, 600));
 		searchPane.add("Browse", browsePanel);
 		searchPane.add("Lucene Search", searchPanel);
+		searchPane.add("ID Selection", selectionPanel);
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.add(searchPane);
 		splitPane.add(emailViewPanel);
@@ -106,10 +111,6 @@ public class EmailDatasetBrowser extends JFrame {
 		filterMenu.add(new JMenuItem(new HideBySqlAction(this)));
 		filterMenu.add(new JMenuItem(new DeleteHiddenAction(emailViewPanel)));
 		menuBar.add(filterMenu);
-
-		JMenu viewMenu = new JMenu("View");
-		viewMenu.add(new JMenuItem(new ViewSelectionAction(this)));
-		menuBar.add(viewMenu);
 
 		JMenu tagMenu = new JMenu("Tag");
 		tagMenu.add(new JMenuItem(new ManageTagsAction(this)));

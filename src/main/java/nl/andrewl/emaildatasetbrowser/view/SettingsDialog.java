@@ -11,8 +11,9 @@ import java.awt.*;
 import java.util.prefs.Preferences;
 
 import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
+import nl.andrewl.emaildatasetbrowser.view.email.EmailBodyPanel;
 import nl.andrewl.emaildatasetbrowser.view.search.EmailTreeSelectionListener;
-import nl.andrewl.emaildatasetbrowser.view.search.SimpleBrowsePanel;
+import nl.andrewl.emaildatasetbrowser.view.search.searchpanel.SimpleBrowsePanel;
 
 public class SettingsDialog extends JDialog {
     private final Preferences prefs;
@@ -21,7 +22,15 @@ public class SettingsDialog extends JDialog {
         super(browser, "Settings");
         this.prefs = EmailDatasetBrowser.getPreferences();
 
-        JPanel p = new JPanel(new GridLayout(3, 1));
+        // TODO: Find a more sophisticated way to set default values for settings.
+        // Currently, the implementing code is responsible for this, which might cause
+        // inconsistentcies.
+
+        // TODO: Find a more sophisticated way to update objects interested in updated
+        // settings. Currently, they're expected to take care of this themselves, which
+        // is unreliable.
+
+        JPanel p = new JPanel(new GridLayout(4, 1));
         p.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         p.add(buildSettingsCheckbox(EmailDatasetBrowser.PREF_LOAD_LAST_DS, false,
@@ -30,11 +39,13 @@ public class SettingsDialog extends JDialog {
         p.add(buildSettingsCheckbox(EmailTreeSelectionListener.PREF_AUTO_OPEN, true,
                 "Automatically expand email in tree-view"));
 
-        p.add(buildSettingsSpinner(SimpleBrowsePanel.PREF_BROWSE_PAGE_SIZE, 20, 1, 100, 1, "Simple browse page size"));
+        p.add(buildSettingsSpinner(SimpleBrowsePanel.PREF_BROWSE_PAGE_SIZE, 20, 1, 100, 1, "Browse page size"));
+
+        p.add(buildSettingsSpinner(EmailBodyPanel.PREF_SCROLL_SPEED, 100, 1, 200, 1, "Email body scroll speed"));
 
         setContentPane(p);
 
-        setPreferredSize(new Dimension(400, 200));
+        setPreferredSize(new Dimension(475, 200));
         pack();
         setLocationRelativeTo(browser);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
