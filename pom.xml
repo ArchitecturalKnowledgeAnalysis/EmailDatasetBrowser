@@ -6,7 +6,7 @@
 
     <groupId>nl.andrewl</groupId>
     <artifactId>emaildatasetbrowser</artifactId>
-    <version>2.12.0</version>
+    <version>2.12.1</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
