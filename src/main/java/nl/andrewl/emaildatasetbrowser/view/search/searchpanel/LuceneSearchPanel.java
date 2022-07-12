@@ -1,7 +1,6 @@
 package nl.andrewl.emaildatasetbrowser.view.search.searchpanel;
 
 import nl.andrewl.email_indexer.data.EmailDataset;
-import nl.andrewl.email_indexer.data.EmailEntry;
 import nl.andrewl.email_indexer.data.EmailRepository;
 import nl.andrewl.email_indexer.data.search.EmailIndexSearcher;
 import nl.andrewl.emaildatasetbrowser.EmailDatasetBrowser;
@@ -12,7 +11,6 @@ import nl.andrewl.emaildatasetbrowser.view.email.EmailViewPanel;
 import nl.andrewl.emaildatasetbrowser.view.search.EmailTreeNode;
 
 import javax.swing.*;
-import javax.swing.tree.TreePath;
 import java.util.List;
 import java.util.Objects;
 

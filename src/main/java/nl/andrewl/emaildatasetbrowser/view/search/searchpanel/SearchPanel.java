@@ -95,6 +95,7 @@ public abstract class SearchPanel extends JPanel implements DatasetChangeListene
         clearButton.addActionListener(e -> {
             currentPageLabel.setText("Page: 0 (0 - 0)");
             totalEmailsLabel.setText("Total emails: 0");
+            emailTreeView.clear();
             emailViewPanel.setEmail(null);
             onClearClicked();
         });
