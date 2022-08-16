@@ -57,7 +57,11 @@ public class DownloadEmailsAction extends AbstractAction {
 		cancelButton.addActionListener(event -> dialog.dispose());
 		JButton downloadButton = new JButton("Download");
 		downloadButton.addActionListener(event -> {
-			ApacheMailingListFetcher fetcher = new ApacheMailingListFetcher();
+			ApacheMailingListFetcher fetcher = new ApacheMailingListFetcher(
+					12,
+					1000,
+					"https://lists.apache.org/api/mbox.lua"
+			);
 			Path outputDir = dirField.getSelectedPath();
 			dialog.dispose();
 			ProgressDialog progressDialog = new ProgressDialog(owner, "Downloading...", "Downloading emails");
